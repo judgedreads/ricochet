@@ -1,0 +1,1 @@
+- notify-send won't show the subheading if it has an ampersand (&) in it. Other special characters are fine and ampersands can appear in the primary heading.

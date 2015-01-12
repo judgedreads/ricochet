@@ -1,0 +1,9 @@
+# Compiled files
+__pychache__/
+*.pyc
+*.pyo
+
+# Backup files
+*.bak
+*.swp
+*~

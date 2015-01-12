@@ -1,0 +1,21 @@
+# backend player: mpd or gstreamer, string
+backend="mpd"
+
+# mpd connection settings
+mpd_host="localhost"
+mpd_port=6600
+
+# full path to music directory, string
+music_dir="/home/judgedreads/Music/"
+
+# album cover size (in the browser grid)
+grid_icon_size=128
+
+# album cover size (in the detail view)
+detail_icon_size=256
+
+# allow notification through libnotify (True or False) - Gst only
+notifications=True
+
+# system tray icon (True or False)
+system_tray=True

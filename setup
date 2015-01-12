@@ -1,0 +1,35 @@
+#!/bin/sh
+
+directory=$( pwd | awk -F / '{ print $NF}' )
+
+if [ $directory == "ricochet" ]; then
+    if [ $1 == "install" ]; then
+        echo "Create program directory: /opt/ricochet"
+        mkdir /opt/ricochet
+        echo "Copying program files"
+        cp -r src /opt/ricochet
+        cp -r images /opt/ricochet
+        cp misc/ricochet /usr/bin/
+        cp misc/ricochetctl /usr/bin/
+        cp misc/ricochet.desktop /usr/share/applications/
+        mkdir -p /home/$(logname)/.config/ricochet
+        cp misc/ricochetrc $(logname)/.config/ricochet/
+        echo "Done"
+    elif [ $1 == "remove" ]; then
+        echo "Removing program files"
+        rm -r /opt/ricochet
+        rm /usr/bin/ricochet
+        rm /usr/bin/ricochetctl
+        rm /usr/share/applications/ricochet.desktop
+        rm -r $(logname)/.config/ricochet
+        echo "Done"
+    else
+        echo "Usage:"
+        echo "  ./setup install"
+        echo "or:"
+        echo "  ./setup remove"
+        echo "To upgrade: use './setup remove' then './setup install'."
+    fi
+else
+    echo "This script must be run in the main directory: 'ricochet'."
+fi
