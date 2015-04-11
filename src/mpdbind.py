@@ -17,8 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from gi.repository import Gtk, GObject
-import subprocess
+from gi.repository import Gtk
 import mpd
 
 import settings

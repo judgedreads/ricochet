@@ -17,8 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from gi.repository import Gst, Gtk, GObject, Gdk
-from socket import socket, AF_UNIX, SOCK_DGRAM, SOCK_STREAM
+from gi.repository import Gst, Gtk, GObject
+from socket import socket, AF_UNIX, SOCK_DGRAM
 import os
 import subprocess
 
