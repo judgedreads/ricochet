@@ -24,7 +24,7 @@ import subprocess
 import settings
 
 
-class Player:
+class Player(object):
 
     # callback for activation on playlist tree
     def on_activate(self, tree, path, column):
