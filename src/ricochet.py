@@ -3,18 +3,18 @@
 # Ricochet: A different angle on music.
 # Copyright (C) 2013-2014 Pearce Dedmon
 
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
 #(at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License
-#along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from gi.repository import Gst, Gtk, GObject, Gdk
@@ -80,7 +80,6 @@ class Control(Gtk.Window):
         print("Next time, punk.")
         Gtk.main_quit()
 
-
     def show_brow(self, widget):
         brow.show()
 
@@ -100,7 +99,7 @@ def show_hide(widget, event):
 
 
 CoverBrowser.player = backend.Player([])
-#CoverBrowser.player.show_all()
+# CoverBrowser.player.show_all()
 
 
 # the main music directory
@@ -159,7 +158,8 @@ def handle_connection(source, condition):
         CoverBrowser.player.skip_prev(None)
         message = "prev"
     elif data == "pos":
-        pos_min, pos_sec, dur_min, dur_sec = CoverBrowser.player.get_info(None, data)
+        pos_min, pos_sec, dur_min, dur_sec = CoverBrowser.player.get_info(
+            None, data)
         message = "%d:%d/%d:%d" % (pos_min, pos_sec, dur_min, dur_sec)
     elif data == "artist":
         message = CoverBrowser.player.get_info(None, data)

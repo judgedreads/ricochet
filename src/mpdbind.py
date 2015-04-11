@@ -3,18 +3,18 @@
 # Ricochet: A different angle on music.
 # Copyright (C) 2013-2014 Pearce Dedmon
 
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
 #(at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License
-#along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from gi.repository import Gtk, GObject
@@ -23,7 +23,6 @@ import mpd
 
 import settings
 
-            
 
 class Player:
 
@@ -38,7 +37,6 @@ class Player:
             else:
                 i += 1
         self.client.play(self.track)
-        
 
     def __init__(self, playlist):
         # option to load a playlist on init
@@ -51,7 +49,8 @@ class Player:
         try:
             self.client.connect(self.host, self.port)
         except mpd.ConnectionError:
-            print("Could not connect to %s on port %d." %(self.host, self.port))
+            print("Could not connect to %s on port %d." %
+                  (self.host, self.port))
             print("Check that mpd is running correctly.")
 
         print("Ricochet v0.3")
@@ -60,7 +59,7 @@ class Player:
         # create playlist widget
         self.liststore = Gtk.ListStore(str)
         self.treeview = Gtk.TreeView()
-        
+
         # initialize the playlist
         self.change_playlist(None)
 
@@ -70,18 +69,17 @@ class Player:
         self.treeview.append_column(column)
         self.treeview.connect("row_activated", self.on_activate)
 
-
     def get_info(self, widget, data):
         if data == "pos":
             self.check_connected()
             pos = self.client.status()['elapsed']
             pos = float(pos)
-            pos_min = int(pos/60)
-            pos_sec = int(pos)%60
+            pos_min = int(pos / 60)
+            pos_sec = int(pos) % 60
             dur = self.client.currentsong()['time']
             dur = float(dur)
-            dur_min = int(dur/60)
-            dur_sec = int(dur)%60
+            dur_min = int(dur / 60)
+            dur_sec = int(dur) % 60
             return pos_min, pos_sec, dur_min, dur_sec
         elif data == "song":
             song = self.client.currentsong()['title']
@@ -122,10 +120,10 @@ class Player:
         self.client.clear()
         self.client.add(data)
         self.client.play()
-        
+
         self.change_playlist(None)
 
-            
+
 # add songs to the current playlist
     def queue(self, widget, data):
         self.check_connected()
@@ -142,12 +140,10 @@ class Player:
         self.client.close()
         self.client.disconnect()
 
-    
     def skip_next(self, widget):
         self.check_connected()
 
         self.client.next()
-
 
     def skip_prev(self, widget):
         self.check_connected()

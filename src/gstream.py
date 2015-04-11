@@ -3,18 +3,18 @@
 # Ricochet: A different angle on music.
 # Copyright (C) 2013-2014 Pearce Dedmon
 
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License, or
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
 #(at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License
-#along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 from gi.repository import Gst, Gtk
@@ -22,7 +22,6 @@ import os
 import subprocess
 
 import settings
-
 
 
 class Player:
@@ -37,19 +36,20 @@ class Player:
             else:
                 i += 1
 
-        self.on_eos(None, None) 
-
+        self.on_eos(None, None)
 
     def __init__(self, playlist):
         # Option to load a playlist on init
         print("Ricochet v0.3")
-        self.version = 'v' + str(Gst.version()[0]) + '.' + str(Gst.version()[1]) + '.' + str(Gst.version()[2])
+        self.version = 'v' + \
+            str(Gst.version()[0]) + '.' + \
+            str(Gst.version()[1]) + '.' + str(Gst.version()[2])
         print("Using Gstreamer " + self.version)
 
 # keep track of playlist and current track
         self.playlist = playlist
         self.track = 1
-        
+
 # set up gstreamer elements
         self.pipeline = Gst.Pipeline()
 
@@ -84,28 +84,28 @@ class Player:
         i = self.track
         if data == "pos":
             pos = self.pipeline.query_position(Gst.Format.TIME)[1]
-            pos = round(pos/1000000000)
-            pos_min = int(pos/60)
-            pos_sec = int(pos)%60
+            pos = round(pos / 1000000000)
+            pos_min = int(pos / 60)
+            pos_sec = int(pos) % 60
             dur = self.pipeline.query_duration(Gst.Format.TIME)[1]
-            dur = round(dur/1000000000)
-            dur_min = int(dur/60)
-            dur_sec = int(dur)%60
+            dur = round(dur / 1000000000)
+            dur_min = int(dur / 60)
+            dur_sec = int(dur) % 60
             return pos_min, pos_sec, dur_min, dur_sec
         elif data == "song":
-            song = self.playlist[i-1].split('/')[-1]
+            song = self.playlist[i - 1].split('/')[-1]
             return song
         elif data == "album":
-            album = self.playlist[i-1].split('/')[-2]
+            album = self.playlist[i - 1].split('/')[-2]
             return album
         elif data == "artist":
-            artist = self.playlist[i-1].split('/')[-3]
+            artist = self.playlist[i - 1].split('/')[-3]
             return artist
 
 
 # handle playlist changes
     def change_playlist(self, widget):
-        
+
         self.liststore.clear()
 
         for item in self.playlist:
@@ -136,12 +136,12 @@ class Player:
         self.pipeline.set_state(Gst.State.NULL)
         self.current_state = "PAUSED"
 
-        #queue the new songs
+        # queue the new songs
         self.queue(None, data)
         self.playbin.set_property('uri', self.playlist[0])
         self.track = 1
 
-        #play the playlist
+        # play the playlist
         self.toggle(None)
 
         self.notify(None, 0)
@@ -157,21 +157,21 @@ class Player:
                 # handle file types: wma doesn't work with gst for some reason
                 ext = song.split('.')[-1]
                 if ext in ['mp3', 'ogg', 'm4a', 'mp4', 'flac', 'mpc']:
-                    temp = "file:///home/judgedreads/Music/" + data + "/" + song
+                    temp = "file:///home/judgedreads/Music/" + \
+                        data + "/" + song
                     self.playlist.append(temp)
         else:
             # no need to handle file types here as they are already handled
             # in the browser.
             song = "file:///home/judgedreads/Music/" + data
             self.playlist.append(song)
-            
+
         self.change_playlist(None)
 
 
 # unload the player
     def quit(self, widget, event):
         self.pipeline.set_state(Gst.State.NULL)
-    
 
     def skip_next(self, widget):
         # unload player
@@ -184,19 +184,18 @@ class Player:
             self.track += 1
 
             self.notify(None, i)
-            
 
     def skip_prev(self, widget):
-        #unload player
+        # unload player
         self.pipeline.set_state(Gst.State.NULL)
         i = self.track - 1
         if i > 0:
             # load previous song and play
-            self.playbin.set_property('uri', self.playlist[i-1])
+            self.playbin.set_property('uri', self.playlist[i - 1])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.track -= 1
 
-            self.notify(None, i-1)
+            self.notify(None, i - 1)
 
 
 # optional notifications using libnotify
@@ -207,7 +206,8 @@ class Player:
             song = self.playlist[i].split('/')[-1]
             album = self.playlist[i].split('/')[-2]
             artist = self.playlist[i].split('/')[-3]
-            cover = "/home/judgedreads/Music/" + artist + '/' + album + '/' + 'cover.jpg'
+            cover = "/home/judgedreads/Music/" + \
+                artist + '/' + album + '/' + 'cover.jpg'
 
 # There seems to be a bug in notify send where '&' can't be in
 # subheading, even when quoted...
