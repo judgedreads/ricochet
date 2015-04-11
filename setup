@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 directory=$( pwd | awk -F / '{ print $NF}' )
 
@@ -7,13 +7,13 @@ if [ $directory == "ricochet" ]; then
         echo "Create program directory: /opt/ricochet"
         mkdir /opt/ricochet
         echo "Copying program files"
-        cp -r src /opt/ricochet
-        cp -r images /opt/ricochet
-        cp misc/ricochet /usr/bin/
-        cp misc/ricochetctl /usr/bin/
-        cp misc/ricochet.desktop /usr/share/applications/
+        cp -r -p src /opt/ricochet
+        cp -r -p images /opt/ricochet
+        cp -p misc/ricochet /usr/bin/
+        cp -p misc/ricochetctl /usr/bin/
+        cp -p misc/ricochet.desktop /usr/share/applications/
         mkdir -p /home/$(logname)/.config/ricochet
-        cp misc/ricochetrc $(logname)/.config/ricochet/
+        cp -p misc/ricochetrc /home/$(logname)/.config/ricochet/
         echo "Done"
     elif [ $1 == "remove" ]; then
         echo "Removing program files"
@@ -21,7 +21,7 @@ if [ $directory == "ricochet" ]; then
         rm /usr/bin/ricochet
         rm /usr/bin/ricochetctl
         rm /usr/share/applications/ricochet.desktop
-        rm -r $(logname)/.config/ricochet
+        rm -r /home/$(logname)/.config/ricochet
         echo "Done"
     else
         echo "Usage:"
