@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from gi.repository import Gst, Gtk
+from gi.repository import Gst, Gtk, Notify
 import os
 import subprocess
 
@@ -211,7 +211,10 @@ class Player(object):
 
 # There seems to be a bug in notify send where '&' can't be in
 # subheading, even when quoted...
-            subprocess.call(["notify-send", "-i", cover, song, artist])
+            # subprocess.call(["notify-send", "-i", cover, song, artist])
+            Notify.init("Track Info")
+            Playing = Notify.Notification.new(song, artist, cover)
+            Playing.show()
 
 
 # callback for when the end of a song is reached
