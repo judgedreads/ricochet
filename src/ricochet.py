@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python3
 
 # Ricochet: A different angle on music.
 # Copyright (C) 2013-2014 Pearce Dedmon
