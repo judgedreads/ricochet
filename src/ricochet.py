@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python3
 
 # Ricochet: A different angle on music.
 # Copyright (C) 2013-2014 Pearce Dedmon
@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from gi.repository import Gst, Gtk, GObject
+from gi.repository import Gst, Gtk, GObject, Notify
 from socket import socket, AF_UNIX, SOCK_DGRAM
 import os
 import subprocess
@@ -181,6 +181,8 @@ except OSError:
     subprocess.call(['rm', '/tmp/ricochet'])
     server.bind('/tmp/ricochet')
 GObject.io_add_watch(server, GObject.IO_IN, handle_connection)
+
+Notify.init('ricochet')
 
 # main loop
 Gtk.main()

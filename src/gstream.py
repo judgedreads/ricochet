@@ -218,7 +218,7 @@ class Player(object):
     # be the 'proper' way of doing things. Also, the notify docs
     # are here: https://developer.gnome.org/libnotify/0.7/ not 
     # with Gtk docs.
-            Notify.init("Ricochet")
+            #Notify.init("Ricochet")
             Playing = Notify.Notification.new(song, artist, cover)
             Playing.add_action('action', 'Next', self.notif_skip, 'next')
             image = GdkPixbuf.Pixbuf.new_from_file(cover)
@@ -230,8 +230,6 @@ class Player(object):
             self.skip_next(None)
         elif data == 'prev':
             self.skip_prev(None)
-        notif.close()
-        Gtk.main_quit()
 
 # callback for when the end of a song is reached
     def on_eos(self, bus, msg):
