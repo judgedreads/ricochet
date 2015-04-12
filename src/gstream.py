@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from gi.repository import Gst, Gtk
+from gi.repository import Gst, Gtk, Notify, GdkPixbuf
 import os
 import subprocess
 
@@ -173,6 +173,7 @@ class Player(object):
 
     def skip_next(self, widget):
         # unload player
+        print('skipping')
         self.pipeline.set_state(Gst.State.NULL)
         i = self.track
         if i < len(self.playlist):
@@ -207,10 +208,26 @@ class Player(object):
             cover = "/home/judgedreads/Music/" + \
                 artist + '/' + album + '/' + 'cover.jpg'
 
-# There seems to be a bug in notify send where '&' can't be in
-# subheading, even when quoted...
-            subprocess.call(["notify-send", "-i", cover, song, artist])
+    # for actions to work, we need to run a separate Gtk.main()
+    # but this interferes with closing (2 main methods running).
+    # Might need to completely separate notification framework.
+    # also try using GtkApplication class to init stuff like
+    # Notify.init and connect all windows to this, this seems to
+    # be the 'proper' way of doing things. Also, the notify docs
+    # are here: https://developer.gnome.org/libnotify/0.7/ not 
+    # with Gtk docs.
+            #Notify.init("Ricochet")
+            Playing = Notify.Notification.new(song, artist, cover)
+            Playing.add_action('action', 'Next', self.notif_skip, 'next')
+            image = GdkPixbuf.Pixbuf.new_from_file(cover)
+            Playing.set_image_from_pixbuf(image)
+            Playing.show()
 
+    def notif_skip(self, notif, action, data):
+        if data == 'next':
+            self.skip_next(None)
+        elif data == 'prev':
+            self.skip_prev(None)
 
 # callback for when the end of a song is reached
     def on_eos(self, bus, msg):
