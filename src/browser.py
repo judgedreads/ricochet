@@ -24,20 +24,6 @@ import settings
 # The class structure for each album in the main browser
 class Cover(Gtk.Button):
 
-    # launch the detailed album view
-    def album_detail(self, widget):
-        album = Album(self.name)
-
-    # Callback function for clicking on album
-    def callback(self, widget, event):
-        if event.button == 1:
-            self.album_detail(self)
-        elif event.button == 2:
-            player.play(None, self.name)
-        elif event.button == 3:
-            self.menu.popup(
-                None, None, None, self.name, event.button, event.time)
-
     def __init__(self, name):
         Gtk.Button.__init__(self)
         self.name = name
@@ -83,23 +69,23 @@ class Cover(Gtk.Button):
 
         self.show()
 
+    # launch the detailed album view
+    def album_detail(self, widget):
+        album = Album(self.name)
+
+    # Callback function for clicking on album
+    def callback(self, widget, event):
+        if event.button == 1:
+            self.album_detail(self)
+        elif event.button == 2:
+            player.play(None, self.name)
+        elif event.button == 3:
+            self.menu.popup(
+                None, None, None, self.name, event.button, event.time)
+
 
 # The main window displaying all covers
 class Browser(Gtk.Window):
-
-    # handle keyboard controls
-    def on_key_press(self, widget, event):
-        # print(event.hardware_keycode)
-        child = self.get_focus()
-        index = child.get_index()
-        if event.hardware_keycode == 36 or event.hardware_keycode == 32:
-            Album(self.albums[index])
-        elif event.hardware_keycode == 33:
-            player.play(None, self.albums[index])
-        elif event.hardware_keycode == 24:
-            player.queue(None, self.albums[index])
-        elif event.hardware_keycode == 65:
-            player.toggle(None)
 
     def __init__(self, albums):
         Gtk.Window.__init__(self, title="Cover Browser")
@@ -135,6 +121,20 @@ class Browser(Gtk.Window):
             # pack the cover into the browser
             self.flowbox.add(temp)
 
+    # handle keyboard controls
+    def on_key_press(self, widget, event):
+        # print(event.hardware_keycode)
+        child = self.get_focus()
+        index = child.get_index()
+        if event.hardware_keycode == 36 or event.hardware_keycode == 32:
+            Album(self.albums[index])
+        elif event.hardware_keycode == 33:
+            player.play(None, self.albums[index])
+        elif event.hardware_keycode == 24:
+            player.queue(None, self.albums[index])
+        elif event.hardware_keycode == 65:
+            player.toggle(None)
+
     def quit(self, widget, event):
         self.hide()
 # make sure it doesn't delete
@@ -143,37 +143,6 @@ class Browser(Gtk.Window):
 
 # The class for the detailed album view
 class Album(Gtk.Window):
-
-    def on_button_press(self, widget, event):
-        # print(event.type)
-        select = widget.get_selection()
-        model, treeiter = select.get_selected_rows()
-        if event.button == 3:
-            for path in treeiter:
-                player.queue(None, self.name + '/' + model[path][0])
-        elif event.button == 2:
-            player.play(None, self.name + '/' + model[treeiter][0])
-            for i in range(1, len(treeiter)):
-                player.queue(None, self.name + '/' + model[i][0])
-        elif event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            player.play(None, self.name + '/' + model[treeiter][0])
-
-# Could also make the backend capable of handling lists ^^
-
-    def on_key_press(self, widget, event):
-        # print(event.hardware_keycode)
-        select = widget.get_selection()
-        model, treeiter = select.get_selected_rows()
-
-        if event.hardware_keycode == 36 or event.hardware_keycode == 33:
-            player.play(None, self.name + '/' + model[treeiter][0])
-            for i in range(1, len(treeiter)):
-                player.queue(None, self.name + '/' + model[i][0])
-        elif event.hardware_keycode == 24:
-            for path in treeiter:
-                player.queue(None, self.name + '/' + model[path][0])
-        elif event.hardware_keycode == 65:
-            player.toggle(None)
 
     def __init__(self, name):
         Gtk.Window.__init__(self, title=name)
@@ -242,3 +211,34 @@ class Album(Gtk.Window):
         self.scroll.add(treeview)
 
         self.show_all()
+
+    def on_button_press(self, widget, event):
+        # print(event.type)
+        select = widget.get_selection()
+        model, treeiter = select.get_selected_rows()
+        if event.button == 3:
+            for path in treeiter:
+                player.queue(None, self.name + '/' + model[path][0])
+        elif event.button == 2:
+            player.play(None, self.name + '/' + model[treeiter][0])
+            for i in range(1, len(treeiter)):
+                player.queue(None, self.name + '/' + model[i][0])
+        elif event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
+            player.play(None, self.name + '/' + model[treeiter][0])
+
+# Could also make the backend capable of handling lists ^^
+
+    def on_key_press(self, widget, event):
+        # print(event.hardware_keycode)
+        select = widget.get_selection()
+        model, treeiter = select.get_selected_rows()
+
+        if event.hardware_keycode == 36 or event.hardware_keycode == 33:
+            player.play(None, self.name + '/' + model[treeiter][0])
+            for i in range(1, len(treeiter)):
+                player.queue(None, self.name + '/' + model[i][0])
+        elif event.hardware_keycode == 24:
+            for path in treeiter:
+                player.queue(None, self.name + '/' + model[path][0])
+        elif event.hardware_keycode == 65:
+            player.toggle(None)

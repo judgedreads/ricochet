@@ -22,7 +22,7 @@ from socket import socket, AF_UNIX, SOCK_DGRAM
 import os
 import subprocess
 
-import CoverBrowser
+import browser
 import settings
 
 
@@ -49,9 +49,9 @@ class Control(Gtk.Window):
         self.button1 = Gtk.Button(label="Prev")
         self.button2 = Gtk.Button(label="Next")
         self.button3 = Gtk.Button(label="Play/Pause")
-        self.button1.connect("clicked", CoverBrowser.player.skip_prev)
-        self.button2.connect("clicked", CoverBrowser.player.skip_next)
-        self.button3.connect("clicked", CoverBrowser.player.toggle)
+        self.button1.connect("clicked", browser.player.skip_prev)
+        self.button2.connect("clicked", browser.player.skip_next)
+        self.button3.connect("clicked", browser.player.toggle)
         self.box.pack_start(self.button1, True, True, 0)
         self.box.pack_start(self.button3, True, True, 0)
         self.box.pack_start(self.button2, True, True, 0)
@@ -69,14 +69,14 @@ class Control(Gtk.Window):
         self.scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         self.vbox.pack_start(self.scroll, True, True, 0)
 
-        self.scroll.add(CoverBrowser.player.treeview)
+        self.scroll.add(browser.player.treeview)
 
 
 # close the backend and browser and then Gtk
     def quit(self, widget, event):
         server.close()
         brow.quit(None, None)
-        CoverBrowser.player.quit(None, None)
+        browser.player.quit(None, None)
         print("Next time, punk.")
         Gtk.main_quit()
 
@@ -97,14 +97,14 @@ def show_hide(widget, event):
         else:
             brow.show()
 
-
-CoverBrowser.player = backend.Player([])
-# CoverBrowser.player.show_all()
+# TODO: pass this shit through as args to __init__
+browser.player = backend.Player([])
+# browser.player.show_all()
 
 
 # the main music directory
 music = settings.settings['music_dir']
-CoverBrowser.music = music
+browser.music = music
 
 artists = os.listdir(music)
 
@@ -127,7 +127,7 @@ albums.sort()
 
 
 # instantiate the browser
-brow = CoverBrowser.Browser(albums)
+brow = browser.Browser(albums)
 
 control = Control()
 control.show_all()
@@ -149,24 +149,24 @@ def handle_connection(source, condition):
     sock = socket(AF_UNIX, SOCK_DGRAM)
     sock.connect('/tmp/ricochetctl')
     if data == "toggle":
-        CoverBrowser.player.toggle(None)
+        browser.player.toggle(None)
         message = "toggle"
     elif data == "next":
-        CoverBrowser.player.skip_next(None)
+        browser.player.skip_next(None)
         message = "next"
     elif data == "prev":
-        CoverBrowser.player.skip_prev(None)
+        browser.player.skip_prev(None)
         message = "prev"
     elif data == "pos":
-        pos_min, pos_sec, dur_min, dur_sec = CoverBrowser.player.get_info(
+        pos_min, pos_sec, dur_min, dur_sec = browser.player.get_info(
             None, data)
         message = "%d:%d/%d:%d" % (pos_min, pos_sec, dur_min, dur_sec)
     elif data == "artist":
-        message = CoverBrowser.player.get_info(None, data)
+        message = browser.player.get_info(None, data)
     elif data == "album":
-        message = CoverBrowser.player.get_info(None, data)
+        message = browser.player.get_info(None, data)
     elif data == "song":
-        message = CoverBrowser.player.get_info(None, data)
+        message = browser.player.get_info(None, data)
 
     info = bytes(message, 'UTF-8')
     sock.sendall(info)
