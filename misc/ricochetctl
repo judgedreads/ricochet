@@ -1,12 +1,9 @@
-#!/bin/env python
+#!/usr/bin/env python3
 
 from socket import socket, AF_UNIX, SOCK_DGRAM
 from gi.repository import GObject
 import subprocess
 import sys
-
-server = socket(AF_UNIX, SOCK_DGRAM)
-server.bind('/tmp/ricochetctl')
 
 sock = socket(AF_UNIX, SOCK_DGRAM)
 try:
@@ -17,21 +14,6 @@ except FileNotFoundError:
 
 #TODO: handle ConnectionRefusedError or remove named pipe on main program close.
 
-
-def handle_connection(source, connection):
-    data = server.recv(1024).decode('UTF-8')
-    print(data)
-    sock.close()
-# remove the socket from /tmp
-    subprocess.call(['rm', '/tmp/ricochetctl'])
-    loop.quit()
-
 # have to encode str to bytes in python3
 s = bytes(sys.argv[1], 'UTF-8')
 sock.sendall(s)
-
-GObject.io_add_watch(server, GObject.IO_IN, handle_connection)
-# have to assign to variable otherwise can't call quit() on it
-loop = GObject.MainLoop()
-loop.run()
-

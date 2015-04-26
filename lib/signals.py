@@ -19,8 +19,6 @@ class Server(object):
     def handle_connection(self, source, condition):
         # receive data and decode it from bytes to str
         data = self.server.recv(1024).decode('UTF-8')
-        sock = socket(AF_UNIX, SOCK_DGRAM)
-        sock.connect('/tmp/ricochetctl')
         if data == "toggle":
             self.player.toggle(None)
             message = "toggle"
@@ -30,19 +28,6 @@ class Server(object):
         elif data == "prev":
             self.player.skip_prev(None)
             message = "prev"
-        elif data == "pos":
-            pos_min, pos_sec, dur_min, dur_sec = self.player.get_info(
-                None, data)
-            message = "%d:%d/%d:%d" % (pos_min, pos_sec, dur_min, dur_sec)
-        elif data == "artist":
-            message = self.player.get_info(None, data)
-        elif data == "album":
-            message = self.player.get_info(None, data)
-        elif data == "song":
-            message = self.player.get_info(None, data)
-
-        info = bytes(message, 'UTF-8')
-        sock.sendall(info)
         # by returning True, the io watcher remains
         return True
 

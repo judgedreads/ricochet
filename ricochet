@@ -79,7 +79,7 @@ albums.sort()
 # instantiate the browser
 brow = browser.Browser(albums)
 
-server = Server()
+server = Server(player)
 server.main()
 control = Control(player, brow, server)
 control.show_all()
