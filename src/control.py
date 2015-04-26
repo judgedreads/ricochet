@@ -1,8 +1,12 @@
+from gi.repository import Gtk
+
 # The main control window for the playlist and playback controls
 class Control(Gtk.Window):
 
-    def __init__(self, player, browser):
+    def __init__(self, player, browser, server):
         self.player = player
+        self.server = server
+        self.brow = browser
         
         Gtk.Window.__init__(self)
         self.set_title("Ricochet v0.3")
@@ -39,7 +43,7 @@ class Control(Gtk.Window):
 
 # close the backend and browser and then Gtk
     def quit(self, widget, event):
-        server.close()
+        self.server.close()
         self.brow.quit(None, None)
         self.player.quit(None, None)
         print("Next time, punk.")

@@ -18,13 +18,12 @@
 
 
 from gi.repository import Gst, Gtk, GObject, Notify
-from socket import socket, AF_UNIX, SOCK_DGRAM
 import os
-import subprocess
 
 import browser
 import settings
 from control import Control
+from signals import Server
 
 
 if settings.settings['backend'] == "gstreamer":
@@ -82,7 +81,9 @@ albums.sort()
 # instantiate the browser
 brow = browser.Browser(albums)
 
-control = Control()
+server = Server()
+server.main()
+control = Control(player, brow, server)
 control.show_all()
 
 # show the window and run the main method
@@ -94,46 +95,6 @@ if settings.settings['system_tray'] == 'True':
     tray = Gtk.StatusIcon.new_from_file("images/ricochet.png")
     tray.connect("button-press-event", show_hide)
 
-
-# callback for the socket communication
-def handle_connection(source, condition):
-    # receive data and decode it from bytes to str
-    data = server.recv(1024).decode('UTF-8')
-    sock = socket(AF_UNIX, SOCK_DGRAM)
-    sock.connect('/tmp/ricochetctl')
-    if data == "toggle":
-        player.toggle(None)
-        message = "toggle"
-    elif data == "next":
-        player.skip_next(None)
-        message = "next"
-    elif data == "prev":
-        player.skip_prev(None)
-        message = "prev"
-    elif data == "pos":
-        pos_min, pos_sec, dur_min, dur_sec = player.get_info(
-            None, data)
-        message = "%d:%d/%d:%d" % (pos_min, pos_sec, dur_min, dur_sec)
-    elif data == "artist":
-        message = player.get_info(None, data)
-    elif data == "album":
-        message = player.get_info(None, data)
-    elif data == "song":
-        message = player.get_info(None, data)
-
-    info = bytes(message, 'UTF-8')
-    sock.sendall(info)
-# by returning True, the io watcher remains
-    return True
-
-# create a named pipe for communication
-server = socket(AF_UNIX, SOCK_DGRAM)
-try:
-    server.bind('/tmp/ricochet')
-except OSError:
-    subprocess.call(['rm', '/tmp/ricochet'])
-    server.bind('/tmp/ricochet')
-GObject.io_add_watch(server, GObject.IO_IN, handle_connection)
 
 Notify.init('ricochet')
 

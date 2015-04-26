@@ -1,16 +1,22 @@
-from gi.repository import Notify
+from gi.repository import Notify, GdkPixbuf
 
 # TODO need to make everything more modular then set it all up
 # from main exe. Pass the backend class around to connect the
 # callbacks e.g. notif_skip takes gst player as arg.
 
 class NullNotifier(object):
-    def send(self):
+    def __init__(self, playlist):
+        self.playlist = playlist
+
+    def notify(self, i):
         pass
 
 
 class Notifier(object):
-        i = index
+    def __init__(self, playlist):
+        self.playlist = playlist
+
+    def notify(self, i):
         print(self.playlist[i])
         song = self.playlist[i].split('/')[-1]
         album = self.playlist[i].split('/')[-2]

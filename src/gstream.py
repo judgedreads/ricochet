@@ -22,6 +22,12 @@ import subprocess
 import settings
 
 
+if settings.settings['notifications'] == "True":
+    from notifications import Notifier
+else:
+    from notifications import NullNotifier as Notifier
+
+
 class Player(object):
 
     # callback for activation on playlist tree
@@ -144,7 +150,7 @@ class Player(object):
         # play the playlist
         self.toggle(None)
 
-        self.notify(None, 0)
+        self.notify(0)
 
 
 # add music to current playlist
@@ -184,7 +190,7 @@ class Player(object):
             self.pipeline.set_state(Gst.State.PLAYING)
             self.track += 1
 
-            self.notify(None, i)
+            self.notify(i)
 
     def skip_prev(self, widget):
         # unload player
@@ -196,9 +202,11 @@ class Player(object):
             self.pipeline.set_state(Gst.State.PLAYING)
             self.track -= 1
 
-            self.notify(None, i - 1)
+            self.notify(i - 1)
 
-
+    def notify(self, i):
+        n = Notifier(self.playlist)
+        n.notify(i)
 
 # callback for when the end of a song is reached
     def on_eos(self, bus, msg):
@@ -212,7 +220,7 @@ class Player(object):
             # advance the track counter
             self.track += 1
 
-            self.notify(None, i)
+            self.notify(i)
         else:
             # stop when the last song is done
             self.pipeline.set_state(Gst.State.NULL)

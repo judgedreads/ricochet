@@ -2,7 +2,7 @@ import os
 
 # set up defaults
 settings = {'backend': 'gstreamer', 'mpd_host': 'localhost', 'mpd_port': 6600, 'music_dir': '/home/judgedreads/Music/',
-            'grid_icon_size': 128, 'detail_icon_size': 256, 'notifications': True, 'system_tray': True}
+            'grid_icon_size': 128, 'detail_icon_size': 256, 'notifications': 'True', 'system_tray': 'True'}
 
 home = os.environ['HOME']
 path = home + '/.config/ricochet/ricochetrc'
