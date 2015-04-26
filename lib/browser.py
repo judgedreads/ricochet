@@ -18,7 +18,7 @@
 from gi.repository import Gtk, Gdk, GdkPixbuf
 import os
 
-import settings
+from . import settings
 
 
 # The class structure for each album in the main browser

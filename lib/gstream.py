@@ -19,13 +19,13 @@ from gi.repository import Gst, Gtk, Notify, GdkPixbuf
 import os
 import subprocess
 
-import settings
+from . import settings
 
 
 if settings.settings['notifications'] == "True":
-    from notifications import Notifier
+    from .notifications import Notifier
 else:
-    from notifications import NullNotifier as Notifier
+    from .notifications import NullNotifier as Notifier
 
 
 class Player(object):

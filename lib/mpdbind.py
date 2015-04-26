@@ -18,7 +18,7 @@
 from gi.repository import Gtk
 import mpd
 
-import settings
+from . import settings
 
 
 class Player:

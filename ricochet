@@ -20,17 +20,17 @@
 from gi.repository import Gst, Gtk, GObject, Notify
 import os
 
-import browser
-import settings
-from control import Control
-from signals import Server
+from lib import browser
+from lib import settings
+from lib.control import Control
+from lib.signals import Server
 
 
 if settings.settings['backend'] == "gstreamer":
-    import gstream as backend
+    from lib import gstream as backend
     Gst.init()
 elif settings.settings['backend'] == "mpd":
-    import mpdbind as backend
+    from lib import mpdbind as backend
 else:
     print("Invalid backend: should be 'mpd' or 'gstreamer'")
 
