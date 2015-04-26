@@ -35,8 +35,6 @@ else:
     print("Invalid backend: should be 'mpd' or 'gstreamer'")
 
 
-
-
 # callback for tray to show/hide windows
 def show_hide(widget, event):
     if event.button == 1:
@@ -51,7 +49,7 @@ def show_hide(widget, event):
             brow.show()
 
 # TODO: pass this shit through as args to __init__
-player  = backend.Player()
+player = backend.Player()
 browser.player = player
 
 # the main music directory

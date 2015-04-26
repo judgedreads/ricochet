@@ -4,7 +4,9 @@ from gi.repository import Notify, GdkPixbuf
 # from main exe. Pass the backend class around to connect the
 # callbacks e.g. notif_skip takes gst player as arg.
 
+
 class NullNotifier(object):
+
     def __init__(self, playlist):
         self.playlist = playlist
 
@@ -13,6 +15,7 @@ class NullNotifier(object):
 
 
 class Notifier(object):
+
     def __init__(self, playlist):
         self.playlist = playlist
 
@@ -30,9 +33,9 @@ class Notifier(object):
 # also try using GtkApplication class to init stuff like
 # Notify.init and connect all windows to this, this seems to
 # be the 'proper' way of doing things. Also, the notify docs
-# are here: https://developer.gnome.org/libnotify/0.7/ not 
+# are here: https://developer.gnome.org/libnotify/0.7/ not
 # with Gtk docs.
-        #Notify.init("Ricochet")
+        # Notify.init("Ricochet")
         Playing = Notify.Notification.new(song, artist, cover)
         Playing.add_action('action', 'Next', self.notif_skip, 'next')
         image = GdkPixbuf.Pixbuf.new_from_file(cover)

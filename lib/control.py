@@ -1,13 +1,15 @@
 from gi.repository import Gtk
 
 # The main control window for the playlist and playback controls
+
+
 class Control(Gtk.Window):
 
     def __init__(self, player, browser, server):
         self.player = player
         self.server = server
         self.brow = browser
-        
+
         Gtk.Window.__init__(self)
         self.set_title("Ricochet v0.3")
         self.set_icon_from_file("images/ricochet.png")

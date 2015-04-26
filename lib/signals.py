@@ -2,7 +2,9 @@ from socket import socket, AF_UNIX, SOCK_DGRAM
 from gi.repository import GObject
 import subprocess
 
+
 class Server(object):
+
     def __init__(self):
         # create a named pipe for communication
         self.server = socket(AF_UNIX, SOCK_DGRAM)
@@ -44,7 +46,8 @@ class Server(object):
         return True
 
     def main(self):
-        GObject.io_add_watch(self.server, GObject.IO_IN, self.handle_connection)
+        GObject.io_add_watch(
+            self.server, GObject.IO_IN, self.handle_connection)
 
     def close(self):
         self.server.close()
