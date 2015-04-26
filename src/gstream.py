@@ -36,7 +36,9 @@ class Player(object):
 
         self.on_eos(None, None)
 
-    def __init__(self, playlist):
+    def __init__(self, playlist=None):
+        if playlist is None:
+            playlist = []
         # Option to load a playlist on init
         print("Ricochet v0.3")
         self.version = 'v' + \

@@ -24,6 +24,7 @@ import subprocess
 
 import browser
 import settings
+from control import Control
 
 
 if settings.settings['backend'] == "gstreamer":
@@ -51,9 +52,8 @@ def show_hide(widget, event):
             brow.show()
 
 # TODO: pass this shit through as args to __init__
-browser.player = backend.Player([])
-# browser.player.show_all()
-
+player  = backend.Player()
+browser.player = player
 
 # the main music directory
 music = settings.settings['music_dir']
@@ -102,24 +102,24 @@ def handle_connection(source, condition):
     sock = socket(AF_UNIX, SOCK_DGRAM)
     sock.connect('/tmp/ricochetctl')
     if data == "toggle":
-        browser.player.toggle(None)
+        player.toggle(None)
         message = "toggle"
     elif data == "next":
-        browser.player.skip_next(None)
+        player.skip_next(None)
         message = "next"
     elif data == "prev":
-        browser.player.skip_prev(None)
+        player.skip_prev(None)
         message = "prev"
     elif data == "pos":
-        pos_min, pos_sec, dur_min, dur_sec = browser.player.get_info(
+        pos_min, pos_sec, dur_min, dur_sec = player.get_info(
             None, data)
         message = "%d:%d/%d:%d" % (pos_min, pos_sec, dur_min, dur_sec)
     elif data == "artist":
-        message = browser.player.get_info(None, data)
+        message = player.get_info(None, data)
     elif data == "album":
-        message = browser.player.get_info(None, data)
+        message = player.get_info(None, data)
     elif data == "song":
-        message = browser.player.get_info(None, data)
+        message = player.get_info(None, data)
 
     info = bytes(message, 'UTF-8')
     sock.sendall(info)
