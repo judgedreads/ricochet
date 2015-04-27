@@ -14,7 +14,7 @@
 
   - This program assumes you are running a Linux distribution
 
-  - The music is expected to be structured as follows: MusicDir/Artist/Album/song e.g. mine is ~/Music/Artist/Album/song
+  - The music is expected to be structured as follows: _MusicDir/Artist/Album/song_ e.g. mine is _~/Music/Artist/Album/song_
 
   - Cover art is expected to be called cover.jpg and located in the album directory to which it corresponds. 
 
@@ -31,15 +31,15 @@
 
 ###Controls:
 
-Main browser: 
+**Main browser:**
   - Left click on an album brings up the album window with song list, right click an album for context menu with queue option, middle click to play album. 
   - Keyboard controls: arrows: navigate, p/enter: play album, q: queue album, o: open album, space: play/pause.
 
-Detailed album view:
+**Detailed album view:**
   - double-click the songs to play, right click to queue songs.
   - Can also play selection with 'enter' or 'p', and queue selection with 'q'. 'space' will toggle play/pause.
 
-Control window:
+**Control window:**
   - Buttons control playback and double-clicking a song in the playlist will play that song.
 
 
