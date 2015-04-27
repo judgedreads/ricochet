@@ -42,11 +42,11 @@
   - Buttons control playback and double-clicking a song in the playlist will play that song.
 
 **ricochetctl:**
-  `ricochetctl` can be used to send commands to ricochet externally, the commands are:
 
-    - `ricochetctl toggle` to toggle play/pause
-    - `ricochetctl next` to skip to the next track
-    - `ricochetctl prev` to skip to the prev track
+  `ricochetctl` can be used to send commands to ricochet externally, the commands are:
+  - `ricochetctl toggle` to toggle play/pause
+  - `ricochetctl next` to skip to the next track
+  - `ricochetctl prev` to skip to the prev track
 
 
 ##Planned Features:
