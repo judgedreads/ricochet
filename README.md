@@ -12,22 +12,21 @@
 
 ##Usage:
 
+###Running:
+
   - This program assumes you are running a Linux distribution
 
   - The music is expected to be structured as follows: _MusicDir/Artist/Album/song_ e.g. mine is _~/Music/Artist/Album/song_
 
   - Cover art is expected to be called cover.jpg and located in the album directory to which it corresponds. 
 
-  - A simple install script (run: `./setup install`) will put the files in /opt and an executable in /usr/bin; needs to be run as root. Then you can just run `ricochet` anywhere. Use `./setup remove` to uninstall.
+  - A simple install script (run: `./setup install`) will put the data in _/opt/ricochet/_ and executables in _/usr/bin_; needs to be run as root. Then you can just run `ricochet` anywhere. Use `./setup remove` to uninstall.
 
   - Ricochet can also be run from the program directory: `./ricochet`
 
-  - Settings should be configured in ~/.config/ricochet/ricochetrc file (a sample is included)
-
-  - `ricochetctl` allows control over the main program, possible commands are: `ricochetctl toggle`, `ricochetctl next`, and `ricochetctl prev`. These can be bound to keys in the preferred way.
+  - Settings should be configured in _~/.config/ricochet/ricochetrc_ (a sample config is included)
 
   - If using mpd, make sure it is running before launching Ricochet
-
 
 ###Controls:
 
@@ -41,6 +40,12 @@
 
 **Control window:**
   - Buttons control playback and double-clicking a song in the playlist will play that song.
+
+**ricochetctl:**
+  `ricochetctl` can be used to send commands to ricochet externally, the commands are:
+    - `ricochetctl toggle` to toggle play/pause
+    - `ricochetctl next` to skip to the next track
+    - `ricochetctl prev` to skip to the prev track
 
 
 ##Planned Features:
