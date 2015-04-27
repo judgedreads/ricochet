@@ -1,30 +1,35 @@
-Ricochet
-========
+#Ricochet
 
-Requirements:
--------------
+##Requirements:
+
   - mpd or gstreamer >1.0
   - python 3
-  - gtk3
+  - GTK+ >3.12
   - python bindings for gstreamer1.0 and gtk3 (gst-python and python-gobject in Arch repos, names may differ for other distros)
 
 ... I think that's all.
 
 
-Usage:
-------
+##Usage:
 
-  - There is partial configuration in the settings.py file
+  - This program assumes you are running a Linux distribution
 
-  - Just run src/ricochet.py from main ricochet directory, make sure executable bit is set (chmod +x ricochet.py)
+  - The music is expected to be structured as follows: MusicDir/Artist/Album/song e.g. mine is ~/Music/Artist/Album/song
 
-  - make sure mpd is running (unless using gstreamer)
+  - Cover art is expected to be called cover.jpg and located in the album directory to which it corresponds. 
 
-  - A simple install script (run: ./setup install) will put the files in /opt and an executable in /usr/bin; needs to be run as root. Then you can just run 'ricochet' anywhere. use ./setup remove to uninstall.
+  - A simple install script (run: `./setup install`) will put the files in /opt and an executable in /usr/bin; needs to be run as root. Then you can just run `ricochet` anywhere. Use `./setup remove` to uninstall.
+
+  - Ricochet can also be run from the program directory: `./ricochet`
+
+  - Settings should be configured in ~/.config/ricochet/ricochetrc file (a sample is included)
+
+  - `ricochetctl` allows control over the main program, possible commands are: `ricochetctl toggle`, `ricochetctl next`, and `ricochetctl prev`. These can be bound to keys in the preferred way.
+
+  - If using mpd, make sure it is running before launching Ricochet
 
 
-Controls:
----------
+###Controls:
 
 Main browser: 
   - Left click on an album brings up the album window with song list, right click an album for context menu with queue option, middle click to play album. 
@@ -38,36 +43,16 @@ Control window:
   - Buttons control playback and double-clicking a song in the playlist will play that song.
 
 
-Some assumptions about this program:
-------------------------------------
+##Planned Features:
 
-  - This is a work in progress and a learning exercise
-
-  - This is not a finished application nor is it under full-time maintainance.
-
-  - This program assumes you are running a Linux distribution
-
-  - You may need to change the top line of the python file (cover-browser) depending on your distribution (e.g. /usr/bin/env python) but you can always run it with python: python ricochet.py
-
-  - Some assumptions about the structure of the music collection is made, again because this was a gui exercise initially (using a database would be more portable). The music is expected to be structured as follows: Music_Dir/Artist/Album/song.ext e.g. mine is ~/Music/Artist/Album/song.ext.
-
-  - Cover art is expected to be called cover.jpg and located in the album directory to which it corresponds. 
-
-
-Planned Features:
------------------
-
-  - Incorporate album art look-up (art look up has been written but not yet implemented.)
-  - More advanced gui with an artist filter side bar?
-  - Improve the capabilities of the backends
-  - More playlist control
-  - Save settings such as window geometry and playlist in config directory
+  - Incorporate album art look-up
+  - More advanced gui e.g. artist filter side bar
+  - Save settings such as window geometry and playlist
   - Pandora integration
-  - Porting some/all code to C/C++ with a plugin architecture
+  - Porting some/all code to Vala/C/C++ with a python plugin architecture
 
 
-Changelog:
-----------
+##Changelog:
 
 v0.1:
   - Basic implementation using pygtk (gtk2) and python2
@@ -102,13 +87,3 @@ v0.3.1:
 v0.3.2:
   - Improved the settings so that they can be read from an rc file
   - Improved the socket control for hotkey/conky integration
-
-If you have any advice I would appreciate it :) and feature requests are
-welcome (although no promises about me implementing them). I'd love to
-know if anyone does anything cool with it too - contact: 
-pearce@millerdedmon.com
-
-
-Enjoy!
-
-  --judgedreads
