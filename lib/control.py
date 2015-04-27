@@ -1,9 +1,9 @@
 from gi.repository import Gtk
 
-# The main control window for the playlist and playback controls
 
 
 class Control(Gtk.Window):
+    '''The main control window for the playlist and playback controls'''
 
     def __init__(self, player, browser, server):
         self.player = player
@@ -43,8 +43,8 @@ class Control(Gtk.Window):
         self.scroll.add(self.player.treeview)
 
 
-# close the backend and browser and then Gtk
     def quit(self, widget, event):
+        '''close the backend and browser and then Gtk'''
         self.server.close()
         self.brow.quit(None, None)
         self.player.quit(None, None)

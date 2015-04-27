@@ -30,8 +30,8 @@ else:
 
 class Player(object):
 
-    # callback for activation on playlist tree
     def on_activate(self, tree, path, column):
+        '''callback for activation on playlist tree'''
         song = self.liststore[path][0]
         i = 0
         for track in self.playlist:
@@ -43,20 +43,20 @@ class Player(object):
         self.on_eos(None, None)
 
     def __init__(self, playlist=None):
+        '''Optionally load a playlist on init'''
         if playlist is None:
             playlist = []
-        # Option to load a playlist on init
         print("Ricochet v0.3")
         self.version = 'v' + \
             str(Gst.version()[0]) + '.' + \
             str(Gst.version()[1]) + '.' + str(Gst.version()[2])
         print("Using Gstreamer " + self.version)
 
-# keep track of playlist and current track
+        # keep track of playlist and current track
         self.playlist = playlist
         self.track = 1
 
-# set up gstreamer elements
+        # set up gstreamer elements
         self.pipeline = Gst.Pipeline()
 
         self.bus = self.pipeline.get_bus()
@@ -67,10 +67,9 @@ class Player(object):
 
         self.pipeline.add(self.playbin)
 
-# keep track of play state
         self.current_state = "PAUSED"
 
-# create playlist tree widget
+        # create playlist tree widget
         self.liststore = Gtk.ListStore(str)
         self.treeview = Gtk.TreeView()
 
@@ -83,9 +82,6 @@ class Player(object):
 
         self.treeview.connect("row-activated", self.on_activate)
 
-
-# info queries
-# should make more functions use this to reduce code duplication
     def get_info(self, widget, data):
         i = self.track
         if data == "pos":
@@ -109,8 +105,8 @@ class Player(object):
             return artist
 
 
-# handle playlist changes
     def change_playlist(self, widget):
+        '''handle playlist changes'''
 
         self.liststore.clear()
 
@@ -121,10 +117,9 @@ class Player(object):
         self.treeview.set_model(self.liststore)
 
 
-# toggle play state
     def toggle(self, widget):
+        '''toggle play state'''
         if self.current_state == "PAUSED":
-            #self.set_title(self.playlist[self.track - 1].split('/')[-1])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.current_state = "PLAYING"
         elif self.current_state == "PLAYING":
@@ -132,13 +127,10 @@ class Player(object):
             self.current_state = "PAUSED"
 
 
-# method to play now, i.e. replace playlist and play it
     def play(self, widget, data):
+        '''method to play now, i.e. replace playlist and play it'''
 
-        # empty the playlist
         self.playlist = []
-
-# need to set current music (if any) to stop before playing more
         self.pipeline.set_state(Gst.State.NULL)
         self.current_state = "PAUSED"
 
@@ -153,9 +145,9 @@ class Player(object):
         self.notify(0)
 
 
-# add music to current playlist
     def queue(self, widget, data):
-        # check if directory or file
+        '''add music to current playlist'''
+
         if os.path.isdir("/home/judgedreads/Music/" + data):
             songs = os.listdir("/home/judgedreads/Music/" + data)
             songs.sort()
@@ -167,25 +159,20 @@ class Player(object):
                         data + "/" + song
                     self.playlist.append(temp)
         else:
-            # no need to handle file types here as they are already handled
-            # in the browser.
             song = "file:///home/judgedreads/Music/" + data
             self.playlist.append(song)
 
         self.change_playlist(None)
 
 
-# unload the player
     def quit(self, widget, event):
         self.pipeline.set_state(Gst.State.NULL)
 
     def skip_next(self, widget):
-        # unload player
         print('skipping')
         self.pipeline.set_state(Gst.State.NULL)
         i = self.track
         if i < len(self.playlist):
-            # load next song and play
             self.playbin.set_property('uri', self.playlist[i])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.track += 1
@@ -193,11 +180,9 @@ class Player(object):
             self.notify(i)
 
     def skip_prev(self, widget):
-        # unload player
         self.pipeline.set_state(Gst.State.NULL)
         i = self.track - 1
         if i > 0:
-            # load previous song and play
             self.playbin.set_property('uri', self.playlist[i - 1])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.track -= 1
@@ -208,19 +193,14 @@ class Player(object):
         n = Notifier(self.playlist)
         n.notify(i)
 
-# callback for when the end of a song is reached
     def on_eos(self, bus, msg):
+        '''callback for when the end of a song is reached'''
         i = self.track
-        # unload the player
         self.pipeline.set_state(Gst.State.NULL)
         if i < len(self.playlist):
-            # load next song and play
             self.playbin.set_property('uri', self.playlist[i])
             self.pipeline.set_state(Gst.State.PLAYING)
-            # advance the track counter
             self.track += 1
-
             self.notify(i)
         else:
-            # stop when the last song is done
             self.pipeline.set_state(Gst.State.NULL)

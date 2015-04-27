@@ -4,9 +4,9 @@ import subprocess
 
 
 class Server(object):
+    '''Class for external communication'''
 
     def __init__(self, player):
-        # create a named pipe for communication
         self.server = socket(AF_UNIX, SOCK_DGRAM)
         self.player = player
         try:
@@ -15,8 +15,8 @@ class Server(object):
             subprocess.call(['rm', '/tmp/ricochet'])
             self.server.bind('/tmp/ricochet')
 
-    # callback for the socket communication
     def handle_connection(self, source, condition):
+    '''callback for the socket communication'''
         # receive data and decode it from bytes to str
         data = self.server.recv(1024).decode('UTF-8')
         if data == "toggle":

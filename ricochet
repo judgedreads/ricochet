@@ -35,8 +35,8 @@ else:
     print("Invalid backend: should be 'mpd' or 'gstreamer'")
 
 
-# callback for tray to show/hide windows
 def show_hide(widget, event):
+    '''callback for tray to show/hide windows'''
     if event.button == 1:
         if control.get_visible():
             control.hide()
@@ -52,7 +52,6 @@ def show_hide(widget, event):
 player = backend.Player()
 browser.player = player
 
-# the main music directory
 music = settings.settings['music_dir']
 browser.music = music
 
@@ -61,22 +60,13 @@ artists = os.listdir(music)
 albums = []
 
 for artist in artists:
-    # list all items(albums) in the artist directory
     albumlist = os.listdir(music + artist)
     for i in range(0, len(albumlist)):
         albumlist[i] = artist + "/" + albumlist[i]
-    # need extend method as append only joins one item i.e. treats whole
-    # extra array as one item
     albums.extend(albumlist)
 
-
-# listdir accesses files the way they are indexed in the filesystem
-# so need to sort them. list.sort() alters current list, sorted returns
-# a new one. Don't need the old one and .sort is more efficient.
 albums.sort()
 
-
-# instantiate the browser
 brow = browser.Browser(albums)
 
 server = Server(player)
@@ -84,17 +74,13 @@ server.main()
 control = Control(player, brow, server)
 control.show_all()
 
-# show the window and run the main method
 brow.show_all()
 brow.connect("delete-event", brow.quit)
 
-# optionally create system tray icon
 if settings.settings['system_tray'] == 'True':
     tray = Gtk.StatusIcon.new_from_file("images/ricochet.png")
     tray.connect("button-press-event", show_hide)
 
-
 Notify.init('ricochet')
 
-# main loop
 Gtk.main()

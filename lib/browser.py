@@ -21,13 +21,12 @@ import os
 from . import settings
 
 
-# The class structure for each album in the main browser
 class Cover(Gtk.Button):
+    '''The class structure for each album in the main browser'''
 
     def __init__(self, name):
         Gtk.Button.__init__(self)
         self.name = name
-        # Setting full path of album
         self.directory = music + self.name
 
         size = int(settings.settings['grid_icon_size'])
@@ -37,7 +36,6 @@ class Cover(Gtk.Button):
         if os.path.exists(self.directory + "/cover.jpg"):
             self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 self.directory + "/cover.jpg", size, size)
-
         else:
             self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 "images/music_note.png", size, size)
@@ -62,19 +60,18 @@ class Cover(Gtk.Button):
         menu_item_play.connect("activate", player.play, self.name)
         menu_item_play.show()
 
-        # Connecting the callback function to the button click
         self.connect("button-press-event", self.callback)
 
         self.set_tooltip_text(self.name)
 
         self.show()
 
-    # launch the detailed album view
     def album_detail(self, widget):
+    '''launch the detailed album view'''
         album = Album(self.name)
 
-    # Callback function for clicking on album
     def callback(self, widget, event):
+    '''Callback function for clicking on album'''
         if event.button == 1:
             self.album_detail(self)
         elif event.button == 2:
@@ -84,8 +81,8 @@ class Cover(Gtk.Button):
                 None, None, None, self.name, event.button, event.time)
 
 
-# The main window displaying all covers
 class Browser(Gtk.Window):
+    '''The main window displaying all covers'''
 
     def __init__(self, albums):
         Gtk.Window.__init__(self, title="Cover Browser")
@@ -96,16 +93,15 @@ class Browser(Gtk.Window):
         self.set_icon_from_file("images/ricochet.png")
         self.set_default_size(950, 500)
 
-# scrolled window for the albums
+        # scrolled window for the albums
         self.scroll = Gtk.ScrolledWindow()
         self.scroll.set_border_width(0)
-        # no horiz scroll but allow vert scroll when necessary
         self.scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         self.scroll.show()
         self.add(self.scroll)
 
-# flowbox to hold the albums for dynamic window resizing and row
-# organising
+        # flowbox to hold the albums for dynamic window resizing and row
+        # organising
         self.flowbox = Gtk.FlowBox()
         self.flowbox.set_valign(Gtk.Align.START)
         self.flowbox.set_max_children_per_line(20)
@@ -117,12 +113,10 @@ class Browser(Gtk.Window):
         # a loop to create a Cover class for each album found
         for album in albums:
             temp = Cover(album)
-
-            # pack the cover into the browser
             self.flowbox.add(temp)
 
-    # handle keyboard controls
     def on_key_press(self, widget, event):
+    '''handle keyboard controls'''
         # print(event.hardware_keycode)
         child = self.get_focus()
         index = child.get_index()
@@ -137,12 +131,12 @@ class Browser(Gtk.Window):
 
     def quit(self, widget, event):
         self.hide()
-# make sure it doesn't delete
+        # make sure it doesn't delete
         return True
 
 
-# The class for the detailed album view
 class Album(Gtk.Window):
+'''The class for the detailed album view'''
 
     def __init__(self, name):
         Gtk.Window.__init__(self, title=name)
@@ -165,28 +159,26 @@ class Album(Gtk.Window):
         # orientation defaults to 0 (horiz)
         self.vbox = Gtk.Box(orientation=1, spacing=0)
         self.add(self.vbox)
-# make sure image doesn't expand or fill but the scroll window does.
+        # make sure image doesn't expand or fill but the scroll window
+        #does.
         self.vbox.pack_start(self.image, False, False, 0)
 
-# scrolled area for the songs
+        # scrolled area for the songs
         self.scroll = Gtk.ScrolledWindow()
         self.scroll.set_border_width(0)
-        # no horiz scroll but allow vert scroll when necessary
         self.scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         self.vbox.pack_start(self.scroll, True, True, 0)
 
         songs = os.listdir(music + name)
         songs.sort()
 
-# set up the song treeview
+        # set up the song treeview
         self.liststore = Gtk.ListStore(str)
 
         for song in songs:
             ext = song.split(".")[-1]
             if ext in ["mp3", "mpc", "ogg", "wma", "m4a", "mp4", "flac"]:
                 self.liststore.append([song])
-                #temp = Song(song, name)
-                #self.vbox.pack_start(temp, True, True, 0)
 
         treeview = Gtk.TreeView(model=self.liststore)
 
@@ -197,11 +189,11 @@ class Album(Gtk.Window):
         column = Gtk.TreeViewColumn("Track", renderer, text=0)
         treeview.append_column(column)
         treeview.set_property("headers-visible", False)
-# disable search grabbing keyboard input
+        # disable search grabbing keyboard input
         treeview.set_enable_search(False)
 
-# allow selection of multiple rows. get_selection won't work now so use
-# get_selected_rows instead (on selection object)
+        # allow selection of multiple rows. get_selection won't work
+        # now so use get_selected_rows instead (on selection object)
         Gtk.TreeSelection.set_mode(
             treeview.get_selection(), Gtk.SelectionMode.MULTIPLE)
 
@@ -226,7 +218,7 @@ class Album(Gtk.Window):
         elif event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
             player.play(None, self.name + '/' + model[treeiter][0])
 
-# Could also make the backend capable of handling lists ^^
+    # TODO: Could also make the backend capable of handling lists ^^
 
     def on_key_press(self, widget, event):
         # print(event.hardware_keycode)
