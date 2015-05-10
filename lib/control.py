@@ -1,8 +1,8 @@
 from gi.repository import Gtk
 
 
-
 class Control(Gtk.Window):
+
     '''The main control window for the playlist and playback controls'''
 
     def __init__(self, player, browser, server):
@@ -12,7 +12,7 @@ class Control(Gtk.Window):
 
         Gtk.Window.__init__(self)
         self.set_title("Ricochet v0.3")
-        self.set_icon_from_file("images/ricochet.png")
+        self.set_icon_from_file("/opt/ricochet/images/ricochet.png")
         self.connect('delete-event', self.quit)
         self.set_default_size(300, 400)
 
@@ -41,7 +41,6 @@ class Control(Gtk.Window):
         self.vbox.pack_start(self.scroll, True, True, 0)
 
         self.scroll.add(self.player.treeview)
-
 
     def quit(self, widget, event):
         '''close the backend and browser and then Gtk'''

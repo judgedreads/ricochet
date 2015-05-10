@@ -22,6 +22,7 @@ from . import settings
 
 
 class Cover(Gtk.Button):
+
     '''The class structure for each album in the main browser'''
 
     def __init__(self, name):
@@ -38,7 +39,7 @@ class Cover(Gtk.Button):
                 self.directory + "/cover.jpg", size, size)
         else:
             self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                "images/music_note.png", size, size)
+                "/opt/ricochet/images/music_note.png", size, size)
 
         self.image = Gtk.Image()
         self.image.set_from_pixbuf(self.pixbuf)
@@ -67,11 +68,11 @@ class Cover(Gtk.Button):
         self.show()
 
     def album_detail(self, widget):
-    '''launch the detailed album view'''
+        '''launch the detailed album view'''
         album = Album(self.name)
 
     def callback(self, widget, event):
-    '''Callback function for clicking on album'''
+        '''Callback function for clicking on album'''
         if event.button == 1:
             self.album_detail(self)
         elif event.button == 2:
@@ -82,6 +83,7 @@ class Cover(Gtk.Button):
 
 
 class Browser(Gtk.Window):
+
     '''The main window displaying all covers'''
 
     def __init__(self, albums):
@@ -90,7 +92,7 @@ class Browser(Gtk.Window):
         self.albums = albums
 
         self.set_border_width(0)
-        self.set_icon_from_file("images/ricochet.png")
+        self.set_icon_from_file("/opt/ricochet/images/ricochet.png")
         self.set_default_size(950, 500)
 
         # scrolled window for the albums
@@ -116,7 +118,7 @@ class Browser(Gtk.Window):
             self.flowbox.add(temp)
 
     def on_key_press(self, widget, event):
-    '''handle keyboard controls'''
+        '''handle keyboard controls'''
         # print(event.hardware_keycode)
         child = self.get_focus()
         index = child.get_index()
@@ -136,7 +138,8 @@ class Browser(Gtk.Window):
 
 
 class Album(Gtk.Window):
-'''The class for the detailed album view'''
+
+    '''The class for the detailed album view'''
 
     def __init__(self, name):
         Gtk.Window.__init__(self, title=name)
@@ -150,8 +153,8 @@ class Album(Gtk.Window):
             self.set_icon_from_file(music + name + "/cover.jpg")
         else:
             self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                "images/music_note.png", 256, 256)
-            self.set_icon_from_file("images/music_note.png")
+                "/opt/ricochet/images/music_note.png", 256, 256)
+            self.set_icon_from_file("/opt/ricochet/images/music_note.png")
 
         self.image = Gtk.Image()
         self.image.set_from_pixbuf(self.pixbuf)
@@ -160,7 +163,7 @@ class Album(Gtk.Window):
         self.vbox = Gtk.Box(orientation=1, spacing=0)
         self.add(self.vbox)
         # make sure image doesn't expand or fill but the scroll window
-        #does.
+        # does.
         self.vbox.pack_start(self.image, False, False, 0)
 
         # scrolled area for the songs

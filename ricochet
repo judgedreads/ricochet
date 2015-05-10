@@ -78,7 +78,7 @@ brow.show_all()
 brow.connect("delete-event", brow.quit)
 
 if settings.settings['system_tray'] == 'True':
-    tray = Gtk.StatusIcon.new_from_file("images/ricochet.png")
+    tray = Gtk.StatusIcon.new_from_file("/opt/ricochet/images/ricochet.png")
     tray.connect("button-press-event", show_hide)
 
 Notify.init('ricochet')

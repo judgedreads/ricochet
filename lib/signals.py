@@ -4,6 +4,7 @@ import subprocess
 
 
 class Server(object):
+
     '''Class for external communication'''
 
     def __init__(self, player):
@@ -16,7 +17,7 @@ class Server(object):
             self.server.bind('/tmp/ricochet')
 
     def handle_connection(self, source, condition):
-    '''callback for the socket communication'''
+        '''callback for the socket communication'''
         # receive data and decode it from bytes to str
         data = self.server.recv(1024).decode('UTF-8')
         if data == "toggle":
