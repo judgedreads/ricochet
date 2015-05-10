@@ -179,8 +179,8 @@ class Album(Gtk.Window):
         self.liststore = Gtk.ListStore(str)
 
         for song in songs:
-            ext = song.split(".")[-1]
-            if ext in ["mp3", "mpc", "ogg", "wma", "m4a", "mp4", "flac"]:
+            if song.endswith(("mp3", "mpc", "ogg", "wma", "m4a", "mp4",
+                "flac"))
                 self.liststore.append([song])
 
         treeview = Gtk.TreeView(model=self.liststore)

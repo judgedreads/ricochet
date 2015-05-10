@@ -152,8 +152,7 @@ class Player(object):
             songs.sort()
             for song in songs:
                 # handle file types: wma doesn't work with gst for some reason
-                ext = song.split('.')[-1]
-                if ext in ['mp3', 'ogg', 'm4a', 'mp4', 'flac', 'mpc']:
+                if song.endswith(('mp3', 'ogg', 'm4a', 'mp4', 'flac', 'mpc')):
                     temp = "file:///home/judgedreads/Music/" + \
                         data + "/" + song
                     self.playlist.append(temp)
