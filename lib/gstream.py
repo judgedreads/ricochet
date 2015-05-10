@@ -46,7 +46,6 @@ class Player(object):
         '''Optionally load a playlist on init'''
         if playlist is None:
             playlist = []
-        print("Ricochet v0.3")
         self.version = 'v' + \
             str(Gst.version()[0]) + '.' + \
             str(Gst.version()[1]) + '.' + str(Gst.version()[2])

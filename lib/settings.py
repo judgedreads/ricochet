@@ -9,7 +9,6 @@ path = home + '/.config/ricochet/ricochetrc'
 
 try:
     f = open(path, 'r')
-    print('Reading ricochetrc settings.')
     for line in f:
         if line[0] != '#' and line != '\n':
             key = line.strip().split('=')[0]

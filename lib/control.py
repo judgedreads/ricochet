@@ -11,7 +11,7 @@ class Control(Gtk.Window):
         self.brow = browser
 
         Gtk.Window.__init__(self)
-        self.set_title("Ricochet v0.3")
+        self.set_title("Ricochet")
         self.set_icon_from_file("/opt/ricochet/images/ricochet.png")
         self.connect('delete-event', self.quit)
         self.set_default_size(300, 400)
