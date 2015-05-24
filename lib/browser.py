@@ -19,6 +19,7 @@ from gi.repository import Gtk, Gdk, GdkPixbuf
 import os
 
 from . import settings
+from . import albumart
 
 
 class Cover(Gtk.Button):
@@ -60,6 +61,10 @@ class Cover(Gtk.Button):
         self.menu.append(menu_item_play)
         menu_item_play.connect("activate", player.play, self.name)
         menu_item_play.show()
+        menu_item_cover = Gtk.MenuItem("Get Cover")
+        self.menu.append(menu_item_cover)
+        menu_item_cover.connect("activate", self.fetch_album_art)
+        menu_item_cover.show()
 
         self.connect("button-press-event", self.callback)
 
@@ -70,6 +75,20 @@ class Cover(Gtk.Button):
     def album_detail(self, widget):
         '''launch the detailed album view'''
         album = Album(self.name)
+
+    def fetch_album_art(self, widget):
+        code = albumart.fetch_album_art(self.name)
+        if code == 0:
+            size = int(settings.settings['grid_icon_size'])
+            if os.path.exists(self.directory + "/cover.jpg"):
+                self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                    self.directory + "/cover.jpg", size, size)
+            else:
+                self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                    "/opt/ricochet/images/music_note.png", size, size)
+
+            self.image.set_from_pixbuf(self.pixbuf)
+            self.image.show()
 
     def callback(self, widget, event):
         '''Callback function for clicking on album'''
@@ -179,8 +198,7 @@ class Album(Gtk.Window):
         self.liststore = Gtk.ListStore(str)
 
         for song in songs:
-            if song.endswith(("mp3", "mpc", "ogg", "wma", "m4a", "mp4",
-                "flac"))
+            if song.endswith(("mp3", "mpc", "ogg", "wma", "m4a", "mp4", "flac")):
                 self.liststore.append([song])
 
         treeview = Gtk.TreeView(model=self.liststore)

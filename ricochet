@@ -25,6 +25,7 @@ from lib import settings
 from lib.control import Control
 from lib.signals import Server
 
+
 print('Ricochet v0.3.3')
 
 if settings.settings['backend'] == "gstreamer":
