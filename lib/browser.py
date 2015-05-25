@@ -91,25 +91,20 @@ class Cover(Gtk.Button):
                 None, None, None, self.name, event.button, event.time)
 
 
-class Browser(Gtk.Window):
+class Browser(Gtk.ScrolledWindow):
 
     '''The main window displaying all covers'''
 
     def __init__(self, albums):
-        Gtk.Window.__init__(self, title="Cover Browser")
+        Gtk.ScrolledWindow.__init__(self)
 
         self.albums = albums
 
         self.set_border_width(0)
-        self.set_icon_from_file("/opt/ricochet/images/ricochet.png")
-        self.set_default_size(950, 500)
 
         # scrolled window for the albums
-        self.scroll = Gtk.ScrolledWindow()
-        self.scroll.set_border_width(0)
-        self.scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        self.scroll.show()
-        self.add(self.scroll)
+        self.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self.show()
 
         # flowbox to hold the albums for dynamic window resizing and row
         # organising
@@ -119,7 +114,7 @@ class Browser(Gtk.Window):
         # allows selection of items with keyboard
         self.flowbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
         self.flowbox.connect("key-press-event", self.on_key_press)
-        self.scroll.add(self.flowbox)
+        self.add(self.flowbox)
 
         # a loop to create a Cover class for each album found
         for album in albums:

@@ -1,7 +1,7 @@
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
 
 
-class Control(Gtk.Window):
+class Control(Gtk.Box):
 
     '''The main control window for the playlist and playback controls'''
 
@@ -10,11 +10,14 @@ class Control(Gtk.Window):
         self.server = server
         self.brow = browser
 
-        Gtk.Window.__init__(self)
-        self.set_title("Ricochet")
-        self.set_icon_from_file("/opt/ricochet/images/ricochet.png")
-        self.connect('delete-event', self.quit)
-        self.set_default_size(300, 400)
+        self.player.image = Gtk.Image()
+        self.player.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+            "/opt/ricochet/images/music_note.png", 256, 256)
+        self.player.image.set_from_pixbuf(self.player.pixbuf)
+        self.player.image.show()
+
+        Gtk.Box.__init__(self, orientation=1)
+        self.pack_start(self.player.image, False, False, 0)
 
         self.box = Gtk.Box()
         self.button1 = Gtk.Button(label="Prev")
@@ -27,28 +30,11 @@ class Control(Gtk.Window):
         self.box.pack_start(self.button3, True, True, 0)
         self.box.pack_start(self.button2, True, True, 0)
 
-        self.vbox = Gtk.Box(orientation=1)
-        self.add(self.vbox)
-        self.vbox.pack_start(self.box, False, False, 0)
-
-        self.browser_button = Gtk.Button(label="Cover Browser")
-        self.browser_button.connect("clicked", self.show_brow)
-        self.vbox.pack_start(self.browser_button, False, False, 0)
+        self.pack_start(self.box, False, False, 0)
 
         self.scroll = Gtk.ScrolledWindow()
         self.scroll.set_border_width(0)
         self.scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        self.vbox.pack_start(self.scroll, True, True, 0)
+        self.pack_start(self.scroll, True, True, 0)
 
         self.scroll.add(self.player.treeview)
-
-    def quit(self, widget, event):
-        '''close the backend and browser and then Gtk'''
-        self.server.close()
-        self.brow.quit(None, None)
-        self.player.quit(None, None)
-        print("Next time, punk.")
-        Gtk.main_quit()
-
-    def show_brow(self, widget):
-        self.brow.show()

@@ -30,18 +30,6 @@ else:
 
 class Player(object):
 
-    def on_activate(self, tree, path, column):
-        '''callback for activation on playlist tree'''
-        song = self.liststore[path][0]
-        i = 0
-        for track in self.playlist:
-            if track.find(song) != -1:
-                self.track = i
-            else:
-                i += 1
-
-        self.on_eos(None, None)
-
     def __init__(self, playlist=None):
         '''Optionally load a playlist on init'''
         if playlist is None:
@@ -81,6 +69,18 @@ class Player(object):
 
         self.treeview.connect("row-activated", self.on_activate)
 
+    def on_activate(self, tree, path, column):
+        '''callback for activation on playlist tree'''
+        song = self.liststore[path][0]
+        i = 0
+        for track in self.playlist:
+            if track.find(song) != -1:
+                self.track = i
+            else:
+                i += 1
+
+        self.on_eos(None, None)
+
     def get_info(self, widget, data):
         i = self.track
         if data == "pos":
@@ -103,6 +103,17 @@ class Player(object):
             artist = self.playlist[i - 1].split('/')[-3]
             return artist
 
+    def update_image(self):
+        segs = self.playlist[self.track - 1].split('/')
+        path = '/'.join(segs[2:-1]) + '/cover.jpg'
+        if os.path.exists(path):
+            self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                path, 256, 256)
+        else:
+            self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                "/opt/ricochet/images/music_note.png", 256, 256)
+        self.image.set_from_pixbuf(self.pixbuf)
+        self.image.show()
 
     def change_playlist(self, widget):
         '''handle playlist changes'''
@@ -115,7 +126,6 @@ class Player(object):
 
         self.treeview.set_model(self.liststore)
 
-
     def toggle(self, widget):
         '''toggle play state'''
         if self.current_state == "PAUSED":
@@ -124,7 +134,6 @@ class Player(object):
         elif self.current_state == "PLAYING":
             self.pipeline.set_state(Gst.State.PAUSED)
             self.current_state = "PAUSED"
-
 
     def play(self, widget, data):
         '''method to play now, i.e. replace playlist and play it'''
@@ -142,7 +151,7 @@ class Player(object):
         self.toggle(None)
 
         self.notify(0)
-
+        self.update_image()
 
     def queue(self, widget, data):
         '''add music to current playlist'''
@@ -162,7 +171,6 @@ class Player(object):
 
         self.change_playlist(None)
 
-
     def quit(self, widget, event):
         self.pipeline.set_state(Gst.State.NULL)
 
@@ -176,6 +184,7 @@ class Player(object):
             self.track += 1
 
             self.notify(i)
+            self.update_image()
 
     def skip_prev(self, widget):
         self.pipeline.set_state(Gst.State.NULL)
@@ -186,6 +195,7 @@ class Player(object):
             self.track -= 1
 
             self.notify(i - 1)
+            self.update_image()
 
     def notify(self, i):
         n = Notifier(self.playlist)
@@ -200,5 +210,6 @@ class Player(object):
             self.pipeline.set_state(Gst.State.PLAYING)
             self.track += 1
             self.notify(i)
+            self.update_image()
         else:
             self.pipeline.set_state(Gst.State.NULL)
