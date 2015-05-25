@@ -6,7 +6,7 @@ class NullNotifier(object):
     '''Dummy notifier for when notifications are disabled'''
 
     def __init__(self, player):
-        self.playlist = player.playlist
+        self.player = player
 
     def notify(self, i):
         pass

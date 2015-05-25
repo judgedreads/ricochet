@@ -1,23 +1,5 @@
-# Ricochet: A different angle on music.
-# Copyright (C) 2013-2014 Pearce Dedmon
-
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-from gi.repository import Gst, Gtk, Notify, GdkPixbuf
+from gi.repository import Gst, Gtk, GdkPixbuf
 import os
-import subprocess
 
 from . import settings
 
@@ -32,29 +14,23 @@ class Player(object):
 
     def __init__(self, playlist=None):
         '''Optionally load a playlist on init'''
+        VERSION = '.'.join(map(str, Gst.version()[0:3]))
         if playlist is None:
             playlist = []
-        self.version = 'v' + \
-            str(Gst.version()[0]) + '.' + \
-            str(Gst.version()[1]) + '.' + str(Gst.version()[2])
-        print("Using Gstreamer " + self.version)
+        print("Using Gstreamer v%s" % VERSION)
 
         # keep track of playlist and current track
         self.playlist = playlist
         self.track = 1
+        self.current_state = "PAUSED"
 
         # set up gstreamer elements
         self.pipeline = Gst.Pipeline()
-
         self.bus = self.pipeline.get_bus()
         self.bus.add_signal_watch()
         self.bus.connect('message::eos', self.on_eos)
-
         self.playbin = Gst.ElementFactory.make('playbin', None)
-
         self.pipeline.add(self.playbin)
-
-        self.current_state = "PAUSED"
 
         # create playlist tree widget
         self.liststore = Gtk.ListStore(str)
@@ -78,7 +54,6 @@ class Player(object):
                 self.track = i
             else:
                 i += 1
-
         self.on_eos(None, None)
 
     def get_info(self, widget, data):
@@ -117,13 +92,10 @@ class Player(object):
 
     def change_playlist(self, widget):
         '''handle playlist changes'''
-
         self.liststore.clear()
-
         for item in self.playlist:
             song = item.split('/')[-1]
             self.liststore.append([song])
-
         self.treeview.set_model(self.liststore)
 
     def toggle(self, widget):
@@ -182,7 +154,6 @@ class Player(object):
             self.playbin.set_property('uri', self.playlist[i])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.track += 1
-
             self.notify(i)
             self.update_image()
 
@@ -193,7 +164,6 @@ class Player(object):
             self.playbin.set_property('uri', self.playlist[i - 1])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.track -= 1
-
             self.notify(i - 1)
             self.update_image()
 

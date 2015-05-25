@@ -21,7 +21,7 @@ import mpd
 from . import settings
 
 
-class Player:
+class Player(object):
 
     # callback for activation on playlist tree
     def on_activate(self, tree, path, column):
@@ -39,6 +39,7 @@ class Player:
         # option to load a playlist on init
 
         self.client = mpd.MPDClient()
+        VERSION = self.client.mpd_version
         self.host = settings.settings['mpd_host']
         self.port = settings.settings['mpd_port']
 
@@ -50,8 +51,7 @@ class Player:
                   (self.host, self.port))
             print("Check that mpd is running correctly.")
 
-        print("Ricochet v0.3")
-        print("Using MPD v" + self.client.mpd_version)
+        print("Using MPD v%s" % VERSION)
 
         # create playlist widget
         self.liststore = Gtk.ListStore(str)

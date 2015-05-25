@@ -20,13 +20,13 @@
 from gi.repository import Gst, Gtk, GObject, Notify, Gio, GLib
 import os
 
-from lib import browser
+from lib.browser import Browser
 from lib import settings
 from lib.control import Control
 from lib.signals import Server
 
-
-print('Ricochet v0.3.3')
+VERSION = '0.3.4'
+print('Ricochet v%s' % VERSION)
 
 if settings.settings['backend'] == "gstreamer":
     from lib import gstream as backend
@@ -51,15 +51,12 @@ class Ricochet(Gtk.Application):
         window = Gtk.ApplicationWindow()
         window.set_border_width(0)
         window.set_icon_from_file("/opt/ricochet/images/ricochet.png")
-        window.set_default_size(950, 500)
+        window.set_default_size(1000, 700)
 
         Notify.init('Ricochet')
 
         player = backend.Player()
-        browser.player = player
-
         music = settings.settings['music_dir']
-        browser.music = music
 
         artists = os.listdir(music)
         albums = []
@@ -69,8 +66,7 @@ class Ricochet(Gtk.Application):
                 albumlist[i] = artist + "/" + albumlist[i]
             albums.extend(albumlist)
         albums.sort()
-
-        brow = browser.Browser(albums)
+        brow = Browser(albums, player)
 
         server = Server(player)
         server.main()
@@ -81,7 +77,6 @@ class Ricochet(Gtk.Application):
         hbox.pack_start(brow, True, True, 0)
 
         window.add(hbox)
-
         app.add_window(window)
         window.show_all()
 
