@@ -53,6 +53,8 @@ class Ricochet(Gtk.Application):
         window.set_icon_from_file("/opt/ricochet/images/ricochet.png")
         window.set_default_size(950, 500)
 
+        Notify.init('Ricochet')
+
         player = backend.Player()
         browser.player = player
 
@@ -79,8 +81,6 @@ class Ricochet(Gtk.Application):
         hbox.pack_start(brow, True, True, 0)
 
         window.add(hbox)
-
-        Notify.init('Ricochet')
 
         app.add_window(window)
         window.show_all()

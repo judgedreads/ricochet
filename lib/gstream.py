@@ -198,7 +198,7 @@ class Player(object):
             self.update_image()
 
     def notify(self, i):
-        n = Notifier(self.playlist)
+        n = Notifier(self)
         n.notify(i)
 
     def on_eos(self, bus, msg):
