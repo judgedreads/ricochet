@@ -31,20 +31,8 @@ class Cover(Gtk.Button):
         self.name = name
         self.directory = music + self.name
 
-        size = int(settings.settings['grid_icon_size'])
-
-        # A check for album art, if found it goes on the button,
-        # if not then the default logo is on the button
-        if os.path.exists(self.directory + "/cover.jpg"):
-            self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                self.directory + "/cover.jpg", size, size)
-        else:
-            self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                "/opt/ricochet/images/music_note.png", size, size)
-
         self.image = Gtk.Image()
-        self.image.set_from_pixbuf(self.pixbuf)
-        self.image.show()
+        self.set_album_art()
         self.add(self.image)
 
         # set up menu and its items
@@ -66,11 +54,22 @@ class Cover(Gtk.Button):
         menu_item_cover.connect("activate", self.fetch_album_art)
         menu_item_cover.show()
 
-        self.connect("button-press-event", self.callback)
+        self.connect("button-press-event", self.on_button_press)
 
         self.set_tooltip_text(self.name)
 
         self.show()
+
+    def set_album_art(self):
+        size = int(settings.settings['grid_icon_size'])
+        if os.path.exists(self.directory + "/cover.jpg"):
+            self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                self.directory + "/cover.jpg", size, size)
+        else:
+            self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                "/opt/ricochet/images/music_note.png", size, size)
+        self.image.set_from_pixbuf(self.pixbuf)
+        self.image.show()
 
     def album_detail(self, widget):
         '''launch the detailed album view'''
@@ -79,18 +78,9 @@ class Cover(Gtk.Button):
     def fetch_album_art(self, widget):
         code = albumart.fetch_album_art(self.name)
         if code == 0:
-            size = int(settings.settings['grid_icon_size'])
-            if os.path.exists(self.directory + "/cover.jpg"):
-                self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                    self.directory + "/cover.jpg", size, size)
-            else:
-                self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                    "/opt/ricochet/images/music_note.png", size, size)
+            self.set_album_art()
 
-            self.image.set_from_pixbuf(self.pixbuf)
-            self.image.show()
-
-    def callback(self, widget, event):
+    def on_button_press(self, widget, event):
         '''Callback function for clicking on album'''
         if event.button == 1:
             self.album_detail(self)
