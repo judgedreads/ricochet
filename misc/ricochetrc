@@ -18,4 +18,4 @@ detail_icon_size=256
 notifications=True
 
 # system tray icon (True or False)
-system_tray=True
+system_tray=False
