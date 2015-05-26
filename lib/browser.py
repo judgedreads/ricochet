@@ -49,7 +49,7 @@ class Cover(Gtk.EventBox):
     def set_album_art(self):
         path = ''.join([music, self.name, '/cover.jpg'])
         if not os.path.exists(path):
-            path = '/opt/ricochet/images/music_note.png'
+            path = '/opt/ricochet/images/default_album.jpg'
         size = int(settings.settings['grid_icon_size'])
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
         self.image.set_from_pixbuf(pixbuf)
@@ -132,7 +132,7 @@ class Album(Gtk.Window):
 
         path = ''.join([music, self.name, '/cover.jpg'])
         if not os.path.exists(path):
-            path = '/opt/ricochet/images/music_note.png'
+            path = '/opt/ricochet/images/default_album.jpg'
         size = int(settings.settings['detail_icon_size'])
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
         image = Gtk.Image()

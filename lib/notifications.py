@@ -31,7 +31,7 @@ class Notifier(object):
         cover = "/home/judgedreads/Music/" + \
             artist + '/' + album + '/' + 'cover.jpg'
         if not os.path.exists(cover):
-            cover = '/opt/ricochet/images/music_note.png'
+            cover = '/opt/ricochet/images/default_album.jpg'
         icon = '/opt/ricochet/images/ricochet.png'
 
         title = ''.join(song.split('.')[0:-1])

@@ -99,7 +99,7 @@ class Player(object):
                 path, 256, 256)
         else:
             self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                "/opt/ricochet/images/music_note.png", 256, 256)
+                "/opt/ricochet/images/default_album.jpg", 256, 256)
         self.image.set_from_pixbuf(self.pixbuf)
         self.image.show()
 
