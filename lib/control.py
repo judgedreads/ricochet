@@ -22,10 +22,10 @@ class Control(Gtk.Box):
         button_box = Gtk.Box()
         button1 = Gtk.Button(label="Prev")
         button2 = Gtk.Button(label="Next")
-        button3 = Gtk.Button(label="Play/Pause")
+        button3 = Gtk.Button(label="Play")
         button1.connect("clicked", self.player.skip_prev)
         button2.connect("clicked", self.player.skip_next)
-        button3.connect("clicked", self.player.toggle)
+        button3.connect("clicked", self.toggle, button3)
         button_box.pack_start(button1, True, True, 0)
         button_box.pack_start(button3, True, True, 0)
         button_box.pack_start(button2, True, True, 0)
@@ -39,3 +39,10 @@ class Control(Gtk.Box):
 
         scroll.add(self.player.treeview)
         self.show_all()
+
+    def toggle(self, widget, button):
+        self.player.toggle(None)
+        if self.player.current_state == 'PLAYING':
+            button.set_label('Pause')
+        else:
+            button.set_label('Play')
