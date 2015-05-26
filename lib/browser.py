@@ -8,12 +8,12 @@ from . import albumart
 music = settings.settings['music_dir']
 
 
-class Cover(Gtk.Button):
+class Cover(Gtk.EventBox):
 
     '''The class structure for each album in the main browser'''
 
     def __init__(self, name, player):
-        Gtk.Button.__init__(self)
+        Gtk.EventBox.__init__(self)
         self.name = name
         self.player = player
 
@@ -106,18 +106,17 @@ class Browser(Gtk.ScrolledWindow):
 
     def on_key_press(self, widget, event):
         '''handle keyboard controls'''
-        # FIXME get_focus method not working
-        # print(event.hardware_keycode)
-        child = self.get_focus()
-        index = child.get_index()
-        if event.hardware_keycode == 36 or event.hardware_keycode == 32:
-            Album(self.albums[index], self.player)
-        elif event.hardware_keycode == 33:
-            self.player.play(None, self.albums[index])
-        elif event.hardware_keycode == 24:
-            self.player.queue(None, self.albums[index])
-        elif event.hardware_keycode == 65:
-            self.player.toggle(None)
+        children = widget.get_selected_children()
+        for child in children:
+            index = child.get_index()
+            if event.hardware_keycode == 36 or event.hardware_keycode == 32:
+                Album(self.albums[index], self.player)
+            elif event.hardware_keycode == 33:
+                self.player.play(None, self.albums[index])
+            elif event.hardware_keycode == 24:
+                self.player.queue(None, self.albums[index])
+            elif event.hardware_keycode == 65:
+                self.player.toggle(None)
 
 
 class Album(Gtk.Window):
