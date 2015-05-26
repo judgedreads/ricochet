@@ -35,6 +35,8 @@ class Player(object):
         # create playlist tree widget
         self.liststore = Gtk.ListStore(str)
         self.treeview = Gtk.TreeView()
+        selection = self.treeview.get_selection()
+        selection.set_mode(Gtk.SelectionMode.MULTIPLE)
 
         self.change_playlist(None)
 
@@ -44,6 +46,7 @@ class Player(object):
         self.treeview.append_column(column)
 
         self.treeview.connect("row-activated", self.on_activate)
+        self.treeview.connect("key_press_event", self.on_key_press)
 
     def on_activate(self, tree, path, column):
         '''callback for activation on playlist tree'''
@@ -55,6 +58,16 @@ class Player(object):
             else:
                 i += 1
         self.on_eos(None, None)
+
+    def on_key_press(self, widget, event):
+        if event.hardware_keycode == 119:
+            selection = widget.get_selection()
+            songs = selection.get_selected_rows()[1]
+            for song in songs:
+                for track in self.playlist:
+                    if self.liststore[song][0] in track:
+                        self.playlist.remove(track)
+            self.change_playlist(None)
 
     def get_info(self, widget, data):
         i = self.track
