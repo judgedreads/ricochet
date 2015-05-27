@@ -6,7 +6,7 @@ mpd_host=localhost
 mpd_port=6600
 
 # full path to music directory
-music_dir=/home/judgedreads/Music/
+music_dir=
 
 # album cover size (in the browser grid)
 grid_icon_size=128

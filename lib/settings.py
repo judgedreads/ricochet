@@ -21,7 +21,8 @@ try:
         if line[0] != '#' and line != '\n':
             key = line.strip().split('=')[0]
             value = line.strip().split('=')[1]
-            settings[key] = value
+            if value:
+                settings[key] = value
 
     f.close()
 except FileNotFoundError:

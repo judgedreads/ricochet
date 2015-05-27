@@ -18,6 +18,7 @@ class Player(object):
         if playlist is None:
             playlist = []
         print("Using Gstreamer v%s" % VERSION)
+        self.MUSIC_DIR = settings.settings['music_dir']
 
         # keep track of playlist and current track
         self.playlist = playlist
@@ -141,17 +142,16 @@ class Player(object):
     def queue(self, widget, data):
         '''add music to current playlist'''
 
-        if os.path.isdir("/home/judgedreads/Music/" + data):
-            songs = os.listdir("/home/judgedreads/Music/" + data)
+        if os.path.isdir(self.MUSIC_DIR + data):
+            songs = os.listdir(self.MUSIC_DIR + data)
             songs.sort()
             for song in songs:
                 # handle file types: wma doesn't work with gst for some reason
                 if song.endswith(('mp3', 'ogg', 'm4a', 'mp4', 'flac', 'mpc')):
-                    temp = "file:///home/judgedreads/Music/" + \
-                        data + "/" + song
+                    temp = "file://%s%s/%s" % (self.MUSIC_DIR, data, song)
                     self.playlist.append(temp)
         else:
-            song = "file:///home/judgedreads/Music/" + data
+            song = "file://%s%s" % (self.MUSIC_DIR, data)
             self.playlist.append(song)
 
         self.change_playlist(None)

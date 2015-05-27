@@ -1,6 +1,8 @@
 from gi.repository import Notify, GdkPixbuf
 import os
 
+from . import settings
+
 
 class NullNotifier(object):
 
@@ -22,14 +24,14 @@ class Notifier(object):
         self.notif.set_category('x-gnome.music')
         self.notif.set_timeout(3)
         self.player = player
+        self.MUSIC_DIR = settings.settings['music_dir']
 
     def notify(self, i):
         print(self.player.playlist[i])
         song = self.player.playlist[i].split('/')[-1]
         album = self.player.playlist[i].split('/')[-2]
         artist = self.player.playlist[i].split('/')[-3]
-        cover = "/home/judgedreads/Music/" + \
-            artist + '/' + album + '/' + 'cover.jpg'
+        cover = self.MUSIC_DIR + artist + '/' + album + '/' + 'cover.jpg'
         if not os.path.exists(cover):
             cover = '/opt/ricochet/images/default_album.jpg'
         icon = '/opt/ricochet/images/ricochet.png'
