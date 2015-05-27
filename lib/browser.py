@@ -144,39 +144,53 @@ class Album(Gtk.Window):
         # does.
         vbox.pack_start(image, False, False, 0)
 
-        # scrolled area for the songs
-        scroll = Gtk.ScrolledWindow()
-        scroll.set_border_width(0)
-        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        vbox.pack_start(scroll, True, True, 0)
+        discs = []
+        for item in os.listdir(music + name):
+            if item.startswith('.'):
+                continue
+            if os.path.isdir(os.path.join(music, name, item)):
+                discs.append(os.path.join(music, name, item))
+        if discs == []:
+            discs.append(music + name)
 
-        # set up the song treeview
-        liststore = Gtk.ListStore(str)
-        songs = os.listdir(music + name)
-        songs.sort()
-        for song in songs:
-            if song.endswith(("mp3", "mpc", "ogg", "wma", "m4a", "mp4", "flac")):
-                liststore.append([song])
-        treeview = Gtk.TreeView(model=liststore)
-        renderer = Gtk.CellRendererText()
-        # option is PangoEllipsizeMode numbered 0,1,2,3 for none, start,
-        # middle, end (True becomes 1=start)
-        renderer.set_property("ellipsize", 3)
-        column = Gtk.TreeViewColumn("Track", renderer, text=0)
-        treeview.append_column(column)
-        treeview.set_property("headers-visible", False)
-        # disable search grabbing keyboard input
-        treeview.set_enable_search(False)
+        tabbed = Gtk.Notebook()
+        for disc in discs:
 
-        # allow selection of multiple rows. get_selection won't work
-        # now so use get_selected_rows instead (on selection object)
-        Gtk.TreeSelection.set_mode(
-            treeview.get_selection(), Gtk.SelectionMode.MULTIPLE)
+            # scrolled area for the songs
+            scroll = Gtk.ScrolledWindow()
+            scroll.set_border_width(0)
+            scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
-        treeview.connect("button-press-event", self.on_button_press)
-        treeview.connect("key-press-event", self.on_key_press)
+            # set up the song treeview
+            liststore = Gtk.ListStore(str)
+            songs = os.listdir(disc)
+            songs.sort()
+            for song in songs:
+                if song.endswith(("mp3", "mpc", "ogg", "wma", "m4a", "mp4", "flac")):
+                    liststore.append([song])
+            treeview = Gtk.TreeView(model=liststore)
+            renderer = Gtk.CellRendererText()
+            # option is PangoEllipsizeMode numbered 0,1,2,3 for none, start,
+            # middle, end (True becomes 1=start)
+            renderer.set_property("ellipsize", 3)
+            column = Gtk.TreeViewColumn("Track", renderer, text=0)
+            treeview.append_column(column)
+            treeview.set_property("headers-visible", False)
+            # disable search grabbing keyboard input
+            treeview.set_enable_search(False)
 
-        scroll.add(treeview)
+            # allow selection of multiple rows. get_selection won't work
+            # now so use get_selected_rows instead (on selection object)
+            Gtk.TreeSelection.set_mode(
+                treeview.get_selection(), Gtk.SelectionMode.MULTIPLE)
+
+            treeview.connect("button-press-event", self.on_button_press)
+            treeview.connect("key-press-event", self.on_key_press)
+
+            scroll.add(treeview)
+            tabbed.append_page(scroll, None)
+
+        vbox.pack_start(tabbed, True, True, 0)
 
         self.show_all()
 
