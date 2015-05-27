@@ -149,11 +149,12 @@ class Album(Gtk.Window):
             if item.startswith('.'):
                 continue
             if os.path.isdir(os.path.join(music, name, item)):
-                discs.append(os.path.join(music, name, item))
+                discs.append(os.path.join(name, item))
         if discs == []:
-            discs.append(music + name)
+            discs.append(name)
 
         tabbed = Gtk.Notebook()
+        tabbed.set_scrollable(True)
         for disc in discs:
 
             # scrolled area for the songs
@@ -163,7 +164,7 @@ class Album(Gtk.Window):
 
             # set up the song treeview
             liststore = Gtk.ListStore(str)
-            songs = os.listdir(disc)
+            songs = os.listdir(music + disc)
             songs.sort()
             for song in songs:
                 if song.endswith(("mp3", "mpc", "ogg", "wma", "m4a", "mp4", "flac")):
@@ -184,8 +185,8 @@ class Album(Gtk.Window):
             Gtk.TreeSelection.set_mode(
                 treeview.get_selection(), Gtk.SelectionMode.MULTIPLE)
 
-            treeview.connect("button-press-event", self.on_button_press)
-            treeview.connect("key-press-event", self.on_key_press)
+            treeview.connect("button-press-event", self.on_button_press, disc)
+            treeview.connect("key-press-event", self.on_key_press, disc)
 
             scroll.add(treeview)
             tabbed.append_page(scroll, None)
@@ -194,33 +195,33 @@ class Album(Gtk.Window):
 
         self.show_all()
 
-    def on_button_press(self, widget, event):
+    def on_button_press(self, widget, event, disc):
         # print(event.type)
         select = widget.get_selection()
         model, treeiter = select.get_selected_rows()
         if event.button == 3:
             for path in treeiter:
-                self.player.queue(None, self.name + '/' + model[path][0])
+                self.player.queue(None, disc + '/' + model[path][0])
         elif event.button == 2:
-            self.player.play(None, self.name + '/' + model[treeiter][0])
+            self.player.play(None, disc + '/' + model[treeiter][0])
             for i in range(1, len(treeiter)):
-                self.player.queue(None, self.name + '/' + model[i][0])
+                self.player.queue(None, disc + '/' + model[i][0])
         elif event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            self.player.play(None, self.name + '/' + model[treeiter][0])
+            self.player.play(None, disc + '/' + model[treeiter][0])
 
     # TODO: Could also make the backend capable of handling lists ^^
 
-    def on_key_press(self, widget, event):
+    def on_key_press(self, widget, event, disc):
         # print(event.hardware_keycode)
         select = widget.get_selection()
         model, treeiter = select.get_selected_rows()
 
         if event.hardware_keycode == 36 or event.hardware_keycode == 33:
-            self.player.play(None, self.name + '/' + model[treeiter][0])
+            self.player.play(None, disc + '/' + model[treeiter][0])
             for i in range(1, len(treeiter)):
-                self.player.queue(None, self.name + '/' + model[i][0])
+                self.player.queue(None, disc + '/' + model[i][0])
         elif event.hardware_keycode == 24:
             for path in treeiter:
-                self.player.queue(None, self.name + '/' + model[path][0])
+                self.player.queue(None, disc + '/' + model[path][0])
         elif event.hardware_keycode == 65:
             self.player.toggle(None)
