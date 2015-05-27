@@ -107,8 +107,10 @@ class Player(object):
     def change_playlist(self, widget):
         '''handle playlist changes'''
         self.liststore.clear()
-        for item in self.playlist:
+        for i, item in enumerate(self.playlist):
             song = item.split('/')[-1]
+            if i == self.track - 1:
+                song = '\u25B6 ' + song
             self.liststore.append([song])
         self.treeview.set_model(self.liststore)
 
@@ -138,6 +140,7 @@ class Player(object):
 
         self.notify(0)
         self.update_image()
+        self.change_playlist(None)
 
     def queue(self, widget, data):
         '''add music to current playlist'''
@@ -169,6 +172,7 @@ class Player(object):
             self.track += 1
             self.notify(i)
             self.update_image()
+            self.change_playlist(None)
 
     def skip_prev(self, widget):
         self.pipeline.set_state(Gst.State.NULL)
@@ -179,6 +183,7 @@ class Player(object):
             self.track -= 1
             self.notify(i - 1)
             self.update_image()
+            self.change_playlist(None)
 
     def notify(self, i):
         n = Notifier(self)
@@ -194,5 +199,6 @@ class Player(object):
             self.track += 1
             self.notify(i)
             self.update_image()
+            self.change_playlist(None)
         else:
             self.pipeline.set_state(Gst.State.NULL)
