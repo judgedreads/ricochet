@@ -27,8 +27,7 @@ class Album(Gtk.Window):
 
         vbox = Gtk.Box(orientation=1, spacing=0)
         self.add(vbox)
-        # make sure image doesn't expand or fill but the scroll window
-        # does.
+        # make sure image doesn't expand or fill
         vbox.pack_start(image, False, False, 0)
 
         discs = []
@@ -110,7 +109,6 @@ class Album(Gtk.Window):
     # TODO: Could also make the backend capable of handling lists ^^
 
     def on_key_press(self, widget, event, disc):
-        # print(event.hardware_keycode)
         select = widget.get_selection()
         model, treeiter = select.get_selected_rows()
 

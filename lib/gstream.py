@@ -110,7 +110,7 @@ class Player(object):
         for i, item in enumerate(self.playlist):
             segs = item.split('/')[-1].split('.')[:-1]
             song = '.'.join(segs)
-            if i == self.track - 1:
+            if i == self.track - 1 and self.current_state == 'PLAYING':
                 song = '\u25B6 ' + song
             self.liststore.append([song])
         self.treeview.set_model(self.liststore)
@@ -123,6 +123,7 @@ class Player(object):
         elif self.current_state == "PLAYING":
             self.pipeline.set_state(Gst.State.PAUSED)
             self.current_state = "PAUSED"
+        self.change_playlist(None)
 
     def play(self, widget, data):
         '''method to play now, i.e. replace playlist and play it'''
@@ -147,8 +148,20 @@ class Player(object):
         '''add music to current playlist'''
 
         if os.path.isdir(self.MUSIC_DIR + data):
-            songs = os.listdir(self.MUSIC_DIR + data)
-            songs.sort()
+            discs = []
+            for item in os.listdir(self.MUSIC_DIR + data):
+                if item.startswith('.'):
+                    continue
+                if os.path.isdir(os.path.join(self.MUSIC_DIR, data, item)):
+                    discs.append(os.path.join(data, item))
+            if discs == []:
+                discs.append(data)
+            songs = []
+            discs.sort()
+            for disc in discs:
+                files = os.listdir(self.MUSIC_DIR + disc)
+                files.sort()
+                songs.extend(files)
             for song in songs:
                 # handle file types: wma doesn't work with gst for some reason
                 if song.endswith(('mp3', 'ogg', 'm4a', 'mp4', 'flac', 'mpc')):
