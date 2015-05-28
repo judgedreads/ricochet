@@ -108,7 +108,8 @@ class Player(object):
         '''handle playlist changes'''
         self.liststore.clear()
         for i, item in enumerate(self.playlist):
-            song = item.split('/')[-1]
+            segs = item.split('/')[-1].split('.')[:-1]
+            song = '.'.join(segs)
             if i == self.track - 1:
                 song = '\u25B6 ' + song
             self.liststore.append([song])
