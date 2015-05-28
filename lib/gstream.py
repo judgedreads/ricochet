@@ -176,6 +176,12 @@ class Player(object):
     def quit(self, widget, event):
         self.pipeline.set_state(Gst.State.NULL)
 
+    def stop(self, widget):
+        self.pipeline.set_state(Gst.State.NULL)
+        self.current_state = 'PAUSED'
+        self.playlist = []
+        self.change_playlist(None)
+
     def skip_next(self, widget):
         print('skipping')
         self.pipeline.set_state(Gst.State.NULL)
