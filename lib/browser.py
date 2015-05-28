@@ -153,6 +153,7 @@ class Album(Gtk.Window):
         if discs == []:
             discs.append(name)
 
+        discs.sort()
         tabbed = Gtk.Notebook()
         tabbed.set_scrollable(True)
         for disc in discs:
@@ -190,6 +191,7 @@ class Album(Gtk.Window):
 
             scroll.add(treeview)
             tabbed.append_page(scroll, None)
+            tabbed.set_tab_label_text(scroll, os.path.basename(disc))
 
         vbox.pack_start(tabbed, True, True, 0)
 
