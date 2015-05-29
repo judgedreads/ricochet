@@ -159,14 +159,14 @@ class Player(object):
             songs = []
             discs.sort()
             for disc in discs:
-                files = os.listdir(self.MUSIC_DIR + disc)
-                files.sort()
-                songs.extend(files)
-            for song in songs:
-                # handle file types: wma doesn't work with gst for some reason
-                if song.endswith(('mp3', 'ogg', 'm4a', 'mp4', 'flac', 'mpc')):
-                    temp = "file://%s%s/%s" % (self.MUSIC_DIR, data, song)
-                    self.playlist.append(temp)
+                songs = os.listdir(self.MUSIC_DIR + disc)
+                songs.sort()
+                for song in songs:
+                    # handle file types: wma doesn't work with gst for some
+                    # reason
+                    if song.endswith(('mp3', 'ogg', 'm4a', 'mp4', 'flac', 'mpc')):
+                        temp = "file://%s%s/%s" % (self.MUSIC_DIR, disc, song)
+                        self.playlist.append(temp)
         else:
             song = "file://%s%s" % (self.MUSIC_DIR, data)
             self.playlist.append(song)

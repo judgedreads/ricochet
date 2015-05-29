@@ -27,7 +27,7 @@ class Notifier(object):
         self.MUSIC_DIR = settings.settings['music_dir']
 
     def notify(self, i):
-        print(self.player.playlist[i])
+        # print(self.player.playlist[i])
         song = self.player.playlist[i].split('/')[-1]
         album = self.player.playlist[i].split('/')[-2]
         artist = self.player.playlist[i].split('/')[-3]
