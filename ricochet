@@ -58,6 +58,9 @@ class Ricochet(Gtk.Application):
         player = backend.Player()
         music = settings.settings['music_dir']
 
+        # TODO: look at multiprocessing this, could sort artists and get
+        # a nested list to pass to browser, or could work out how to use
+        # Process to get a flat array (or just post process).
         artists = os.listdir(music)
         albums = []
         for artist in artists:
@@ -83,3 +86,5 @@ class Ricochet(Gtk.Application):
 if __name__ == "__main__":
     app = Ricochet()
     app.run(None)
+    # TODO: need a shutdown method to properly close the gstreamer
+    # pipeline.
