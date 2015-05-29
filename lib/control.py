@@ -24,22 +24,22 @@ class Control(Gtk.Box):
         button_box = Gtk.Box()
         button1 = Gtk.Button()
         pixbuf1 = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            'images/prev.png', 20, 20)
+            '/opt/ricochet/images/prev.png', 20, 20)
         image1 = Gtk.Image().new_from_pixbuf(pixbuf1)
         button1.add(image1)
         button2 = Gtk.Button()
         pixbuf2 = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            'images/next.png', 20, 20)
+            '/opt/ricochet/images/next.png', 20, 20)
         image2 = Gtk.Image().new_from_pixbuf(pixbuf2)
         button2.add(image2)
         button3 = Gtk.Button()
         pixbuf3 = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            'images/play.png', 20, 20)
+            '/opt/ricochet/images/play.png', 20, 20)
         image3 = Gtk.Image().new_from_pixbuf(pixbuf3)
         button3.add(image3)
         button4 = Gtk.Button()
         pixbuf4 = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            'images/stop.png', 20, 20)
+            '/opt/ricochet/images/stop.png', 20, 20)
         image4 = Gtk.Image().new_from_pixbuf(pixbuf4)
         button4.add(image4)
         button1.connect("clicked", self.player.skip_prev)
