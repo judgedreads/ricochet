@@ -62,4 +62,4 @@ class Control(Gtk.Box):
         self.show_all()
 
     def toggle(self, widget, button):
-        self.player.toggle(None)
+        self.player.toggle()

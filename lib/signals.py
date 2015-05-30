@@ -21,7 +21,7 @@ class Server(object):
         # receive data and decode it from bytes to str
         data = self.server.recv(1024).decode('UTF-8')
         if data == "toggle":
-            self.player.toggle(None)
+            self.player.toggle()
             message = "toggle"
         elif data == "next":
             self.player.skip_next(None)

@@ -96,13 +96,13 @@ class Album(Gtk.Window):
         model, treeiter = select.get_selected_rows()
         if event.button == 3:
             for path in treeiter:
-                self.player.queue(None, disc + '/' + model[path][0])
+                self.player.queue(files=disc + '/' + model[path][0])
         elif event.button == 2:
-            self.player.play(None, disc + '/' + model[treeiter][0])
+            self.player.play(files=disc + '/' + model[treeiter][0])
             for i in range(1, len(treeiter)):
-                self.player.queue(None, disc + '/' + model[i][0])
+                self.player.queue(files=disc + '/' + model[i][0])
         elif event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            self.player.play(None, disc + '/' + model[treeiter][0])
+            self.player.play(files=disc + '/' + model[treeiter][0])
 
     # TODO: Could also make the backend capable of handling lists ^^
 
@@ -111,11 +111,11 @@ class Album(Gtk.Window):
         model, treeiter = select.get_selected_rows()
 
         if event.hardware_keycode == 36 or event.hardware_keycode == 33:
-            self.player.play(None, disc + '/' + model[treeiter][0])
+            self.player.play(files=disc + '/' + model[treeiter][0])
             for i in range(1, len(treeiter)):
-                self.player.queue(None, disc + '/' + model[i][0])
+                self.player.queue(files=disc + '/' + model[i][0])
         elif event.hardware_keycode == 24:
             for path in treeiter:
-                self.player.queue(None, disc + '/' + model[path][0])
+                self.player.queue(files=disc + '/' + model[path][0])
         elif event.hardware_keycode == 65:
-            self.player.toggle(None)
+            self.player.toggle()

@@ -34,7 +34,7 @@ class Player(object):
         selection = self.treeview.get_selection()
         selection.set_mode(Gtk.SelectionMode.MULTIPLE)
 
-        self.change_playlist(None)
+        self.change_playlist()
 
         renderer = Gtk.CellRendererText()
         renderer.set_property("ellipsize", 3)
@@ -120,7 +120,7 @@ class Player(object):
             self.liststore.append([song])
         self.treeview.set_model(self.liststore)
 
-    def toggle(self, widget):
+    def toggle(self, widget=None):
         '''toggle play state'''
         if self.current_state in ["PAUSED", "STOPPED"]:
             self.pipeline.set_state(Gst.State.PLAYING)
@@ -128,40 +128,40 @@ class Player(object):
         elif self.current_state == "PLAYING":
             self.pipeline.set_state(Gst.State.PAUSED)
             self.current_state = "PAUSED"
-        self.change_playlist(None)
+        self.change_playlist()
         print(self.pipeline.get_state(Gst.State.NULL))
 
-    def play(self, widget, data):
+    def play(self, widget=None, files=None):
         '''method to play now, i.e. replace playlist and play it'''
 
-        self.playlist = []
         self.pipeline.set_state(Gst.State.NULL)
+        self.playlist = []
         self.current_state = "PAUSED"
 
         # queue the new songs
-        self.queue(None, data)
+        self.queue(files=files)
         self.playbin.set_property('uri', self.playlist[0])
         self.track = 1
 
         # play the playlist
-        self.toggle(None)
+        self.toggle()
 
         self.notify()
         self.update_image()
-        self.change_playlist(None)
+        self.change_playlist()
 
-    def queue(self, widget, data):
+    def queue(self, widget=None, files=None):
         '''add music to current playlist'''
 
-        if os.path.isdir(self.MUSIC_DIR + data):
+        if os.path.isdir(self.MUSIC_DIR + files):
             discs = []
-            for item in os.listdir(self.MUSIC_DIR + data):
+            for item in os.listdir(self.MUSIC_DIR + files):
                 if item.startswith('.'):
                     continue
-                if os.path.isdir(os.path.join(self.MUSIC_DIR, data, item)):
-                    discs.append(os.path.join(data, item))
+                if os.path.isdir(os.path.join(self.MUSIC_DIR, files, item)):
+                    discs.append(os.path.join(files, item))
             if discs == []:
-                discs.append(data)
+                discs.append(files)
             songs = []
             discs.sort()
             for disc in discs:
@@ -174,10 +174,10 @@ class Player(object):
                         temp = "file://%s%s/%s" % (self.MUSIC_DIR, disc, song)
                         self.playlist.append(temp)
         else:
-            song = "file://%s%s" % (self.MUSIC_DIR, data)
+            song = "file://%s%s" % (self.MUSIC_DIR, files)
             self.playlist.append(song)
 
-        self.change_playlist(None)
+        self.change_playlist()
 
     def quit(self, widget, event):
         self.pipeline.set_state(Gst.State.NULL)
@@ -186,7 +186,7 @@ class Player(object):
         self.pipeline.set_state(Gst.State.NULL)
         self.current_state = 'PAUSED'
         self.playlist = []
-        self.change_playlist(None)
+        self.change_playlist()
         print(self.pipeline.get_state(Gst.State.NULL))
 
     def skip_next(self, widget):
@@ -199,7 +199,7 @@ class Player(object):
             self.track += 1
             self.notify()
             self.update_image()
-            self.change_playlist(None)
+            self.change_playlist()
 
     def skip_prev(self, widget):
         self.pipeline.set_state(Gst.State.NULL)
