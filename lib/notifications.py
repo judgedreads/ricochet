@@ -1,19 +1,6 @@
 from gi.repository import Notify, GdkPixbuf
 import os
 
-from . import settings
-
-
-class NullNotifier(object):
-
-    '''Dummy notifier for when notifications are disabled'''
-
-    def __init__(self, player):
-        self.player = player
-
-    def notify(self, i):
-        pass
-
 
 class Notifier(object):
 
@@ -24,7 +11,7 @@ class Notifier(object):
         self.notif.set_category('x-gnome.music')
         self.notif.set_timeout(3)
         self.player = player
-        self.MUSIC_DIR = settings.settings['music_dir']
+        self.MUSIC_DIR = player.MUSIC_DIR
 
     def notify(self, i):
         # print(self.player.playlist[i])

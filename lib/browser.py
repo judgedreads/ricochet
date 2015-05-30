@@ -1,12 +1,8 @@
 from gi.repository import Gtk, Gdk, GdkPixbuf
 import os
 
-from . import settings
 from . import albumart
 from .albumdetail import Album
-
-
-music = settings.settings['music_dir']
 
 
 class Cover(Gtk.EventBox):
@@ -48,10 +44,10 @@ class Cover(Gtk.EventBox):
         self.show_all()
 
     def set_album_art(self):
-        path = ''.join([music, self.name, '/cover.jpg'])
+        path = ''.join([self.player.MUSIC_DIR, self.name, '/cover.jpg'])
         if not os.path.exists(path):
             path = '/opt/ricochet/images/default_album.jpg'
-        size = int(settings.settings['grid_icon_size'])
+        size = int(self.player.settings['grid_icon_size'])
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
         self.image.set_from_pixbuf(pixbuf)
         self.image.show()
@@ -61,7 +57,7 @@ class Cover(Gtk.EventBox):
         album = Album(self.name, self.player)
 
     def fetch_album_art(self, widget):
-        code = albumart.fetch_album_art(self.name)
+        code = albumart.fetch_album_art(self.name, self.player.MUSIC_DIR)
         if code == 0:
             self.set_album_art()
 

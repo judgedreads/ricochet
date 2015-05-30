@@ -55,7 +55,7 @@ class Ricochet(Gtk.Application):
 
         Notify.init('Ricochet')
 
-        player = backend.Player()
+        player = backend.Player(settings.settings)
         music = settings.settings['music_dir']
 
         # TODO: look at multiprocessing this, could sort artists and get

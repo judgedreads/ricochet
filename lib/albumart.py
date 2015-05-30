@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import requests
-from . import settings
 
 
 def _get_image_url(html):
@@ -16,7 +15,7 @@ def _get_image_url(html):
     return None
 
 
-def fetch_album_art(name):
+def fetch_album_art(name, musicdir):
     try:
         r = requests.get(
             'http://www.last.fm/music/%s' % name.replace(' ', '+')
@@ -27,8 +26,7 @@ def fetch_album_art(name):
     image_url = _get_image_url(r.text)
     if image_url is None:
         return 1
-    music = settings.settings['music_dir']
-    path = '%s%s/cover.jpg' % (music, name)
+    path = '%s%s/cover.jpg' % (musicdir, name)
     print(path)
     f = open(path, 'wb')
     try:

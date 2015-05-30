@@ -3,8 +3,6 @@ import os
 
 from . import settings
 
-music = settings.settings['music_dir']
-
 
 class Album(Gtk.Window):
 
@@ -17,10 +15,10 @@ class Album(Gtk.Window):
         self.name = name
         self.player = player
 
-        path = ''.join([music, self.name, '/cover.jpg'])
+        path = ''.join([self.player.MUSIC_DIR, self.name, '/cover.jpg'])
         if not os.path.exists(path):
             path = '/opt/ricochet/images/default_album.jpg'
-        size = int(settings.settings['detail_icon_size'])
+        size = int(self.player.settings['detail_icon_size'])
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
         image = Gtk.Image()
         image.set_from_pixbuf(pixbuf)
@@ -31,10 +29,10 @@ class Album(Gtk.Window):
         vbox.pack_start(image, False, False, 0)
 
         discs = []
-        for item in os.listdir(music + name):
+        for item in os.listdir(self.player.MUSIC_DIR + name):
             if item.startswith('.'):
                 continue
-            if os.path.isdir(os.path.join(music, name, item)):
+            if os.path.isdir(os.path.join(self.player.MUSIC_DIR, name, item)):
                 discs.append(os.path.join(name, item))
         if discs == []:
             tracklist = self.get_tracklist(name)
@@ -64,7 +62,7 @@ class Album(Gtk.Window):
 
         # set up the song treeview
         liststore = Gtk.ListStore(str)
-        songs = os.listdir(music + disc)
+        songs = os.listdir(self.player.MUSIC_DIR + disc)
         songs.sort()
         for song in songs:
             if song.endswith(("mp3", "mpc", "ogg", "wma", "m4a", "mp4", "flac")):

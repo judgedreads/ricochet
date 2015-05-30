@@ -1,24 +1,19 @@
 from gi.repository import Gst, Gtk, GdkPixbuf
 import os
 
-from . import settings
-
-
-if settings.settings['notifications'] == "True":
-    from .notifications import Notifier
-else:
-    from .notifications import NullNotifier as Notifier
+from .notifications import Notifier
 
 
 class Player(object):
 
-    def __init__(self, playlist=None):
+    def __init__(self, settings, playlist=None):
         '''Optionally load a playlist on init'''
         VERSION = '.'.join(map(str, Gst.version()[0:3]))
         if playlist is None:
             playlist = []
         print("Using Gstreamer v%s" % VERSION)
-        self.MUSIC_DIR = settings.settings['music_dir']
+        self.settings = settings
+        self.MUSIC_DIR = settings['music_dir']
 
         # keep track of playlist and current track
         self.playlist = playlist
@@ -63,9 +58,9 @@ class Player(object):
                 break
         self.pipeline.set_state(Gst.State.PLAYING)
         self.current_state = "PLAYING"
-        self.notify(num)
+        self.notify()
         self.update_image()
-        self.change_playlist(None)
+        self.change_playlist()
 
     def on_key_press(self, widget, event):
         if event.hardware_keycode == 119:
@@ -111,7 +106,7 @@ class Player(object):
         self.image.set_from_pixbuf(self.pixbuf)
         self.image.show()
 
-    def change_playlist(self, widget):
+    def change_playlist(self, widget=None):
         '''handle playlist changes'''
         self.liststore.clear()
         for i, item in enumerate(self.playlist):
@@ -151,7 +146,7 @@ class Player(object):
         # play the playlist
         self.toggle(None)
 
-        self.notify(0)
+        self.notify()
         self.update_image()
         self.change_playlist(None)
 
@@ -202,7 +197,7 @@ class Player(object):
             self.playbin.set_property('uri', self.playlist[i])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.track += 1
-            self.notify(i)
+            self.notify()
             self.update_image()
             self.change_playlist(None)
 
@@ -213,13 +208,14 @@ class Player(object):
             self.playbin.set_property('uri', self.playlist[i - 1])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.track -= 1
-            self.notify(i - 1)
+            self.notify()
             self.update_image()
-            self.change_playlist(None)
+            self.change_playlist()
 
-    def notify(self, i):
+    def notify(self):
         n = Notifier(self)
-        n.notify(i)
+        if self.settings['notifications'] == "True":
+            n.notify(self.track - 1)
 
     def on_eos(self, bus, msg):
         '''callback for when the end of a song is reached'''
@@ -229,8 +225,8 @@ class Player(object):
             self.playbin.set_property('uri', self.playlist[i])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.track += 1
-            self.notify(i)
+            self.notify()
             self.update_image()
-            self.change_playlist(None)
+            self.change_playlist()
         else:
             self.pipeline.set_state(Gst.State.NULL)
