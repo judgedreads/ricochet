@@ -23,7 +23,7 @@ class Player(object):
         # keep track of playlist and current track
         self.playlist = playlist
         self.track = 1
-        self.current_state = "PAUSED"
+        self.current_state = "STOPPED"
 
         # set up gstreamer elements
         self.pipeline = Gst.Pipeline()
@@ -52,13 +52,20 @@ class Player(object):
     def on_activate(self, tree, path, column):
         '''callback for activation on playlist tree'''
         song = self.liststore[path][0]
-        i = 0
-        for track in self.playlist:
-            if track.find(song) != -1:
-                self.track = i
-            else:
-                i += 1
-        self.on_eos(None, None)
+        song = song.replace('\u25B6 ', '')
+        song = song.replace('\u25AE\u25AE ', '')
+        for num, name in enumerate(self.playlist):
+            name = os.path.basename(name)
+            if name.split('.')[0] == song:
+                self.pipeline.set_state(Gst.State.NULL)
+                self.playbin.set_property('uri', self.playlist[num])
+                self.track = num + 1
+                break
+        self.pipeline.set_state(Gst.State.PLAYING)
+        self.current_state = "PLAYING"
+        self.notify(num)
+        self.update_image()
+        self.change_playlist(None)
 
     def on_key_press(self, widget, event):
         if event.hardware_keycode == 119:
@@ -110,20 +117,24 @@ class Player(object):
         for i, item in enumerate(self.playlist):
             segs = item.split('/')[-1].split('.')[:-1]
             song = '.'.join(segs)
-            if i == self.track - 1 and self.current_state == 'PLAYING':
-                song = '\u25B6 ' + song
+            if i == self.track - 1:
+                if self.current_state == 'PLAYING':
+                    song = '\u25B6 ' + song
+                elif self.current_state == 'PAUSED':
+                    song = '\u25AE\u25AE ' + song
             self.liststore.append([song])
         self.treeview.set_model(self.liststore)
 
     def toggle(self, widget):
         '''toggle play state'''
-        if self.current_state == "PAUSED":
+        if self.current_state in ["PAUSED", "STOPPED"]:
             self.pipeline.set_state(Gst.State.PLAYING)
             self.current_state = "PLAYING"
         elif self.current_state == "PLAYING":
             self.pipeline.set_state(Gst.State.PAUSED)
             self.current_state = "PAUSED"
         self.change_playlist(None)
+        print(self.pipeline.get_state(Gst.State.NULL))
 
     def play(self, widget, data):
         '''method to play now, i.e. replace playlist and play it'''
@@ -181,6 +192,7 @@ class Player(object):
         self.current_state = 'PAUSED'
         self.playlist = []
         self.change_playlist(None)
+        print(self.pipeline.get_state(Gst.State.NULL))
 
     def skip_next(self, widget):
         print('skipping')
