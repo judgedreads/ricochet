@@ -84,12 +84,9 @@ class Browser(Gtk.ScrolledWindow):
         self.albums = []
         self.player = player
 
-        # flowbox to hold the albums for dynamic window resizing and row
-        # organising
         self.flowbox = Gtk.FlowBox()
         self.flowbox.set_valign(Gtk.Align.START)
         self.flowbox.set_max_children_per_line(20)
-        # allows selection of items with keyboard
         self.flowbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
         self.flowbox.connect("key-press-event", self.on_key_press)
         self.add(self.flowbox)

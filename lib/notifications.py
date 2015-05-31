@@ -14,7 +14,6 @@ class Notifier(object):
         self.MUSIC_DIR = player.MUSIC_DIR
 
     def notify(self, i):
-        # print(self.player.playlist[i])
         song = self.player.playlist[i].split('/')[-1]
         album = self.player.playlist[i].split('/')[-2]
         artist = self.player.playlist[i].split('/')[-3]
@@ -32,12 +31,6 @@ class Notifier(object):
         image = GdkPixbuf.Pixbuf.new_from_file(cover)
         self.notif.set_image_from_pixbuf(image)
         self.notif.show()
-
-        # TODO: make dict for each song (probably in browser), where key should
-        # be readable name and val should be dict of info containing file path,
-        # album, cover art, artist, etc. Then can put name on treeview and then
-        # pass corresponding dict through to everything. Need to have some
-        # cleanup methods to get rid of this stuff when it's done.
 
     def notif_skip(self, notification, action, data, ignore=None):
         notification.close()
