@@ -95,15 +95,15 @@ class Player(object):
             return artist
 
     def update_image(self):
-        segs = self.playlist[self.track - 1].split('/')
-        path = '/'.join(segs[2:-1]) + '/cover.jpg'
-        if os.path.exists(path):
-            self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                path, 256, 256)
-        else:
-            self.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                "/opt/ricochet/images/default_album.jpg", 256, 256)
-        self.image.set_from_pixbuf(self.pixbuf)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+            "/opt/ricochet/images/default_album.jpg", 256, 256)
+        if self.playlist:
+            segs = self.playlist[self.track - 1].split('/')
+            path = '/'.join(segs[2:-1]) + '/cover.jpg'
+            if os.path.exists(path):
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                    path, 256, 256)
+        self.image.set_from_pixbuf(pixbuf)
         self.image.show()
 
     def change_playlist(self, widget=None):
@@ -122,12 +122,19 @@ class Player(object):
 
     def toggle(self, widget=None):
         '''toggle play state'''
-        if self.current_state in ["PAUSED", "STOPPED"]:
+        if self.current_state == "PLAYING":
             self.pipeline.set_state(Gst.State.PLAYING)
             self.current_state = "PLAYING"
         elif self.current_state == "PLAYING":
             self.pipeline.set_state(Gst.State.PAUSED)
             self.current_state = "PAUSED"
+        elif self.current_state == "STOPPED":
+            if self.playlist == []:
+                return
+            self.playbin.set_property('uri', self.playlist[0])
+            self.pipeline.set_state(Gst.State.PLAYING)
+            self.current_state = "PLAYING"
+            self.update_image()
         self.change_playlist()
         print(self.pipeline.get_state(Gst.State.NULL))
 
@@ -188,6 +195,7 @@ class Player(object):
         self.track = 1
         self.playlist = []
         self.change_playlist()
+        self.update_image()
         print(self.pipeline.get_state(Gst.State.NULL))
 
     def skip_next(self, widget):
