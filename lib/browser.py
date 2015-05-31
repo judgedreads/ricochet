@@ -44,7 +44,7 @@ class Cover(Gtk.EventBox):
         self.show_all()
 
     def set_album_art(self):
-        path = ''.join([self.player.MUSIC_DIR, self.name, '/cover.jpg'])
+        path = os.path.join(self.player.MUSIC_DIR, self.name, 'cover.jpg')
         if not os.path.exists(path):
             path = '/opt/ricochet/images/default_album.jpg'
         size = int(self.player.settings['grid_icon_size'])

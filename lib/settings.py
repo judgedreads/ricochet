@@ -31,5 +31,6 @@ def get_settings():
 
     settings['grid_icon_size'] = int(settings['grid_icon_size'])
     settings['detail_icon_size'] = int(settings['detail_icon_size'])
+    settings['music_dir'] = os.path.normpath(settings['music_dir'])
 
     return settings

@@ -29,10 +29,6 @@ class Control(Gtk.Box):
         button_box = Gtk.Box()
         for label, method in buttons:
             button = Gtk.Button(label=label)
-            # pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            #    '/opt/ricochet/images/%s.png' % label, 20, 20)
-            #image = Gtk.Image().new_from_pixbuf(pixbuf)
-            # button.add(image)
             button.connect("clicked", method)
             button_box.pack_start(button, True, True, 0)
         self.pack_start(button_box, False, False, 0)

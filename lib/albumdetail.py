@@ -14,7 +14,7 @@ class Album(Gtk.Window):
         self.name = name
         self.player = player
 
-        path = ''.join([self.player.MUSIC_DIR, self.name, '/cover.jpg'])
+        path = os.path.join(self.player.MUSIC_DIR, self.name, 'cover.jpg')
         if not os.path.exists(path):
             path = '/opt/ricochet/images/default_album.jpg'
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
@@ -26,7 +26,7 @@ class Album(Gtk.Window):
         vbox.pack_start(image, False, False, 0)
 
         discs = []
-        for item in os.listdir(self.player.MUSIC_DIR + name):
+        for item in os.listdir(os.path.join(self.player.MUSIC_DIR, name)):
             if item.startswith('.'):
                 continue
             if os.path.isdir(os.path.join(self.player.MUSIC_DIR, name, item)):
@@ -59,7 +59,7 @@ class Album(Gtk.Window):
 
         # set up the song treeview
         liststore = Gtk.ListStore(str)
-        songs = os.listdir(self.player.MUSIC_DIR + disc)
+        songs = os.listdir(os.path.join(self.player.MUSIC_DIR, disc))
         songs.sort()
         for song in songs:
             if song.endswith(("mp3", "mpc", "ogg", "wma", "m4a", "mp4", "flac")):

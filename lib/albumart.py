@@ -26,7 +26,7 @@ def fetch_album_art(name, musicdir):
     image_url = _get_image_url(r.text)
     if image_url is None:
         return 1
-    path = '%s%s/cover.jpg' % (musicdir, name)
+    path = '%s/%s/cover.jpg' % (musicdir, name)
     print(path)
     f = open(path, 'wb')
     try:

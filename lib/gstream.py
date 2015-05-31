@@ -141,28 +141,16 @@ class Player(object):
     def play(self, widget=None, files=None):
         '''method to play now, i.e. replace playlist and play it'''
 
-        self.pipeline.set_state(Gst.State.NULL)
-        self.playlist = []
-        self.current_state = "PAUSED"
-
-        # queue the new songs
+        self.stop()
         self.queue(files=files)
-        self.playbin.set_property('uri', self.playlist[0])
-        self.track = 1
-
-        # play the playlist
         self.toggle()
-
-        self.notify()
-        self.update_image()
-        self.change_playlist()
 
     def queue(self, widget=None, files=None):
         '''add music to current playlist'''
 
-        if os.path.isdir(self.MUSIC_DIR + files):
+        if os.path.isdir(os.path.join(self.MUSIC_DIR, files)):
             discs = []
-            for item in os.listdir(self.MUSIC_DIR + files):
+            for item in os.listdir(os.path.join(self.MUSIC_DIR, files)):
                 if item.startswith('.'):
                     continue
                 if os.path.isdir(os.path.join(self.MUSIC_DIR, files, item)):
@@ -172,16 +160,17 @@ class Player(object):
             songs = []
             discs.sort()
             for disc in discs:
-                songs = os.listdir(self.MUSIC_DIR + disc)
+                songs = os.listdir(os.path.join(self.MUSIC_DIR, disc))
                 songs.sort()
                 for song in songs:
                     # handle file types: wma doesn't work with gst for some
                     # reason
                     if song.endswith(('mp3', 'ogg', 'm4a', 'mp4', 'flac', 'mpc')):
-                        temp = "file://%s%s/%s" % (self.MUSIC_DIR, disc, song)
+                        temp = "file://%s" % os.path.join(
+                            self.MUSIC_DIR, disc, song)
                         self.playlist.append(temp)
         else:
-            song = "file://%s%s" % (self.MUSIC_DIR, files)
+            song = "file://%s/%s" % (self.MUSIC_DIR, files)
             self.playlist.append(song)
 
         self.change_playlist()
@@ -189,7 +178,7 @@ class Player(object):
     def quit(self, widget, event):
         self.pipeline.set_state(Gst.State.NULL)
 
-    def stop(self, widget):
+    def stop(self, widget=None):
         self.pipeline.set_state(Gst.State.NULL)
         self.current_state = 'STOPPED'
         self.track = 1
@@ -198,7 +187,7 @@ class Player(object):
         self.update_image()
         print(self.pipeline.get_state(Gst.State.NULL))
 
-    def skip_next(self, widget):
+    def skip_next(self, widget=None):
         print('skipping')
         self.pipeline.set_state(Gst.State.NULL)
         i = self.track
@@ -210,7 +199,7 @@ class Player(object):
             self.update_image()
             self.change_playlist()
 
-    def skip_prev(self, widget):
+    def skip_prev(self, widget=None):
         self.pipeline.set_state(Gst.State.NULL)
         i = self.track - 1
         if i > 0:

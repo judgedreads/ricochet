@@ -62,7 +62,7 @@ class Ricochet(Gtk.Application):
 
         browser = Browser(player)
         for artist in sorted(os.listdir(music)):
-            for album in os.listdir(''.join([music, artist])):
+            for album in os.listdir(os.path.join(music, artist)):
                 browser.add_album(os.path.join(artist, album))
 
         server = Server(player)

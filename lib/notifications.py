@@ -17,7 +17,7 @@ class Notifier(object):
         song = self.player.playlist[i].split('/')[-1]
         album = self.player.playlist[i].split('/')[-2]
         artist = self.player.playlist[i].split('/')[-3]
-        cover = self.MUSIC_DIR + artist + '/' + album + '/' + 'cover.jpg'
+        cover = os.path.join(self.MUSIC_DIR, artist, album, 'cover.jpg')
         if not os.path.exists(cover):
             cover = '/opt/ricochet/images/default_album.jpg'
         icon = '/opt/ricochet/images/ricochet.png'
@@ -34,4 +34,4 @@ class Notifier(object):
 
     def notif_skip(self, notification, action, data, ignore=None):
         notification.close()
-        self.player.skip_next(None)
+        self.player.skip_next()
