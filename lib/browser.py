@@ -76,30 +76,30 @@ class Browser(Gtk.ScrolledWindow):
 
     '''The main window displaying all covers'''
 
-    def __init__(self, albums, player):
+    def __init__(self, player):
         Gtk.ScrolledWindow.__init__(self)
         self.set_border_width(0)
         self.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
-        self.albums = albums
+        self.albums = []
         self.player = player
 
         # flowbox to hold the albums for dynamic window resizing and row
         # organising
-        flowbox = Gtk.FlowBox()
-        flowbox.set_valign(Gtk.Align.START)
-        flowbox.set_max_children_per_line(20)
+        self.flowbox = Gtk.FlowBox()
+        self.flowbox.set_valign(Gtk.Align.START)
+        self.flowbox.set_max_children_per_line(20)
         # allows selection of items with keyboard
-        flowbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
-        flowbox.connect("key-press-event", self.on_key_press)
-        self.add(flowbox)
-
-        # a loop to create a Cover class for each album found
-        for album in albums:
-            cover = Cover(album, self.player)
-            flowbox.add(cover)
+        self.flowbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
+        self.flowbox.connect("key-press-event", self.on_key_press)
+        self.add(self.flowbox)
 
         self.show_all()
+
+    def add_album(self, album):
+        self.albums.append(album)
+        cover = Cover(album, self.player)
+        self.flowbox.add(cover)
 
     def on_key_press(self, widget, event):
         '''handle keyboard controls'''

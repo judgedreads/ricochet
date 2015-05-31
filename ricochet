@@ -58,15 +58,10 @@ class Ricochet(Gtk.Application):
         player = backend.Player(settings.settings)
         music = settings.settings['music_dir']
 
-        # TODO: look at multiprocessing this, could sort artists and get
-        # a nested list to pass to browser, or could work out how to use
-        # Process to get a flat array (or just post process).
-        albums = []
-        for artist in os.listdir(music):
+        browser = Browser(player)
+        for artist in sorted(os.listdir(music)):
             for album in os.listdir(''.join([music, artist])):
-                albums.append('/'.join([artist, album]))
-        albums.sort()
-        browser = Browser(albums, player)
+                browser.add_album(os.path.join(artist, album))
 
         server = Server(player)
         server.main()

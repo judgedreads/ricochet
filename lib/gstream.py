@@ -184,7 +184,8 @@ class Player(object):
 
     def stop(self, widget):
         self.pipeline.set_state(Gst.State.NULL)
-        self.current_state = 'PAUSED'
+        self.current_state = 'STOPPED'
+        self.track = 1
         self.playlist = []
         self.change_playlist()
         print(self.pipeline.get_state(Gst.State.NULL))
