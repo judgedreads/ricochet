@@ -21,18 +21,18 @@ class Control(Gtk.Box):
         self.pack_start(self.player.image, False, False, 0)
 
         buttons = [
-            ('prev', self.player.skip_prev),
-            ('play', self.player.toggle),
-            ('stop', self.player.stop),
-            ('next', self.player.skip_next)
+            ('\u25AE\u25C0', self.player.skip_prev),
+            ('\u25B6\u25AE\u25AE', self.player.toggle),
+            ('\u25FC', self.player.stop),
+            ('\u25B6\u25AE', self.player.skip_next)
         ]
         button_box = Gtk.Box()
-        for name, method in buttons:
-            button = Gtk.Button()
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                '/opt/ricochet/images/%s.png' % name, 20, 20)
-            image = Gtk.Image().new_from_pixbuf(pixbuf)
-            button.add(image)
+        for label, method in buttons:
+            button = Gtk.Button(label=label)
+            # pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+            #    '/opt/ricochet/images/%s.png' % label, 20, 20)
+            #image = Gtk.Image().new_from_pixbuf(pixbuf)
+            # button.add(image)
             button.connect("clicked", method)
             button_box.pack_start(button, True, True, 0)
         self.pack_start(button_box, False, False, 0)
