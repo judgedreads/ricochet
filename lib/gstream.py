@@ -122,7 +122,7 @@ class Player(object):
 
     def toggle(self, widget=None):
         '''toggle play state'''
-        if self.current_state == "PLAYING":
+        if self.current_state == "PAUSED":
             self.pipeline.set_state(Gst.State.PLAYING)
             self.current_state = "PLAYING"
         elif self.current_state == "PLAYING":
@@ -135,6 +135,7 @@ class Player(object):
             self.pipeline.set_state(Gst.State.PLAYING)
             self.current_state = "PLAYING"
             self.update_image()
+            self.notify()
         self.change_playlist()
         print(self.pipeline.get_state(Gst.State.NULL))
 
@@ -194,6 +195,7 @@ class Player(object):
         if i < len(self.playlist):
             self.playbin.set_property('uri', self.playlist[i])
             self.pipeline.set_state(Gst.State.PLAYING)
+            self.current_state = "PLAYING"
             self.track += 1
             self.notify()
             self.update_image()
@@ -205,6 +207,7 @@ class Player(object):
         if i > 0:
             self.playbin.set_property('uri', self.playlist[i - 1])
             self.pipeline.set_state(Gst.State.PLAYING)
+            self.current_state = "PLAYING"
             self.track -= 1
             self.notify()
             self.update_image()
