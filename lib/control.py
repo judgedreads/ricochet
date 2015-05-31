@@ -5,10 +5,9 @@ class Control(Gtk.Box):
 
     '''The main control window for the playlist and playback controls'''
 
-    def __init__(self, player, browser, server):
+    def __init__(self, player, server):
         self.player = player
         self.server = server
-        self.brow = browser
 
         self.player.image = Gtk.Image()
         self.player.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(

@@ -96,8 +96,8 @@ class Browser(Gtk.ScrolledWindow):
 
         # a loop to create a Cover class for each album found
         for album in albums:
-            temp = Cover(album, self.player)
-            flowbox.add(temp)
+            cover = Cover(album, self.player)
+            flowbox.add(cover)
 
         self.show_all()
 

@@ -61,23 +61,20 @@ class Ricochet(Gtk.Application):
         # TODO: look at multiprocessing this, could sort artists and get
         # a nested list to pass to browser, or could work out how to use
         # Process to get a flat array (or just post process).
-        artists = os.listdir(music)
         albums = []
-        for artist in artists:
-            albumlist = os.listdir(music + artist)
-            for i in range(0, len(albumlist)):
-                albumlist[i] = artist + "/" + albumlist[i]
-            albums.extend(albumlist)
+        for artist in os.listdir(music):
+            for album in os.listdir(''.join([music, artist])):
+                albums.append('/'.join([artist, album]))
         albums.sort()
-        brow = Browser(albums, player)
+        browser = Browser(albums, player)
 
         server = Server(player)
         server.main()
-        control = Control(player, brow, server)
+        control = Control(player, server)
 
         hbox = Gtk.Box()
         hbox.pack_start(control, False, False, 0)
-        hbox.pack_start(brow, True, True, 0)
+        hbox.pack_start(browser, True, True, 0)
 
         window.add(hbox)
         app.add_window(window)
