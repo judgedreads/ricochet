@@ -1,8 +1,6 @@
 from gi.repository import Gtk, Gdk, GdkPixbuf
 import os
 
-from . import settings
-
 
 class Album(Gtk.Window):
 
@@ -10,7 +8,8 @@ class Album(Gtk.Window):
 
     def __init__(self, name, player):
         Gtk.Window.__init__(self, title=name)
-        self.set_default_size(300, 600)
+        size = player.settings['detail_icon_size']
+        self.set_default_size(size, 2 * size)
 
         self.name = name
         self.player = player
@@ -18,14 +17,12 @@ class Album(Gtk.Window):
         path = ''.join([self.player.MUSIC_DIR, self.name, '/cover.jpg'])
         if not os.path.exists(path):
             path = '/opt/ricochet/images/default_album.jpg'
-        size = int(self.player.settings['detail_icon_size'])
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
         image = Gtk.Image()
         image.set_from_pixbuf(pixbuf)
 
         vbox = Gtk.Box(orientation=1, spacing=0)
         self.add(vbox)
-        # make sure image doesn't expand or fill
         vbox.pack_start(image, False, False, 0)
 
         discs = []
@@ -75,11 +72,8 @@ class Album(Gtk.Window):
         column = Gtk.TreeViewColumn("Track", renderer, text=0)
         treeview.append_column(column)
         treeview.set_property("headers-visible", False)
-        # disable search grabbing keyboard input
         treeview.set_enable_search(False)
 
-        # allow selection of multiple rows. get_selection won't work
-        # now so use get_selected_rows instead (on selection object)
         Gtk.TreeSelection.set_mode(
             treeview.get_selection(), Gtk.SelectionMode.MULTIPLE)
 

@@ -28,10 +28,12 @@ from lib.signals import Server
 VERSION = '0.3.4'
 print('Ricochet v%s' % VERSION)
 
-if settings.settings['backend'] == "gstreamer":
+settings = settings.get_settings()
+
+if settings['backend'] == "gstreamer":
     from lib import gstream as backend
     Gst.init()
-elif settings.settings['backend'] == "mpd":
+elif settings['backend'] == "mpd":
     from lib import mpdbind as backend
 else:
     print("Invalid backend: should be 'mpd' or 'gstreamer'")
@@ -55,8 +57,8 @@ class Ricochet(Gtk.Application):
 
         Notify.init('Ricochet')
 
-        player = backend.Player(settings.settings)
-        music = settings.settings['music_dir']
+        player = backend.Player(settings)
+        music = settings['music_dir']
 
         browser = Browser(player)
         for artist in sorted(os.listdir(music)):
