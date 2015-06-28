@@ -19,7 +19,7 @@ class Notifier(object):
         artist = self.player.playlist[i].split('/')[-3]
         cover = os.path.join(self.MUSIC_DIR, artist, album, 'cover.jpg')
         if not os.path.exists(cover):
-            cover = '/opt/ricochet/images/default_album.jpg'
+            cover = '/opt/ricochet/images/default_album.png'
         icon = '/opt/ricochet/images/ricochet.png'
 
         title = ''.join(song.split('.')[0:-1])

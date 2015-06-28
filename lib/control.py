@@ -11,7 +11,7 @@ class Control(Gtk.Box):
 
         self.player.image = Gtk.Image()
         self.player.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            "/opt/ricochet/images/default_album.jpg", 256, 256)
+            "/opt/ricochet/images/default_album.png", 256, 256)
         self.player.image.set_from_pixbuf(self.player.pixbuf)
         self.player.image.show()
         # FIXME: the multi disc albums look in the directory containing

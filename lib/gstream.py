@@ -96,7 +96,7 @@ class Player(object):
 
     def update_image(self):
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            "/opt/ricochet/images/default_album.jpg", 256, 256)
+            "/opt/ricochet/images/default_album.png", 256, 256)
         if self.playlist:
             segs = self.playlist[self.track - 1].split('/')
             path = '/'.join(segs[2:-1]) + '/cover.jpg'
