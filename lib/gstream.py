@@ -202,18 +202,21 @@ class Player(object):
             self.notify()
             self.update_image()
             self.change_playlist()
+        else:
+            self.stop(clear_playlist=False)
 
     def skip_prev(self, widget=None):
-        self.pipeline.set_state(Gst.State.NULL)
         i = self.track - 1
-        if i > 0:
-            self.playbin.set_property('uri', self.playlist[i - 1])
-            self.pipeline.set_state(Gst.State.PLAYING)
-            self.current_state = "PLAYING"
-            self.track -= 1
-            self.notify()
-            self.update_image()
-            self.change_playlist()
+        if i <= 0:
+            return
+        self.pipeline.set_state(Gst.State.NULL)
+        self.playbin.set_property('uri', self.playlist[i - 1])
+        self.pipeline.set_state(Gst.State.PLAYING)
+        self.current_state = "PLAYING"
+        self.track -= 1
+        self.notify()
+        self.update_image()
+        self.change_playlist()
 
     def notify(self):
         n = Notifier(self)
