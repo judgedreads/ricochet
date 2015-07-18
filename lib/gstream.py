@@ -179,11 +179,13 @@ class Player(object):
     def quit(self, widget, event):
         self.pipeline.set_state(Gst.State.NULL)
 
-    def stop(self, widget=None):
+    def stop(self, widget=None, clear_playlist=True):
+        '''Stop playback, optionally clear the playlist'''
         self.pipeline.set_state(Gst.State.NULL)
         self.current_state = 'STOPPED'
         self.track = 1
-        self.playlist = []
+        if clear_playlist is True:
+            self.playlist = []
         self.change_playlist()
         self.update_image()
         print(self.pipeline.get_state(Gst.State.NULL))
@@ -230,4 +232,4 @@ class Player(object):
             self.update_image()
             self.change_playlist()
         else:
-            self.pipeline.set_state(Gst.State.NULL)
+            self.stop(clear_playlist=False)

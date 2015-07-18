@@ -26,7 +26,12 @@ class Notifier(object):
         body = 'by %s\non %s' % (artist, album)
 
         self.notif.clear_actions()
-        self.notif.add_action('action', 'Next', self.notif_skip, None)
+        self.notif.add_action('action', '\u25AE\u25C0',
+                              self.notif_skip, 'prev')
+        self.notif.add_action('action', '\u25B6\u25AE\u25AE',
+                              self.notif_toggle_playback, None)
+        self.notif.add_action('action', '\u25B6\u25AE',
+                              self.notif_skip, 'next')
         self.notif.update(title, body, icon)
         image = GdkPixbuf.Pixbuf.new_from_file(cover)
         self.notif.set_image_from_pixbuf(image)
@@ -34,4 +39,11 @@ class Notifier(object):
 
     def notif_skip(self, notification, action, data, ignore=None):
         notification.close()
-        self.player.skip_next()
+        if data == 'next':
+            self.player.skip_next()
+        elif data == 'prev':
+            self.player.skip_prev()
+
+    def notif_toggle_playback(self, notification, action, data, ignore=None):
+        notification.close()
+        self.player.toggle()
