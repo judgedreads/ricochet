@@ -90,13 +90,13 @@ class Browser(Gtk.ScrolledWindow):
         self.query.connect("inserted-text", self.search_changed)
         self.query.connect("deleted-text", self.search_changed)
         self.search_bar.add(self.entry)
-        self.connect("key-press-event", self.search_callback)
+        #self.connect("key-press-event", self.search_callback)
 
         self.flowbox = Gtk.FlowBox()
         self.flowbox.set_valign(Gtk.Align.START)
         self.flowbox.set_max_children_per_line(20)
         self.flowbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
-        #self.flowbox.connect("key-press-event", self.on_key_press)
+        self.flowbox.connect("key-press-event", self.on_key_press)
         self.flowbox.set_filter_func(self.filter_func)
 
         vbox = Gtk.Box(orientation=1, spacing=0)
@@ -115,7 +115,7 @@ class Browser(Gtk.ScrolledWindow):
     def search_callback(self, widget, event):
         return self.search_bar.handle_event(event)
 
-    def search_changed(self, buf, pos, chars, nchars=None):
+    def search_changed(self, *args):
         self.flowbox.invalidate_filter()
 
     def add_album(self, album):
@@ -123,6 +123,16 @@ class Browser(Gtk.ScrolledWindow):
         cover = Cover(album, self.player)
         self.flowbox.add(cover)
 
+    def emit_key_press(self, key):
+        self.flowbox.event("move-cursor", "logical-positions", 1)
+
+    # TODO catch window/app level key-press-events for playback control
+    # (space to toggle etc) and use "/" (or maybe f?) to begin search.
+    # Other bindings like hjkl would be nice - need to emit arrow
+    # keycodes for that probably. Default focus should also be in grid,
+    # try to remove ability to focus from controls that have solid
+    # keyboard alternatives. Maybe do double-click to open albums too?
+    # kinda annoying when I want to click to select/focus...
     def on_key_press(self, widget, event):
         '''handle keyboard controls'''
         children = widget.get_selected_children()
@@ -137,3 +147,15 @@ class Browser(Gtk.ScrolledWindow):
                 self.player.queue(files=self.albums[index])
             elif event.hardware_keycode == 65:
                 self.player.toggle()
+            elif event.hardware_keycode == 43:
+                event.hardware_keycode = 113
+                self.event(event)
+            elif event.hardware_keycode == 44:
+                event.hardware_keycode = 116
+                self.event(event)
+            elif event.hardware_keycode == 45:
+                event.hardware_keycode = 111
+                self.event(event)
+            elif event.hardware_keycode == 46:
+                event.hardware_keycode = 114
+                self.event(event)
