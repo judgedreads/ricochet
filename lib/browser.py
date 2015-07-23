@@ -90,7 +90,6 @@ class Browser(Gtk.ScrolledWindow):
         self.query.connect("inserted-text", self.search_changed)
         self.query.connect("deleted-text", self.search_changed)
         self.search_bar.add(self.entry)
-        #self.connect("key-press-event", self.search_callback)
 
         self.flowbox = Gtk.FlowBox()
         self.flowbox.set_valign(Gtk.Align.START)
@@ -117,36 +116,27 @@ class Browser(Gtk.ScrolledWindow):
         cover = Cover(album, self.player)
         self.flowbox.add(cover)
 
-    # TODO catch window/app level key-press-events for playback control
-    # (space to toggle etc) and use "/" (or maybe f?) to begin search.
-    # Other bindings like hjkl would be nice - need to emit arrow
-    # keycodes for that probably. Default focus should also be in grid,
-    # try to remove ability to focus from controls that have solid
-    # keyboard alternatives. Maybe do double-click to open albums too?
-    # kinda annoying when I want to click to select/focus...
-    def on_key_press(self, widget, event):
+    def on_key_press(self, flowbox, event):
         '''handle keyboard controls'''
-        children = widget.get_selected_children()
-        print(event.hardware_keycode)
-        for child in children:
-            index = child.get_index()
-            if event.hardware_keycode == 36 or event.hardware_keycode == 32:
-                Album(self.albums[index], self.player)
-            elif event.hardware_keycode == 33:
-                self.player.play(files=self.albums[index])
-            elif event.hardware_keycode == 24:
-                self.player.queue(files=self.albums[index])
-            elif event.hardware_keycode == 43:
-                event.hardware_keycode = 113
-                self.event(event)
-            elif event.hardware_keycode == 44:
-                event.hardware_keycode = 116
-                self.event(event)
-            elif event.hardware_keycode == 45:
-                event.hardware_keycode = 111
-                self.event(event)
-            elif event.hardware_keycode == 46:
-                event.hardware_keycode = 114
-                self.event(event)
-            elif event.hardware_keycode == 61:
-                self.search_bar.set_search_mode(True)
+        child = flowbox.get_selected_children()[0]
+        index = child.get_index()
+        if event.hardware_keycode == 36 or event.hardware_keycode == 32:
+            Album(self.albums[index], self.player)
+        elif event.hardware_keycode == 33:
+            self.player.play(files=self.albums[index])
+        elif event.hardware_keycode == 24:
+            self.player.queue(files=self.albums[index])
+        elif event.hardware_keycode == 43:
+            event.hardware_keycode = 113
+            self.event(event)
+        elif event.hardware_keycode == 44:
+            event.hardware_keycode = 116
+            self.event(event)
+        elif event.hardware_keycode == 45:
+            event.hardware_keycode = 111
+            self.event(event)
+        elif event.hardware_keycode == 46:
+            event.hardware_keycode = 114
+            self.event(event)
+        elif event.hardware_keycode == 61:
+            self.search_bar.set_search_mode(True)
