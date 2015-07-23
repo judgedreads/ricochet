@@ -49,6 +49,10 @@ class Ricochet(Gtk.Application):
         GLib.set_prgname('Ricochet')
         self.connect("activate", self.on_activate)
 
+    def on_key_press(self, widget, event, player):
+        if event.hardware_keycode == 65:
+            player.toggle()
+
     def on_activate(self, app):
         window = Gtk.ApplicationWindow()
         window.set_border_width(0)
@@ -72,8 +76,10 @@ class Ricochet(Gtk.Application):
         hbox = Gtk.Box()
         hbox.pack_start(control, False, False, 0)
         hbox.pack_start(browser, True, True, 0)
+        browser.flowbox.get_child_at_index(0).grab_focus()
 
         window.add(hbox)
+        window.connect("key-press-event", self.on_key_press, player)
         app.add_window(window)
         window.show_all()
 

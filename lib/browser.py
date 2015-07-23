@@ -107,13 +107,7 @@ class Browser(Gtk.ScrolledWindow):
         self.show_all()
 
     def filter_func(self, child):
-        # print(self.entry.get_text())
-        # if self.entry.get_text() in self.albums[child.get_index()]:
-            # print(self.albums[child.get_index()])
         return self.entry.get_text().upper() in self.albums[child.get_index()].upper()
-
-    def search_callback(self, widget, event):
-        return self.search_bar.handle_event(event)
 
     def search_changed(self, *args):
         self.flowbox.invalidate_filter()
@@ -122,9 +116,6 @@ class Browser(Gtk.ScrolledWindow):
         self.albums.append(album)
         cover = Cover(album, self.player)
         self.flowbox.add(cover)
-
-    def emit_key_press(self, key):
-        self.flowbox.event("move-cursor", "logical-positions", 1)
 
     # TODO catch window/app level key-press-events for playback control
     # (space to toggle etc) and use "/" (or maybe f?) to begin search.
@@ -145,8 +136,6 @@ class Browser(Gtk.ScrolledWindow):
                 self.player.play(files=self.albums[index])
             elif event.hardware_keycode == 24:
                 self.player.queue(files=self.albums[index])
-            elif event.hardware_keycode == 65:
-                self.player.toggle()
             elif event.hardware_keycode == 43:
                 event.hardware_keycode = 113
                 self.event(event)
@@ -159,3 +148,5 @@ class Browser(Gtk.ScrolledWindow):
             elif event.hardware_keycode == 46:
                 event.hardware_keycode = 114
                 self.event(event)
+            elif event.hardware_keycode == 61:
+                self.search_bar.set_search_mode(True)

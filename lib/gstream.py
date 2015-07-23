@@ -31,6 +31,7 @@ class Player(object):
         # create playlist tree widget
         self.liststore = Gtk.ListStore(str)
         self.treeview = Gtk.TreeView()
+        self.treeview.set_enable_search(False)
         selection = self.treeview.get_selection()
         selection.set_mode(Gtk.SelectionMode.MULTIPLE)
 
