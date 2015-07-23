@@ -42,19 +42,20 @@
   - Left click on an album brings up the album window with song list,
     right click an album for context menu with queue option, middle
     click to play album. 
-  - Keyboard controls: arrows: navigate, p/enter: play album, q: queue
-    album, o: open album, space: play/pause.
+  - Keyboard controls: arrows/hjkl: navigate, p: play album, q: queue
+    album, o/enter: open album, space: play/pause.
 
 **Detailed album view:**
   - Double-click the songs to play, right click to queue songs.
   - Can also play selection with 'enter' or 'p', and queue selection
     with 'q'. 'space' will toggle play/pause.
 
-**Control window:**
+**Playlist/control centre:**
   - Buttons control playback and double-clicking a song in the playlist
     will play that song.
   - Press delete on a selection of tracks to remove them from the
     playlist.
+  - Space to toggle playback
 
 **ricochetctl:**
 
