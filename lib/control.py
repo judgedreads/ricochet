@@ -30,6 +30,7 @@ class Control(Gtk.Box):
         for label, method in buttons:
             button = Gtk.Button(label=label)
             button.connect("clicked", method)
+            button.set_focus_on_click(False)
             button_box.pack_start(button, True, True, 0)
         self.pack_start(button_box, False, False, 0)
 
