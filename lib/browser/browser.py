@@ -1,4 +1,4 @@
-from gi.repository import Gtk, Gdk, GdkPixbuf
+from gi.repository import Gtk, GdkPixbuf
 import os
 
 from . import albumart
@@ -54,7 +54,7 @@ class Cover(Gtk.EventBox):
 
     def album_detail(self, widget):
         '''launch the detailed album view'''
-        album = Album(self.name, self.player)
+        return Album(self.name, self.player)
 
     def fetch_album_art(self, widget):
         code = albumart.fetch_album_art(self.name, self.player.MUSIC_DIR)
@@ -108,7 +108,8 @@ class Browser(Gtk.ScrolledWindow):
         self.show_all()
 
     def filter_func(self, child):
-        return self.entry.get_text().upper() in self.albums[child.get_index()].upper()
+        return (self.entry.get_text().upper()
+                in self.albums[child.get_index()].upper())
 
     def search_changed(self, *args):
         self.flowbox.invalidate_filter()

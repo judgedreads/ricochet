@@ -1,7 +1,7 @@
 from gi.repository import Gst, Gtk, GdkPixbuf
 import os
 
-from .notifications import Notifier
+from ..notifications import Notifier
 
 
 class Player(object):
@@ -168,7 +168,8 @@ class Player(object):
                 for song in songs:
                     # handle file types: wma doesn't work with gst for some
                     # reason
-                    if song.endswith(('mp3', 'ogg', 'm4a', 'mp4', 'flac', 'mpc')):
+                    if song.endswith(('mp3', 'ogg', 'm4a',
+                                      'mp4', 'flac', 'mpc')):
                         temp = "file://%s" % os.path.join(
                             self.MUSIC_DIR, disc, song)
                         self.playlist.append(temp)

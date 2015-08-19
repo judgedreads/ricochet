@@ -20,9 +20,9 @@
 from gi.repository import (Gst, Gtk, Notify, Gio, GLib)
 import os
 
-from lib.browser import Browser
+from lib.browser.browser import Browser
 from lib import settings
-from lib.control import Control
+from lib.player.control import Control
 from lib.signals import Server
 
 VERSION = '0.3.5'
@@ -31,10 +31,10 @@ print('Ricochet v%s' % VERSION)
 settings = settings.get_settings()
 
 if settings['backend'] == "gstreamer":
-    from lib import gstream as backend
+    from lib.player import gstream as backend
     Gst.init()
 elif settings['backend'] == "mpd":
-    from lib import mpdbind as backend
+    from lib.player import mpdbind as backend
 else:
     print("Invalid backend: should be 'mpd' or 'gstreamer'")
 
@@ -64,10 +64,10 @@ class Ricochet(Gtk.Application):
         player = backend.Player(settings)
         music = settings['music_dir']
 
-        browser = Browser(player)
+        brow = Browser(player)
         for artist in sorted(os.listdir(music)):
             for album in os.listdir(os.path.join(music, artist)):
-                browser.add_album(os.path.join(artist, album))
+                brow.add_album(os.path.join(artist, album))
 
         server = Server(player)
         server.main()
@@ -75,8 +75,8 @@ class Ricochet(Gtk.Application):
 
         hbox = Gtk.Box()
         hbox.pack_start(control, False, False, 0)
-        hbox.pack_start(browser, True, True, 0)
-        browser.flowbox.get_child_at_index(0).grab_focus()
+        hbox.pack_start(brow, True, True, 0)
+        brow.flowbox.get_child_at_index(0).grab_focus()
 
         window.add(hbox)
         window.connect("key-press-event", self.on_key_press, player)

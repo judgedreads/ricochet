@@ -4,7 +4,7 @@
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,22 +18,14 @@
 from gi.repository import Gtk
 import mpd
 
-from . import settings
+from .. import settings
+
+# TODO: need to separate all gui and backend stuff so that maintaining two
+# backends is easy. Make it more like an api where the gui can query stuff like
+# current artist or song or album art etc.
 
 
 class Player(object):
-
-    # callback for activation on playlist tree
-    def on_activate(self, tree, path, column):
-        song = self.liststore[path][0]
-        i = 0
-        for track in self.client.playlist():
-            if track.find(song) != -1:
-                self.track = i
-                break
-            else:
-                i += 1
-        self.client.play(self.track)
 
     def __init__(self, playlist):
         # option to load a playlist on init
@@ -65,6 +57,18 @@ class Player(object):
         column = Gtk.TreeViewColumn("Playlist", renderer, text=0)
         self.treeview.append_column(column)
         self.treeview.connect("row_activated", self.on_activate)
+
+    # callback for activation on playlist tree
+    def on_activate(self, tree, path, column):
+        song = self.liststore[path][0]
+        i = 0
+        for track in self.client.playlist():
+            if track.find(song) != -1:
+                self.track = i
+                break
+            else:
+                i += 1
+        self.client.play(self.track)
 
     def get_info(self, widget, data):
         if data == "pos":
