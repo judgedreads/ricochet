@@ -25,6 +25,7 @@ class Player(object):
         self.bus = self.pipeline.get_bus()
         self.bus.add_signal_watch()
         self.bus.connect('message::eos', self.on_eos)
+        # about-to-finish signal for gapless
         self.playbin = Gst.ElementFactory.make('playbin', None)
         self.pipeline.add(self.playbin)
 
@@ -226,6 +227,8 @@ class Player(object):
 
     def on_eos(self, bus, msg):
         '''callback for when the end of a song is reached'''
+        # TODO:use self.skip_next(), investigate a 'nearly finished'
+        # signal to allow more gapless playback or try not setting NULL?
         i = self.track
         self.pipeline.set_state(Gst.State.NULL)
         if i < len(self.playlist):

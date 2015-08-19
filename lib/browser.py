@@ -96,6 +96,8 @@ class Browser(Gtk.ScrolledWindow):
         self.flowbox.set_max_children_per_line(20)
         self.flowbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
         self.flowbox.connect("key-press-event", self.on_key_press)
+        # self.flowbox.connect(
+        #    "selected-children-changed", self.on_selection_changed)
         self.flowbox.set_filter_func(self.filter_func)
 
         vbox = Gtk.Box(orientation=1, spacing=0)
@@ -115,6 +117,10 @@ class Browser(Gtk.ScrolledWindow):
         self.albums.append(album)
         cover = Cover(album, self.player)
         self.flowbox.add(cover)
+
+    def on_selection_changed(self, box):
+        child = box.get_selected_children()[0]
+        print(self.albums[child.get_index()])
 
     def on_key_press(self, flowbox, event):
         '''handle keyboard controls'''
