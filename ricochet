@@ -31,10 +31,10 @@ print('Ricochet v%s' % VERSION)
 settings = settings.get_settings()
 
 if settings['backend'] == "gstreamer":
-    from lib.player import gstream as backend
+    from lib.player import gstapi as backend
     Gst.init()
 elif settings['backend'] == "mpd":
-    from lib.player import mpdbind as backend
+    from lib.player import mpdapi as backend
 else:
     print("Invalid backend: should be 'mpd' or 'gstreamer'")
 
