@@ -1,9 +1,5 @@
 import mpd
 
-# TODO: need to separate all gui and backend stuff so that maintaining two
-# backends is easy. Make it more like an api where the gui can query stuff like
-# current artist or song or album art etc.
-
 
 class Player(object):
 
@@ -48,8 +44,8 @@ class Player(object):
             artist = self.client.currentsong()['artist']
             return artist
 
-    # handle reloading of the playlist widget upon changes
     def change_playlist(self, widget):
+        '''handle reloading of the playlist widget upon changes'''
         self.check_connected()
 
         playlist = self.client.playlist()
@@ -62,28 +58,25 @@ class Player(object):
                 elif self.current_state == 'PAUSED':
                     song = '\u25AE\u25AE ' + song
 
-    # toggle between playing and paused
     def toggle(self, widget):
+        '''toggle between playing and paused'''
         self.check_connected()
         self.client.pause()
 
-
-# method to play now, i.e. replace playlist and play it
     def play(self, widget, data):
+        '''method to play now, i.e. replace playlist and play it'''
         self.check_connected()
         self.client.clear()
         self.client.add(data)
         self.client.play()
 
-
-# add songs to the current playlist
     def queue(self, widget, data):
+        '''add songs to the current playlist'''
         self.check_connected()
         self.client.add(data)
 
-
-# close connections to mpd
     def quit(self, widget, event):
+        '''close connections to mpd'''
         self.check_connected()
         self.client.close()
         self.client.disconnect()
@@ -96,9 +89,8 @@ class Player(object):
         self.check_connected()
         self.client.previous()
 
-
-# safety measure to handle connection errors before commands
     def check_connected(self):
+        '''safety measure to handle connection errors before commands'''
         try:
             self.client.ping()
         except mpd.ConnectionError:
