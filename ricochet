@@ -19,6 +19,7 @@
 
 from gi.repository import (Gst, Gtk, Notify, Gio, GLib)
 import os
+import sys
 
 from lib.browser.browser import Browser
 from lib import settings
@@ -30,13 +31,13 @@ print('Ricochet v%s' % VERSION)
 
 settings = settings.get_settings()
 
-if settings['backend'] == "gstreamer":
+if settings['backend'].upper() == "GSTREAMER":
     from lib.player import gstapi as backend
     Gst.init()
-elif settings['backend'] == "mpd":
+elif settings['backend'].upper() == "MPD":
     from lib.player import mpdapi as backend
 else:
-    print("Invalid backend: should be 'mpd' or 'gstreamer'")
+    sys.exit("Invalid backend: should be 'mpd' or 'gstreamer'")
 
 
 class Ricochet(Gtk.Application):
@@ -61,17 +62,19 @@ class Ricochet(Gtk.Application):
 
         Notify.init('Ricochet')
 
+        # TODO: pass settings to all classes?
         player = backend.Player(settings)
         music = settings['music_dir']
 
-        brow = Browser(player)
+        control = Control(player, settings)
+        control.MUSIC_DIR = music
+        server = Server(control)
+        server.main()
+
+        brow = Browser(control)
         for artist in sorted(os.listdir(music)):
             for album in os.listdir(os.path.join(music, artist)):
                 brow.add_album(os.path.join(artist, album))
-
-        server = Server(player)
-        server.main()
-        control = Control(player, server)
 
         hbox = Gtk.Box()
         hbox.pack_start(control, False, False, 0)

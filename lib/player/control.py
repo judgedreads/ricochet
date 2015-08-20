@@ -1,6 +1,5 @@
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk, GdkPixbuf, Notify
 import os
-from ..notifications import Notifier
 
 # TODO: Make this be the connection between gui and backend by using the backend
 # as an API. Will need API endpoints to skip, toggle, set states etc.
@@ -13,18 +12,15 @@ class Control(Gtk.Box):
     of music is done through this module, including handling of signals.
     '''
 
-    def __init__(self, player, server):
+    def __init__(self, player, settings):
         self.player = player
-        self.player.bus.connect('message::eos', self.on_eos)
-        self.server = server
+
+        self.settings = settings
+        if settings['backend'].upper() == 'GSTREAMER':
+            self.player.bus.connect('message::eos', self.on_eos)
 
         self.image = Gtk.Image()
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            "/opt/ricochet/images/default_album.png", 256, 256)
-        self.image.set_from_pixbuf(pixbuf)
-        self.image.show()
-        # FIXME: the multi disc albums look in the directory containing
-        # the songs rather than the toplevel album directory.
+        self.update_image()
 
         Gtk.Box.__init__(self, orientation=1)
         self.pack_start(self.image, False, False, 0)
@@ -122,7 +118,17 @@ class Control(Gtk.Box):
         self.update_image()
         self.change_playlist()
 
+    def play(self, *args, **kwargs):
+        self.player.play(*args, **kwargs)
+        self.change_playlist()
+
+    def queue(self, *args, **kwargs):
+        self.player.queue(*args, **kwargs)
+        self.change_playlist()
+
     def update_image(self):
+        # FIXME: the multi disc albums look in the directory containing
+        # the songs rather than the toplevel album directory.
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
             "/opt/ricochet/images/default_album.png", 256, 256)
         if self.player.playlist:
@@ -135,6 +141,52 @@ class Control(Gtk.Box):
         self.image.show()
 
     def notify(self):
+        song = self.player.playlist[self.player.track - 1].split('/')[-1]
+        album = self.player.playlist[self.player.track - 1].split('/')[-2]
+        artist = self.player.playlist[self.player.track - 1].split('/')[-3]
+        cover = os.path.join(self.MUSIC_DIR, artist, album, 'cover.jpg')
+        if not os.path.exists(cover):
+            cover = '/opt/ricochet/images/default_album.png'
+        icon = '/opt/ricochet/images/ricochet.png'
+
+        title = ''.join(song.split('.')[0:-1])
+        body = 'by %s\non %s' % (artist, album)
+
         n = Notifier(self)
         if self.settings['notifications'] == "True":
-            n.notify(self.player.track - 1)
+            n.notify(title, body, icon, cover)
+
+
+class Notifier(object):
+
+    '''Class to handle all notifications'''
+
+    # TODO: make this class redundant by making self.notif belong to control (or
+    # something else like ricochet) then pass it around as necessary and update
+    # instead of destroying.
+
+    def __init__(self, player):
+        self.notif = Notify.Notification()
+        self.notif.set_category('x-gnome.music')
+        self.notif.set_timeout(3)
+        self.player = player
+        self.MUSIC_DIR = player.MUSIC_DIR
+
+    def notify(self, title, body, icon, cover):
+        self.notif.clear_actions()
+        self.notif.add_action('skip_next', '\u25AE\u25C0',
+                              self.notif_skip, 'prev')
+        self.notif.add_action('skip_prev', '\u25B6\u25AE',
+                              self.notif_skip, 'next')
+        self.notif.update(title, body, icon)
+        image = GdkPixbuf.Pixbuf.new_from_file(cover)
+        self.notif.set_image_from_pixbuf(image)
+        self.notif.show()
+
+    def notif_skip(self, notification, action, data, ignore=None):
+        notification.close()
+        print(data)
+        if data == 'next':
+            self.player.skip_next()
+        elif data == 'prev':
+            self.player.skip_prev()

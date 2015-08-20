@@ -5,11 +5,11 @@ import os
 class Player(object):
 
     def __init__(self, settings, playlist=None):
-        '''Optionally load a playlist on init'''
         VERSION = '.'.join(map(str, Gst.version()[0:3]))
+        print("Using Gstreamer v%s" % VERSION)
+        # Optionally load a playlist on init
         if playlist is None:
             playlist = []
-        print("Using Gstreamer v%s" % VERSION)
         self.settings = settings
         self.MUSIC_DIR = settings['music_dir']
 
@@ -111,8 +111,6 @@ class Player(object):
         else:
             song = "file://%s/%s" % (self.MUSIC_DIR, files)
             self.playlist.append(song)
-
-        self.change_playlist()
 
     def select_song(self, song):
         '''
