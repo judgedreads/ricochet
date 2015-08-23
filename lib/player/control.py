@@ -108,26 +108,26 @@ class Control(Gtk.Box):
 
     def skip_prev(self, widget=None):
         self.player.skip_prev()
+        self.change_playlist()
         self.notify()
         self.update_image()
-        self.change_playlist()
 
     def skip_next(self, widget=None):
         self.player.skip_next()
+        self.change_playlist()
         self.notify()
         self.update_image()
-        self.change_playlist()
 
     def toggle(self, widget=None):
         '''toggle play state'''
         self.player.toggle()
-        self.update_image()
         self.change_playlist()
+        self.update_image()
 
     def stop(self, widget=None):
         self.player.stop()
-        self.update_image()
         self.change_playlist()
+        self.update_image()
 
     def play(self, *args, **kwargs):
         self.player.play(*args, **kwargs)

@@ -1,18 +1,19 @@
 import mpd
 from gi.repository import GLib
 from .. import utils
+import time
 
 
 def idle(func):
     def new_func(*args, **kwargs):
         try:
+            args[0].client.fetch_idle()
             ret = func(*args, **kwargs)
         except mpd.PendingCommandError:
-            changes = args[0].client.fetch_idle()
-            print(changes)
             ret = func(*args, **kwargs)
         finally:
             args[0].client.send_idle()
+            # time.sleep(0.2)
             return ret
     return new_func
 

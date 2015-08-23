@@ -63,7 +63,6 @@ def parse_song(filename):
 def get_cover_path(album, music_root=None):
     music_root = get_default_music_root(music_root)
     path = '%s/%s/cover.jpg' % (music_root, album)
-    print(path)
     if not os.path.exists(path):
         path = '/opt/ricochet/images/default_album.png'
     return path
