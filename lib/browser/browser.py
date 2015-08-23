@@ -66,7 +66,7 @@ class Cover(Gtk.EventBox):
         if event.button == 1:
             self.album_detail(self)
         elif event.button == 2:
-            self.player.play(None, self.name)
+            self.player.play(self.name)
         elif event.button == 3:
             self.menu.popup(
                 None, None, None, self.name, event.button, event.time)

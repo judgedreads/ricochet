@@ -1,5 +1,6 @@
 import mpd
 from gi.repository import GLib
+from .. import utils
 
 
 def idle(func):
@@ -23,9 +24,6 @@ class Player(object):
         self.client = mpd.MPDClient()
         self.host = settings['mpd_host']
         self.port = settings['mpd_port']
-        if playlist is None:
-            playlist = []
-        self.playlist = playlist
         self.track = 1
 
         # catch connection errors
@@ -40,7 +38,7 @@ class Player(object):
         VERSION = self.client.mpd_version
         print("Using MPD v%s" % VERSION)
 
-        self.playlist = self.client.playlist()
+        self.playlist = utils.parse_files(self.client.playlist())
 
     def event_callback(self, *args, **kwargs):
         '''
@@ -72,7 +70,7 @@ class Player(object):
         # GLib.MainLoop().run()
 
     @idle
-    def change_playlist(self, widget=None):
+    def change_playlist(self):
         '''handle reloading of the playlist widget upon changes'''
 
         # TODO: should make playlist a list of dicts
@@ -80,48 +78,48 @@ class Player(object):
         # this should simplify a lot of things and reduce the need for
         # parsing
 
-        self.playlist = []
-        for i, item in enumerate(self.client.playlist()):
-            segs = item.split('/')[-1].split('.')[:-1]
-            song = '.'.join(segs)
-            print(song)
+        for i, item in enumerate(self.playlist):
             if str(i) == self.client.currentsong()['pos']:
                 self.track = i + 1
                 if self.client.status()['state'] == 'play':
-                    song = '\u25B6 ' + song
+                    item['playing'] = 'playing'
                 elif self.client.status()['state'] == 'pause':
-                    song = '\u25AE\u25AE ' + song
-            self.playlist.append(song)
+                    item['playing'] = 'paused'
+            else:
+                item['playing'] = False
 
     @idle
-    def toggle(self, widget=None):
+    def toggle(self):
         '''toggle between playing and paused'''
         self.client.pause()
 
     @idle
-    def play(self, widget=None, files=None):
+    def play(self, files=None):
         '''method to play now, i.e. replace playlist and play it'''
         self.client.clear()
+        self.playlist = []
         self.client.add(files)
+        self.playlist.extend(utils.parse_files(files))
         self.client.play()
 
     @idle
-    def queue(self, widget=None, files=None):
+    def queue(self, files=None):
         '''add songs to the current playlist'''
         self.client.add(files)
+        self.playlist.extend(utils.parse_files(files))
 
     @idle
-    def quit(self, widget=None, event=None):
+    def quit(self, event=None):
         '''close connections to mpd'''
         self.client.close()
         self.client.disconnect()
 
     @idle
-    def skip_next(self, widget=None):
+    def skip_next(self):
         self.client.next()
 
     @idle
-    def skip_prev(self, widget=None):
+    def skip_prev(self):
         self.client.previous()
 
     def check_connected(self):

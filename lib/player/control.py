@@ -1,5 +1,4 @@
 from gi.repository import Gtk, GdkPixbuf, Notify
-import os
 
 # TODO: Make this be the connection between gui and backend by using the backend
 # as an API. Will need API endpoints to skip, toggle, set states etc.
@@ -79,7 +78,12 @@ class Control(Gtk.Box):
         self.liststore.clear()
         self.player.change_playlist()
         for song in self.player.playlist:
-            self.liststore.append([song])
+            if song['playing'] == 'playing':
+                self.liststore.append(['\u25B6 ' + song['name']])
+            elif song['playing'] == 'paused':
+                self.liststore.append(['\u25AE\u25AE ' + song['name']])
+            else:
+                self.liststore.append([song['name']])
         self.treeview.set_model(self.liststore)
 
     def on_key_press(self, widget, event):
@@ -136,28 +140,20 @@ class Control(Gtk.Box):
     def update_image(self):
         # FIXME: the multi disc albums look in the directory containing
         # the songs rather than the toplevel album directory.
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-            "/opt/ricochet/images/default_album.png", 256, 256)
+        cover = "/opt/ricochet/images/default_album.png"
         if self.player.playlist:
-            segs = self.player.playlist[self.player.track - 1].split('/')
-            path = '/'.join(segs[2:-1]) + '/cover.jpg'
-            if os.path.exists(path):
-                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
-                    path, 256, 256)
+            song = self.player.playlist[self.player.track - 1]
+            cover = song['cover']
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(cover, 256, 256)
         self.image.set_from_pixbuf(pixbuf)
         self.image.show()
 
     def notify(self):
-        song = self.player.playlist[self.player.track - 1].split('/')[-1]
-        album = self.player.playlist[self.player.track - 1].split('/')[-2]
-        artist = self.player.playlist[self.player.track - 1].split('/')[-3]
-        cover = os.path.join(self.MUSIC_DIR, artist, album, 'cover.jpg')
-        if not os.path.exists(cover):
-            cover = '/opt/ricochet/images/default_album.png'
+        song = self.player.playlist[self.player.track - 1]
+        cover = song['cover']
         icon = '/opt/ricochet/images/ricochet.png'
-
-        title = ''.join(song.split('.')[0:-1])
-        body = 'by %s\non %s' % (artist, album)
+        title = song['name']
+        body = 'by %s\non %s' % (song['artist'], song['album'])
 
         n = Notifier(self)
         if self.settings['notifications'] == "True":
