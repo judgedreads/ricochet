@@ -22,9 +22,17 @@ class Player(object):
         self.pipeline = Gst.Pipeline()
         self.bus = self.pipeline.get_bus()
         self.bus.add_signal_watch()
+        self.bus.connect('message::eos', self.event_callback)
         # about-to-finish signal for gapless
         self.playbin = Gst.ElementFactory.make('playbin', None)
         self.pipeline.add(self.playbin)
+
+    def event_callback(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def on_eos(self, *args, **kwargs):
+        self.skip_next()
+        self.event_callback()
 
     def get_info(self, widget, data):
         i = self.track

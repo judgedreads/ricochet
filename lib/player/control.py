@@ -4,6 +4,11 @@ import os
 # TODO: Make this be the connection between gui and backend by using the backend
 # as an API. Will need API endpoints to skip, toggle, set states etc.
 
+# IDEAS:
+# - Subclass the backend player when creating the control?
+# - Implement empty methods for things like eos so that I can connect them in
+# the backend but define them in control.
+
 
 class Control(Gtk.Box):
 
@@ -14,10 +19,9 @@ class Control(Gtk.Box):
 
     def __init__(self, player, settings):
         self.player = player
+        self.player.event_callback = self.event_callback
 
         self.settings = settings
-        if settings['backend'].upper() == 'GSTREAMER':
-            self.player.bus.connect('message::eos', self.on_eos)
 
         self.image = Gtk.Image()
         self.update_image()
@@ -64,14 +68,17 @@ class Control(Gtk.Box):
         scroll.add(self.treeview)
         self.show_all()
 
-    def on_eos(self, bus, msg):
-        '''callback for when the end of a song is reached'''
-        self.skip_next()
+    def event_callback(self, *args, **kwargs):
+        # should store previous song so that I can check if the
+        # song has changed and if I should notify
+        self.change_playlist()
+        return True
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
         self.liststore.clear()
-        for song in self.player.change_playlist():
+        self.player.change_playlist()
+        for song in self.player.playlist:
             self.liststore.append([song])
         self.treeview.set_model(self.liststore)
 
