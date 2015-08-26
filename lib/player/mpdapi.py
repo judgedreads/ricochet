@@ -1,9 +1,14 @@
 import mpd
 from gi.repository import GLib
 from .. import utils
-import time
 
 
+# IDEA: use two connections? One that idles and one that just opens and closes
+# around each action. I think two clients will be necessary, two connections to
+# the same client will be confusing if even possible.
+
+# this decorator doesn't work well, it often blocks the gui and other code until
+# an mpd event happens (like changing volume)
 def idle(func):
     def new_func(*args, **kwargs):
         try:
@@ -13,8 +18,20 @@ def idle(func):
             ret = func(*args, **kwargs)
         finally:
             args[0].client.send_idle()
-            # time.sleep(0.2)
             return ret
+    return new_func
+
+
+def connect(func):
+    '''safety measure to handle connection errors before commands'''
+    def new_func(*args, **kwargs):
+        try:
+            args[0].client.ping()
+        except mpd.ConnectionError:
+            args[0].client.connect(args[0].host, args[0].port)
+        finally:
+            return func(*args, **kwargs)
+            # close connection here?
     return new_func
 
 
@@ -41,6 +58,9 @@ class Player(object):
 
         self.playlist = utils.parse_files(self.client.playlist())
 
+        self.watcher = mpd.MPDClient()
+        self.wait()
+
     def event_callback(self, *args, **kwargs):
         '''
         This function is not implemented by default so should be done so by
@@ -53,24 +73,27 @@ class Player(object):
         # toggling playback. This check could be implemented in the
         # update/notify stage to see if the song has changed.
         # This will need to be implemented by control.
-        raise NotImplementedError
+        # raise NotImplementedError
+        pass
 
     def _event_callback(self, *args, **kwargs):
-        changes = self.client.fetch_idle()
+        changes = self.watcher.fetch_idle()
         print(changes)
         # yeah I think decorators are the way to go,
         # should fetch_idle before function then send_idle after
+        self.watcher.send_idle()
+        return True
 
     def wait(self):
         # make this into a decorator for use with most methods?
         # or maybe decorate methods so they try to fetch_idle, then
         # run, then call wait when they are done.
-        self.check_connected()
-        self.client.send_idle()
-        GLib.io_add_watch(self.client, GLib.IO_IN, self.event_callback)
+        self.check_connected(self.watcher)
+        self.watcher.send_idle()
+        GLib.io_add_watch(self.watcher, GLib.IO_IN, self.event_callback)
         # GLib.MainLoop().run()
 
-    @idle
+    @connect
     def change_playlist(self):
         '''handle reloading of the playlist widget upon changes'''
 
@@ -89,12 +112,12 @@ class Player(object):
             else:
                 item['playing'] = False
 
-    @idle
+    @connect
     def toggle(self):
         '''toggle between playing and paused'''
         self.client.pause()
 
-    @idle
+    @connect
     def play(self, files=None):
         '''method to play now, i.e. replace playlist and play it'''
         self.client.clear()
@@ -103,29 +126,29 @@ class Player(object):
         self.playlist.extend(utils.parse_files(files))
         self.client.play()
 
-    @idle
+    @connect
     def queue(self, files=None):
         '''add songs to the current playlist'''
         self.client.add(files)
         self.playlist.extend(utils.parse_files(files))
 
-    @idle
+    @connect
     def quit(self, event=None):
         '''close connections to mpd'''
         self.client.close()
         self.client.disconnect()
 
-    @idle
+    @connect
     def skip_next(self):
         self.client.next()
 
-    @idle
+    @connect
     def skip_prev(self):
         self.client.previous()
 
-    def check_connected(self):
+    def check_connected(self, client):
         '''safety measure to handle connection errors before commands'''
         try:
-            self.client.ping()
+            client.ping()
         except mpd.ConnectionError:
-            self.client.connect(self.host, self.port)
+            client.connect(self.host, self.port)
