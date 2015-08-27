@@ -18,13 +18,14 @@ def parse_files(files, music_root=None):
     returns a list of dicts containing information about the songs in the
     playlist
     '''
-    # IDEA: store a hash of the full path so that instead I can
-    # avoid recreating dicts I already have.
+    # I think that this should be done by the browser so that the player can be
+    # handed a list of file paths instead of a directory or filename.
     music_root = get_default_music_root(music_root)
     songs = []
     if not isinstance(files, list):
         files = [os.path.join(files, f)
                  for f in os.listdir(music_root+'/'+files)]
+        files.sort()
     for i, f in enumerate(files):
         # FIXME: make this gst and mpd compatible, ie need to strip file:// and
         # file

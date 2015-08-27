@@ -23,16 +23,21 @@ class Player(object):
         self.pipeline = Gst.Pipeline()
         self.bus = self.pipeline.get_bus()
         self.bus.add_signal_watch()
-        # about-to-finish signal for gapless
         self.playbin = Gst.ElementFactory.make('playbin', None)
         self.pipeline.add(self.playbin)
 
     def listen(self, func):
         def new_func(*args, **kwargs):
-            self.skip_next()
+            self.skip_next(gapless=True)
             func(*args, **kwargs)
             return True
-        self.bus.connect('message::eos', new_func)
+        # self.bus.connect('message::eos', new_func)
+        # might still be worth using eos message to handle reaching the end of
+        # the playlist, some other messages might be worthwhile too.
+
+        # gapless playback - needs to pass gapless=True to skip_next or make
+        # separate function
+        self.playbin.connect('about-to-finish', new_func)
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
@@ -59,13 +64,11 @@ class Player(object):
             self.playbin.set_property('uri', 'file://'+self.playlist[0]['path'])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.current_state = "PLAYING"
-        print(self.playbin.get_property('uri'))
 
     def play(self, widget=None, files=None):
         '''method to play now, i.e. replace playlist and play it'''
 
         self.stop()
-        print(files)
         self.queue(files=files)
         self.toggle()
 
@@ -126,10 +129,10 @@ class Player(object):
         self.track = 1
         if clear_playlist is True:
             self.playlist = []
-        print(self.pipeline.get_state(Gst.State.NULL))
 
-    def skip_next(self, widget=None):
-        self.pipeline.set_state(Gst.State.NULL)
+    def skip_next(self, widget=None, gapless=False):
+        if gapless is False:
+            self.pipeline.set_state(Gst.State.NULL)
         i = self.track
         if i < len(self.playlist):
             self.playbin.set_property('uri', 'file://'+self.playlist[i]['path'])
@@ -140,6 +143,7 @@ class Player(object):
             self.stop(clear_playlist=False)
 
     def skip_prev(self, widget=None):
+        # TODO: CD style skip (make optional)
         i = self.track - 1
         if i <= 0:
             return
