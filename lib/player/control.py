@@ -1,13 +1,5 @@
 from gi.repository import Gtk, GdkPixbuf, Notify
 
-# TODO: Make this be the connection between gui and backend by using the backend
-# as an API. Will need API endpoints to skip, toggle, set states etc.
-
-# IDEAS:
-# - Subclass the backend player when creating the control?
-# - Implement empty methods for things like eos so that I can connect them in
-# the backend but define them in control.
-
 
 class Control(Gtk.Box):
 
@@ -18,7 +10,7 @@ class Control(Gtk.Box):
 
     def __init__(self, player, settings):
         self.player = player
-        self.player.wait(self.event_callback)
+        self.player.listen(self.event_callback)
 
         self.settings = settings
 
@@ -74,6 +66,8 @@ class Control(Gtk.Box):
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
+        # this should be a catch-all to decide whether or not to update the
+        # image or notify
         self.liststore.clear()
         self.player.change_playlist()
         for song in self.player.playlist:

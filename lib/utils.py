@@ -22,17 +22,21 @@ def parse_files(files, music_root=None):
     # avoid recreating dicts I already have.
     music_root = get_default_music_root(music_root)
     songs = []
+    if not isinstance(files, list):
+        files = [os.path.join(files, f)
+                 for f in os.listdir(music_root+'/'+files)]
     for i, f in enumerate(files):
         # FIXME: make this gst and mpd compatible, ie need to strip file:// and
         # file
-        f = f[6:]
+        f = trim_prefix(f, 'file://')
+        f = trim_prefix(f, 'file ')
         if not check_filetype(f):
             continue
         segs = f.split('/')
         song = {
             'artist': segs[0],
             'album': segs[1],
-            'path': music_root + f,
+            'path': os.path.join(music_root, f),
             'cover': get_cover_path('/'.join(segs[0:-1])),
             'playing': False
         }
@@ -45,8 +49,23 @@ def parse_files(files, music_root=None):
     return songs
 
 
+def trim_prefix(s, prefix):
+    # could make this take tuples of prefixes
+    if s.startswith(prefix):
+        return s[len(prefix):]
+    else:
+        return s
+
+
+def trim_suffix(s, suffix):
+    if s.endswith(suffix):
+        return s[:len(suffix)]
+    else:
+        return s
+
+
 def remove_ext(filename):
-    return '.'.join(filename.split('.')[0:-1])
+    return '.'.join(filename.split('.')[:-1])
 
 
 def parse_song(filename):

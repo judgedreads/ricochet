@@ -3,25 +3,6 @@ from gi.repository import GLib
 from .. import utils
 
 
-# IDEA: use two connections? One that idles and one that just opens and closes
-# around each action. I think two clients will be necessary, two connections to
-# the same client will be confusing if even possible.
-
-# this decorator doesn't work well, it often blocks the gui and other code until
-# an mpd event happens (like changing volume)
-def idle(func):
-    def new_func(*args, **kwargs):
-        try:
-            args[0].client.fetch_idle()
-            ret = func(*args, **kwargs)
-        except mpd.PendingCommandError:
-            ret = func(*args, **kwargs)
-        finally:
-            args[0].client.send_idle()
-            return ret
-    return new_func
-
-
 def connect(func):
     '''safety measure to handle connection errors before commands'''
     def new_func(*args, **kwargs):
@@ -60,33 +41,7 @@ class Player(object):
 
         self.watcher = mpd.MPDClient()
 
-    def event_callback(self, *args, **kwargs):
-        '''
-        This function is not implemented by default so should be done so by
-        whatever ends up using this. This function is connected to the mpd
-        client via a GLib IO watcher, returning True will keep the IO watcher
-        connected, returning False or None will remove the watcher.
-        '''
-        # need to ignore most stuff here, mostly just want to update playlist
-        # and notify when a song changes, the tricky thing is not notifying when
-        # toggling playback. This check could be implemented in the
-        # update/notify stage to see if the song has changed.
-        # This will need to be implemented by control.
-        # raise NotImplementedError
-        pass
-
-    def _event_callback(self, *args, **kwargs):
-        changes = self.watcher.fetch_idle()
-        print(changes)
-        # yeah I think decorators are the way to go,
-        # should fetch_idle before function then send_idle after
-        self.watcher.send_idle()
-        return True
-
-    def wait(self, func):
-        # make this into a decorator for use with most methods?
-        # or maybe decorate methods so they try to fetch_idle, then
-        # run, then call wait when they are done.
+    def listen(self, func):
         self.check_connected(self.watcher)
         self.watcher.send_idle()
 
@@ -128,14 +83,14 @@ class Player(object):
         '''method to play now, i.e. replace playlist and play it'''
         self.client.clear()
         self.playlist = []
-        self.client.add(files)
-        self.playlist.extend(utils.parse_files(files))
+        self.queue(files=files)
         self.client.play()
 
     @connect
     def queue(self, files=None):
         '''add songs to the current playlist'''
         self.client.add(files)
+        print(files)
         self.playlist.extend(utils.parse_files(files))
 
     @connect

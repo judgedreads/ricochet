@@ -1,5 +1,6 @@
 from gi.repository import Gst
 import os
+from .. import utils
 
 
 class Player(object):
@@ -22,51 +23,27 @@ class Player(object):
         self.pipeline = Gst.Pipeline()
         self.bus = self.pipeline.get_bus()
         self.bus.add_signal_watch()
-        self.bus.connect('message::eos', self.event_callback)
         # about-to-finish signal for gapless
         self.playbin = Gst.ElementFactory.make('playbin', None)
         self.pipeline.add(self.playbin)
 
-    def event_callback(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def on_eos(self, *args, **kwargs):
-        self.skip_next()
-        self.event_callback()
-
-    def get_info(self, widget, data):
-        i = self.track
-        if data == "pos":
-            pos = self.pipeline.query_position(Gst.Format.TIME)[1]
-            pos = round(pos / 1000000000)
-            pos_min = int(pos / 60)
-            pos_sec = int(pos) % 60
-            dur = self.pipeline.query_duration(Gst.Format.TIME)[1]
-            dur = round(dur / 1000000000)
-            dur_min = int(dur / 60)
-            dur_sec = int(dur) % 60
-            return pos_min, pos_sec, dur_min, dur_sec
-        elif data == "song":
-            song = self.playlist[i - 1].split('/')[-1]
-            return song
-        elif data == "album":
-            album = self.playlist[i - 1].split('/')[-2]
-            return album
-        elif data == "artist":
-            artist = self.playlist[i - 1].split('/')[-3]
-            return artist
+    def listen(self, func):
+        def new_func(*args, **kwargs):
+            self.skip_next()
+            func(*args, **kwargs)
+            return True
+        self.bus.connect('message::eos', new_func)
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
         for i, item in enumerate(self.playlist):
-            segs = item.split('/')[-1].split('.')[:-1]
-            song = '.'.join(segs)
             if i == self.track - 1:
                 if self.current_state == 'PLAYING':
-                    song = '\u25B6 ' + song
+                    item['playing'] = 'playing'
                 elif self.current_state == 'PAUSED':
-                    song = '\u25AE\u25AE ' + song
-            yield song
+                    item['playing'] = 'paused'
+            else:
+                item['playing'] = False
 
     def toggle(self, widget=None):
         '''toggle play state'''
@@ -79,19 +56,20 @@ class Player(object):
         elif self.current_state == "STOPPED":
             if self.playlist == []:
                 return
-            self.playbin.set_property('uri', self.playlist[0])
+            self.playbin.set_property('uri', 'file://'+self.playlist[0]['path'])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.current_state = "PLAYING"
-        print(self.pipeline.get_state(Gst.State.NULL))
+        print(self.playbin.get_property('uri'))
 
     def play(self, widget=None, files=None):
         '''method to play now, i.e. replace playlist and play it'''
 
         self.stop()
+        print(files)
         self.queue(files=files)
         self.toggle()
 
-    def queue(self, widget=None, files=None):
+    def xqueue(self, widget=None, files=None):
         '''add music to current playlist'''
 
         if os.path.isdir(os.path.join(self.MUSIC_DIR, files)):
@@ -119,6 +97,9 @@ class Player(object):
         else:
             song = "file://%s/%s" % (self.MUSIC_DIR, files)
             self.playlist.append(song)
+
+    def queue(self, widget=None, files=None):
+        self.playlist.extend(utils.parse_files(files))
 
     def select_song(self, song):
         '''
@@ -151,7 +132,7 @@ class Player(object):
         self.pipeline.set_state(Gst.State.NULL)
         i = self.track
         if i < len(self.playlist):
-            self.playbin.set_property('uri', self.playlist[i])
+            self.playbin.set_property('uri', 'file://'+self.playlist[i]['path'])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.current_state = "PLAYING"
             self.track += 1
@@ -163,7 +144,7 @@ class Player(object):
         if i <= 0:
             return
         self.pipeline.set_state(Gst.State.NULL)
-        self.playbin.set_property('uri', self.playlist[i - 1])
+        self.playbin.set_property('uri', 'file://'+self.playlist[i-1]['path'])
         self.pipeline.set_state(Gst.State.PLAYING)
         self.current_state = "PLAYING"
         self.track -= 1
