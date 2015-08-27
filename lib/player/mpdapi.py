@@ -59,7 +59,6 @@ class Player(object):
         self.playlist = utils.parse_files(self.client.playlist())
 
         self.watcher = mpd.MPDClient()
-        self.wait()
 
     def event_callback(self, *args, **kwargs):
         '''
@@ -84,13 +83,20 @@ class Player(object):
         self.watcher.send_idle()
         return True
 
-    def wait(self):
+    def wait(self, func):
         # make this into a decorator for use with most methods?
         # or maybe decorate methods so they try to fetch_idle, then
         # run, then call wait when they are done.
         self.check_connected(self.watcher)
         self.watcher.send_idle()
-        GLib.io_add_watch(self.watcher, GLib.IO_IN, self.event_callback)
+
+        def new_func(*args, **kwargs):
+            changes = self.watcher.fetch_idle()
+            if changes:
+                func(*args, **kwargs)
+            self.watcher.send_idle()
+            return True
+        GLib.io_add_watch(self.watcher, GLib.IO_IN, new_func)
         # GLib.MainLoop().run()
 
     @connect
@@ -103,7 +109,7 @@ class Player(object):
         # parsing
 
         for i, item in enumerate(self.playlist):
-            if str(i) == self.client.currentsong()['pos']:
+            if str(i) == self.client.currentsong().get('pos', '0'):
                 self.track = i + 1
                 if self.client.status()['state'] == 'play':
                     item['playing'] = 'playing'

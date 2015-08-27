@@ -18,7 +18,7 @@ class Control(Gtk.Box):
 
     def __init__(self, player, settings):
         self.player = player
-        self.player.event_callback = self.event_callback
+        self.player.wait(self.event_callback)
 
         self.settings = settings
 
@@ -71,7 +71,6 @@ class Control(Gtk.Box):
         # should store previous song so that I can check if the
         # song has changed and if I should notify
         self.change_playlist()
-        return True
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
