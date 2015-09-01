@@ -22,13 +22,10 @@ class Server(object):
         data = self.server.recv(1024).decode('UTF-8')
         if data == "toggle":
             self.player.toggle()
-            message = "toggle"
         elif data == "next":
-            self.player.skip_next(None)
-            message = "next"
+            self.player.skip_next()
         elif data == "prev":
-            self.player.skip_prev(None)
-            message = "prev"
+            self.player.skip_prev()
         # by returning True, the io watcher remains
         return True
 

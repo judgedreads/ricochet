@@ -11,6 +11,7 @@ class Control(Gtk.Box):
     def __init__(self, player, settings):
         self.player = player
         self.player.listen(self.event_callback)
+        self.track = 1
 
         self.settings = settings
 
@@ -70,6 +71,10 @@ class Control(Gtk.Box):
         # image or notify
         self.liststore.clear()
         self.player.change_playlist()
+        if self.player.track != self.track:
+            self.track = self.player.track
+            self.update_image()
+            self.notify()
         for song in self.player.playlist:
             if song['playing'] == 'playing':
                 self.liststore.append(['\u25B6 ' + song['name']])
@@ -83,11 +88,16 @@ class Control(Gtk.Box):
         if event.hardware_keycode == 119:
             selection = widget.get_selection()
             songs = selection.get_selected_rows()[1]
+            rm = []
             for song in songs:
-                for track in self.player.playlist:
-                    if self.liststore[song][0] in track:
-                        self.player.playlist.remove(track)
-            self.change_playlist(None)
+                # don't remove play/pause char as we want this song to be
+                # unremovable
+                for i, track in enumerate(self.player.playlist):
+                    if self.liststore[song][0] == track['name']:
+                        rm.append(i)
+            for x, i in enumerate(rm):
+                self.player.remove(i-x)
+            self.change_playlist()
 
     def on_activate(self, tree, path, column):
         '''callback for activation on playlist tree'''
@@ -95,32 +105,24 @@ class Control(Gtk.Box):
         song = song.replace('\u25B6 ', '')
         song = song.replace('\u25AE\u25AE ', '')
         self.player.select_song(song)
-        self.notify()
-        self.update_image()
         self.change_playlist()
 
     def skip_prev(self, widget=None):
         self.player.skip_prev()
         self.change_playlist()
-        self.notify()
-        self.update_image()
 
     def skip_next(self, widget=None):
         self.player.skip_next()
         self.change_playlist()
-        self.notify()
-        self.update_image()
 
     def toggle(self, widget=None):
         '''toggle play state'''
         self.player.toggle()
         self.change_playlist()
-        self.update_image()
 
     def stop(self, widget=None):
         self.player.stop()
         self.change_playlist()
-        self.update_image()
 
     def play(self, *args, **kwargs):
         self.player.play(*args, **kwargs)
@@ -142,6 +144,8 @@ class Control(Gtk.Box):
         self.image.show()
 
     def notify(self):
+        if self.settings['notifications'] != "True":
+            return
         song = self.player.playlist[self.player.track - 1]
         cover = song['cover']
         icon = '/opt/ricochet/images/ricochet.png'
@@ -149,8 +153,7 @@ class Control(Gtk.Box):
         body = 'by %s\non %s' % (song['artist'], song['album'])
 
         n = Notifier(self)
-        if self.settings['notifications'] == "True":
-            n.notify(title, body, icon, cover)
+        n.notify(title, body, icon, cover)
 
 
 class Notifier(object):
@@ -166,7 +169,6 @@ class Notifier(object):
         self.notif.set_category('x-gnome.music')
         self.notif.set_timeout(3)
         self.player = player
-        self.MUSIC_DIR = player.MUSIC_DIR
 
     def notify(self, title, body, icon, cover):
         self.notif.clear_actions()

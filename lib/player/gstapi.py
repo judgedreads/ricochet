@@ -104,6 +104,9 @@ class Player(object):
     def queue(self, widget=None, files=None):
         self.playlist.extend(utils.parse_files(files))
 
+    def remove(self, ind):
+        del self.playlist[ind]
+
     def select_song(self, song):
         '''
         Temporary function for handling selecting song from playlist. May become

@@ -26,11 +26,11 @@ class Cover(Gtk.EventBox):
         menu_item_open.show()
         menu_item_queue = Gtk.MenuItem("Queue")
         self.menu.append(menu_item_queue)
-        menu_item_queue.connect("activate", self.player.queue, self.name)
+        menu_item_queue.connect("activate", self.queue)
         menu_item_queue.show()
         menu_item_play = Gtk.MenuItem("Play")
         self.menu.append(menu_item_play)
-        menu_item_play.connect("activate", self.player.play, self.name)
+        menu_item_play.connect("activate", self.play)
         menu_item_play.show()
         menu_item_cover = Gtk.MenuItem("Get Cover")
         self.menu.append(menu_item_cover)
@@ -51,6 +51,14 @@ class Cover(Gtk.EventBox):
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
         self.image.set_from_pixbuf(pixbuf)
         self.image.show()
+
+    def queue(self, *args, **kwargs):
+        # TODO create file list from name on this end
+        self.player.queue(files=self.name)
+
+    def play(self, *args, **kwargs):
+        # TODO create file list from name on this end
+        self.player.play(files=self.name)
 
     def album_detail(self, widget):
         '''launch the detailed album view'''

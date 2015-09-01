@@ -58,11 +58,6 @@ class Player(object):
     def change_playlist(self):
         '''handle reloading of the playlist widget upon changes'''
 
-        # TODO: should make playlist a list of dicts
-        # keys can be: file_path, artist, album, track_num, title, etc
-        # this should simplify a lot of things and reduce the need for
-        # parsing
-
         for i, item in enumerate(self.playlist):
             if str(i) == self.client.currentsong().get('pos', '0'):
                 self.track = i + 1
@@ -77,6 +72,11 @@ class Player(object):
     def toggle(self):
         '''toggle between playing and paused'''
         self.client.pause()
+
+    @connect
+    def remove(self, ind):
+        self.client.delete(ind)
+        del self.playlist[ind]
 
     @connect
     def play(self, files=None):
