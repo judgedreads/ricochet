@@ -74,6 +74,28 @@ class Player(object):
         self.client.pause()
 
     @connect
+    def stop(self, clear_playlist=True):
+        '''Stop playback, optionally clear the playlist'''
+        self.client.stop()
+        self.current_state = 'STOPPED'
+        self.track = 1
+        if clear_playlist is True:
+            self.playlist = []
+
+    @connect
+    def select_song(self, song):
+        '''
+        Temporary function for handling selecting song from playlist. May become
+        permanent or refactored.
+        '''
+        for num, track in enumerate(self.playlist):
+            if track['name'] == song:
+                self.client.play(num)
+                self.track = num + 1
+                break
+        self.current_state = "PLAYING"
+
+    @connect
     def remove(self, ind):
         self.client.delete(ind)
         del self.playlist[ind]
@@ -90,7 +112,6 @@ class Player(object):
     def queue(self, files=None):
         '''add songs to the current playlist'''
         self.client.add(files)
-        print(files)
         self.playlist.extend(utils.parse_files(files))
 
     @connect

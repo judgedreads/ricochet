@@ -112,11 +112,10 @@ class Player(object):
         Temporary function for handling selecting song from playlist. May become
         permanent or refactored.
         '''
-        for num, name in enumerate(self.player.playlist):
-            name = os.path.basename(name)
-            if name.split('.')[0] == song:
+        for num, track in enumerate(self.playlist):
+            if track['name'] == song:
                 self.pipeline.set_state(Gst.State.NULL)
-                self.playbin.set_property('uri', self.player.playlist[num])
+                self.playbin.set_property('uri', 'file://'+track['path'])
                 self.track = num + 1
                 break
         self.pipeline.set_state(Gst.State.PLAYING)

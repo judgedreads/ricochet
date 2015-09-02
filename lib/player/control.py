@@ -107,11 +107,11 @@ class Control(Gtk.Box):
         self.player.select_song(song)
         self.change_playlist()
 
-    def skip_prev(self, widget=None):
+    def skip_prev(self, *args, **kwargs):
         self.player.skip_prev()
         self.change_playlist()
 
-    def skip_next(self, widget=None):
+    def skip_next(self, *args, **kwargs):
         self.player.skip_next()
         self.change_playlist()
 
@@ -127,6 +127,7 @@ class Control(Gtk.Box):
     def play(self, *args, **kwargs):
         self.player.play(*args, **kwargs)
         self.change_playlist()
+        self.update_image()
 
     def queue(self, *args, **kwargs):
         self.player.queue(*args, **kwargs)
@@ -160,10 +161,6 @@ class Notifier(object):
 
     '''Class to handle all notifications'''
 
-    # TODO: make this class redundant by making self.notif belong to control (or
-    # something else like ricochet) then pass it around as necessary and update
-    # instead of destroying.
-
     def __init__(self, player):
         self.notif = Notify.Notification()
         self.notif.set_category('x-gnome.music')
@@ -183,7 +180,6 @@ class Notifier(object):
 
     def notif_skip(self, notification, action, data, ignore=None):
         notification.close()
-        print(data)
         if data == 'next':
             self.player.skip_next()
         elif data == 'prev':

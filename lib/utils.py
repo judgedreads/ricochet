@@ -30,7 +30,7 @@ def parse_files(files, music_root=None):
         # FIXME: make this gst and mpd compatible, ie need to strip file:// and
         # file
         f = trim_prefix(f, 'file://')
-        f = trim_prefix(f, 'file ')
+        f = trim_prefix(f, 'file: ')
         if not check_filetype(f):
             continue
         segs = f.split('/')
