@@ -1,5 +1,6 @@
 from gi.repository import Gtk, Gdk, GdkPixbuf
 import os
+from .. import utils
 
 
 class Album(Gtk.Window):
@@ -62,7 +63,7 @@ class Album(Gtk.Window):
         songs = os.listdir(os.path.join(self.player.MUSIC_DIR, disc))
         songs.sort()
         for song in songs:
-            if song.endswith(("mp3", "mpc", "ogg", "wma", "m4a", "mp4", "flac")):
+            if utils.check_filetype(song):
                 liststore.append([song])
         treeview = Gtk.TreeView(model=liststore)
         renderer = Gtk.CellRendererText()
@@ -98,16 +99,17 @@ class Album(Gtk.Window):
         elif event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
             self.player.play(files=disc + '/' + model[treeiter][0])
 
-    # TODO: Could also make the backend capable of handling lists ^^
-
     def on_key_press(self, widget, event, disc):
         select = widget.get_selection()
         model, treeiter = select.get_selected_rows()
 
+        # TODO shift+P to play all, shift+Q to queue all
         if event.hardware_keycode == 36 or event.hardware_keycode == 33:
-            self.player.play(files=disc + '/' + model[treeiter][0])
-            for i in range(1, len(treeiter)):
-                self.player.queue(files=disc + '/' + model[i][0])
+            for i, path in enumerate(treeiter):
+                if i == 0:
+                    self.player.play(files=disc + '/' + model[path][0])
+                else:
+                    self.player.queue(files=disc + '/' + model[path][0])
         elif event.hardware_keycode == 24:
             for path in treeiter:
                 self.player.queue(files=disc + '/' + model[path][0])

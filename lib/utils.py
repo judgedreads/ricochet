@@ -23,12 +23,13 @@ def parse_files(files, music_root=None):
     music_root = get_default_music_root(music_root)
     songs = []
     if not isinstance(files, list):
-        files = [os.path.join(files, f)
-                 for f in os.listdir(music_root+'/'+files)]
-        files.sort()
+        absfiles = music_root+'/'+files
+        if os.path.isfile(absfiles):
+            files = [files]
+        elif os.path.isdir(absfiles):
+            files = [os.path.join(files, f) for f in os.listdir(absfiles)]
+            files.sort()
     for i, f in enumerate(files):
-        # FIXME: make this gst and mpd compatible, ie need to strip file:// and
-        # file
         f = trim_prefix(f, 'file://')
         f = trim_prefix(f, 'file: ')
         if not check_filetype(f):

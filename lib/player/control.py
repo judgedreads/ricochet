@@ -122,6 +122,8 @@ class Control(Gtk.Box):
 
     def stop(self, widget=None):
         self.player.stop()
+        self.track = 1
+        self.update_image()
         self.change_playlist()
 
     def play(self, *args, **kwargs):

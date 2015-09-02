@@ -71,34 +71,10 @@ class Player(object):
     @connect
     def toggle(self):
         '''toggle between playing and paused'''
-        self.client.pause()
-
-    @connect
-    def stop(self, clear_playlist=True):
-        '''Stop playback, optionally clear the playlist'''
-        self.client.stop()
-        self.current_state = 'STOPPED'
-        self.track = 1
-        if clear_playlist is True:
-            self.playlist = []
-
-    @connect
-    def select_song(self, song):
-        '''
-        Temporary function for handling selecting song from playlist. May become
-        permanent or refactored.
-        '''
-        for num, track in enumerate(self.playlist):
-            if track['name'] == song:
-                self.client.play(num)
-                self.track = num + 1
-                break
-        self.current_state = "PLAYING"
-
-    @connect
-    def remove(self, ind):
-        self.client.delete(ind)
-        del self.playlist[ind]
+        if self.current_state == 'STOPPED':
+            self.client.play()
+        else:
+            self.client.pause()
 
     @connect
     def play(self, files=None):
@@ -113,6 +89,30 @@ class Player(object):
         '''add songs to the current playlist'''
         self.client.add(files)
         self.playlist.extend(utils.parse_files(files))
+
+    @connect
+    def remove(self, ind):
+        self.client.delete(ind)
+        del self.playlist[ind]
+
+    @connect
+    def select_song(self, song):
+        for num, track in enumerate(self.playlist):
+            if track['name'] == song:
+                self.client.play(num)
+                self.track = num + 1
+                break
+        self.current_state = "PLAYING"
+
+    @connect
+    def stop(self, clear_playlist=True):
+        '''Stop playback, optionally clear the playlist'''
+        self.client.stop()
+        self.current_state = 'STOPPED'
+        self.track = 1
+        if clear_playlist is True:
+            self.playlist = []
+            self.client.clear()
 
     @connect
     def quit(self, event=None):

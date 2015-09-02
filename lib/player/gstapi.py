@@ -1,5 +1,4 @@
 from gi.repository import Gst
-import os
 from .. import utils
 
 
@@ -72,35 +71,6 @@ class Player(object):
         self.queue(files=files)
         self.toggle()
 
-    def xqueue(self, widget=None, files=None):
-        '''add music to current playlist'''
-
-        if os.path.isdir(os.path.join(self.MUSIC_DIR, files)):
-            discs = []
-            for item in os.listdir(os.path.join(self.MUSIC_DIR, files)):
-                if item.startswith('.'):
-                    continue
-                if os.path.isdir(os.path.join(self.MUSIC_DIR, files, item)):
-                    discs.append(os.path.join(files, item))
-            if discs == []:
-                discs.append(files)
-            songs = []
-            discs.sort()
-            for disc in discs:
-                songs = os.listdir(os.path.join(self.MUSIC_DIR, disc))
-                songs.sort()
-                for song in songs:
-                    # handle file types: wma doesn't work with gst for some
-                    # reason
-                    if song.endswith(('mp3', 'ogg', 'm4a',
-                                      'mp4', 'flac', 'mpc')):
-                        temp = "file://%s" % os.path.join(
-                            self.MUSIC_DIR, disc, song)
-                        self.playlist.append(temp)
-        else:
-            song = "file://%s/%s" % (self.MUSIC_DIR, files)
-            self.playlist.append(song)
-
     def queue(self, widget=None, files=None):
         self.playlist.extend(utils.parse_files(files))
 
@@ -121,9 +91,6 @@ class Player(object):
         self.pipeline.set_state(Gst.State.PLAYING)
         self.current_state = "PLAYING"
 
-    def quit(self, widget, event):
-        self.pipeline.set_state(Gst.State.NULL)
-
     def stop(self, widget=None, clear_playlist=True):
         '''Stop playback, optionally clear the playlist'''
         self.pipeline.set_state(Gst.State.NULL)
@@ -131,6 +98,9 @@ class Player(object):
         self.track = 1
         if clear_playlist is True:
             self.playlist = []
+
+    def quit(self, widget, event):
+        self.pipeline.set_state(Gst.State.NULL)
 
     def skip_next(self, widget=None, gapless=False):
         if gapless is False:
