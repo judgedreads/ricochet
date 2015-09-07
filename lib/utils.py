@@ -39,7 +39,9 @@ def parse_files(files, music_root=None):
             'artist': segs[0],
             'album': segs[1],
             'path': os.path.join(music_root, f),
-            'cover': get_cover_path('/'.join(segs[0:-1])),
+            # TODO: cover path should be passed through from initial browser,
+            # maybe even reuse the pixbuf?
+            'cover': get_cover_path('/'.join(segs[0:2])),
             'playing': False
         }
         num, name = parse_song(segs[-1])

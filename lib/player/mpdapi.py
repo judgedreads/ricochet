@@ -3,16 +3,21 @@ from gi.repository import GLib
 from .. import utils
 
 
+def is_connected(client):
+    if isinstance(client._wfile, mpd._NotConnected):
+        return False
+    else:
+        return True
+
+
 def connect(func):
     '''safety measure to handle connection errors before commands'''
     def new_func(*args, **kwargs):
-        try:
-            args[0].client.ping()
-        except mpd.ConnectionError:
+        if not is_connected(args[0].client):
             args[0].client.connect(args[0].host, args[0].port)
-        finally:
-            return func(*args, **kwargs)
-            # close connection here?
+        ret = func(*args, **kwargs)
+        args[0].client.disconnect()
+        return ret
     return new_func
 
 
@@ -23,26 +28,26 @@ class Player(object):
         self.client = mpd.MPDClient()
         self.host = settings['mpd_host']
         self.port = settings['mpd_port']
-        self.track = 1
 
-        # catch connection errors
         try:
             self.client.connect(self.host, self.port)
         except mpd.ConnectionError:
             print("Could not connect to %s on port %d." %
                   (self.host, self.port))
             print("Check that mpd is running correctly.")
-            # TODO: put this in a function and do a sys.exit
+            # TODO raise a custom exception here
 
         VERSION = self.client.mpd_version
         print("Using MPD v%s" % VERSION)
 
+        self.track = 1
         self.playlist = utils.parse_files(self.client.playlist())
 
         self.watcher = mpd.MPDClient()
 
     def listen(self, func):
-        self.check_connected(self.watcher)
+        if not is_connected(self.watcher):
+            self.watcher.connect(self.host, self.port)
         self.watcher.send_idle()
 
         def new_func(*args, **kwargs):
@@ -71,7 +76,7 @@ class Player(object):
     @connect
     def toggle(self):
         '''toggle between playing and paused'''
-        if self.current_state == 'STOPPED':
+        if self.client.status()['state'] == 'stop':
             self.client.play()
         else:
             self.client.pause()
@@ -81,12 +86,15 @@ class Player(object):
         '''method to play now, i.e. replace playlist and play it'''
         self.client.clear()
         self.playlist = []
-        self.queue(files=files)
+        self._queue(files=files)
         self.client.play()
 
     @connect
     def queue(self, files=None):
         '''add songs to the current playlist'''
+        self._queue(files=files)
+
+    def _queue(self, files=None):
         self.client.add(files)
         self.playlist.extend(utils.parse_files(files))
 
@@ -102,13 +110,11 @@ class Player(object):
                 self.client.play(num)
                 self.track = num + 1
                 break
-        self.current_state = "PLAYING"
 
     @connect
     def stop(self, clear_playlist=True):
         '''Stop playback, optionally clear the playlist'''
         self.client.stop()
-        self.current_state = 'STOPPED'
         self.track = 1
         if clear_playlist is True:
             self.playlist = []
@@ -117,8 +123,8 @@ class Player(object):
     @connect
     def quit(self, event=None):
         '''close connections to mpd'''
-        self.client.close()
         self.client.disconnect()
+        self.client.close()
 
     @connect
     def skip_next(self):
@@ -127,10 +133,3 @@ class Player(object):
     @connect
     def skip_prev(self):
         self.client.previous()
-
-    def check_connected(self, client):
-        '''safety measure to handle connection errors before commands'''
-        try:
-            client.ping()
-        except mpd.ConnectionError:
-            client.connect(self.host, self.port)

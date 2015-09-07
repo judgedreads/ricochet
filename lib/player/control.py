@@ -67,8 +67,6 @@ class Control(Gtk.Box):
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
-        # this should be a catch-all to decide whether or not to update the
-        # image or notify
         self.liststore.clear()
         self.player.change_playlist()
         if self.player.track != self.track:
