@@ -26,17 +26,18 @@ class Player(object):
         self.pipeline.add(self.playbin)
 
     def listen(self, func):
-        def new_func(*args, **kwargs):
-            self.skip_next(gapless=True)
+        def gapless(*args, **kwargs):
+            self.skip_gapless()
             func(*args, **kwargs)
             return True
-        # self.bus.connect('message::eos', new_func)
-        # might still be worth using eos message to handle reaching the end of
-        # the playlist, some other messages might be worthwhile too.
 
-        # gapless playback - needs to pass gapless=True to skip_next or make
-        # separate function
-        self.playbin.connect('about-to-finish', new_func)
+        def eos(*args, **kwargs):
+            self.skip_next()
+            func(*args, **kwargs)
+            return True
+
+        self.playbin.connect('about-to-finish', gapless)
+        self.bus.connect('message::eos', eos)
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
@@ -102,17 +103,25 @@ class Player(object):
     def quit(self, widget, event):
         self.pipeline.set_state(Gst.State.NULL)
 
-    def skip_next(self, widget=None, gapless=False):
-        if gapless is False:
-            self.pipeline.set_state(Gst.State.NULL)
+    def skip_next(self, widget=None):
         i = self.track
         if i < len(self.playlist):
+            self.pipeline.set_state(Gst.State.NULL)
             self.playbin.set_property('uri', 'file://'+self.playlist[i]['path'])
             self.pipeline.set_state(Gst.State.PLAYING)
             self.current_state = "PLAYING"
             self.track += 1
         else:
             self.stop(clear_playlist=False)
+
+    def skip_gapless(self, widget=None):
+        i = self.track
+        if i < len(self.playlist):
+            self.playbin.set_property('uri', 'file://'+self.playlist[i]['path'])
+            self.current_state = "PLAYING"
+            self.track += 1
+        else:
+            return
 
     def skip_prev(self, widget=None):
         # TODO: CD style skip (make optional)
