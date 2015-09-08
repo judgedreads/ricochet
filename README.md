@@ -7,8 +7,7 @@
   - GTK+ >3.12
   - python bindings for gstreamer1.0 and gtk3 (gst-python and
     python-gobject in Arch repos, names may differ for other distros)
-
-... I think that's all.
+  - [python mpd bindings](https://github.com/Mic92/python-mpd2): `pip3 install python-mpd2`
 
 
 ##Usage:
@@ -64,3 +63,6 @@
   - `ricochetctl toggle` to toggle play/pause
   - `ricochetctl next` to skip to the next track
   - `ricochetctl prev` to skip to the previous track
+
+These are intended to be bound to global keys using a WM/DE. If using
+mpd, other programs can be used to control playback as well as ricochet.
