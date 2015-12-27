@@ -61,18 +61,12 @@ class Control(Gtk.Box):
         self.show_all()
 
     def event_callback(self, *args, **kwargs):
-        # should store previous song so that I can check if the
-        # song has changed and if I should notify
         self.change_playlist()
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
-        self.liststore.clear()
         self.player.change_playlist()
-        if self.player.track != self.track:
-            self.track = self.player.track
-            self.update_image()
-            self.notify()
+        self.liststore.clear()
         for song in self.player.playlist:
             if song['playing'] == 'playing':
                 self.liststore.append(['\u25B6 ' + song['name']])
@@ -81,6 +75,10 @@ class Control(Gtk.Box):
             else:
                 self.liststore.append([song['name']])
         self.treeview.set_model(self.liststore)
+        if self.player.track != self.track:
+            self.track = self.player.track
+            self.update_image()
+            self.notify()
 
     def on_key_press(self, widget, event):
         if event.hardware_keycode == 119:

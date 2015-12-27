@@ -5,7 +5,7 @@ import requests
 
 def _get_image_url(html):
     for line in html.split('\n'):
-        if 'class="album-cover"' not in line:
+        if 'class="artist_pic"' not in line:
             continue
         for item in line.split():
             if 'src' in item:
@@ -16,10 +16,14 @@ def _get_image_url(html):
 
 
 def fetch_album_art(name, musicdir):
+    artist, album = name.split('/')
+    artist = artist.replace(' ', '_')
+    print(artist)
     try:
         r = requests.get(
-            'http://www.last.fm/music/%s' % name.replace(' ', '+')
+            'http://musicdatabase.co/artist/%s/album/%s' % (artist, album)
         )
+        print(r.status_code)
     except requests.exceptions.RequestException as e:
         print(e)
         return 1
