@@ -16,6 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import gi
+gi.require_version('Gst', '1.0')
+gi.require_version('Gtk', '3.0')
+gi.require_version('Notify', '0.7')
 
 from gi.repository import (Gst, Gtk, Notify, Gio, GLib)
 import os
@@ -25,6 +29,7 @@ from lib.browser.browser import Browser
 from lib import settings
 from lib.player.control import Control
 from lib.signals import Server
+
 
 VERSION = '0.3.6'
 print('Ricochet v%s' % VERSION)
