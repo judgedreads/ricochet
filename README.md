@@ -2,11 +2,10 @@
 
 ##Requirements:
 
-  - mpd or gstreamer >1.0
+  - mpd
   - python 3
   - GTK+ >3.12
-  - python bindings for gstreamer1.0 and gtk3 (gst-python and
-    python-gobject in Arch repos, names may differ for other distros)
+  - python bindings for gtk+ 3.0 (probably packaged with python gobject)
   - [python mpd bindings](https://github.com/Mic92/python-mpd2): `pip3 install python-mpd2`
 
 
@@ -33,7 +32,7 @@
   - Settings should be configured in _~/.config/ricochet/ricochetrc_ (a
     sample config is included)
 
-  - If using mpd, make sure it is running before launching Ricochet
+  - Make sure mpd is running before launching Ricochet
 
 ###Controls:
 
@@ -56,13 +55,9 @@
     playlist.
   - Space to toggle playback
 
-**ricochetctl:**
+##Non Goals
 
-  `ricochetctl` can be used to send commands to ricochet externally, the
-  commands are:
-  - `ricochetctl toggle` to toggle play/pause
-  - `ricochetctl next` to skip to the next track
-  - `ricochetctl prev` to skip to the previous track
-
-These are intended to be bound to global keys using a WM/DE. If using
-mpd, other programs can be used to control playback as well as ricochet.
+As a simple, album-oriented frontend to mpd, ricochet will not provide
+external control/integrations such as global hotkeys or MPRIS (dbus)
+support. These features are already very well implemented by other tools
+such as mpc and mpdris2.

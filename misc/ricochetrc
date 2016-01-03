@@ -1,12 +1,9 @@
-# backend player: mpd or gstreamer
-backend=mpd
-
 # mpd connection settings
 mpd_host=localhost
 mpd_port=6600
 
 # full path to music directory (defaults to $HOME/Music)
-music_dir=
+#music_dir=
 
 # album cover size (in the browser grid)
 grid_icon_size=128

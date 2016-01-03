@@ -7,14 +7,12 @@ def get_settings():
 
     # set up defaults
     settings = {
-        'backend': 'gstreamer',
         'mpd_host': 'localhost',
         'mpd_port': '6600',
         'music_dir': '%s/Music/' % os.environ['HOME'],
         'grid_icon_size': 128,
         'detail_icon_size': 256,
         'notifications': 'True',
-        'system_tray': 'False'
     }
 
     if os.path.isfile(path):
