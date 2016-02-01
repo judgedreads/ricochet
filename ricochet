@@ -43,7 +43,7 @@ from lib.player import mpdapi as backend
 def _cache_image(args):
     im = Image.open(args[0])
     im.thumbnail((args[2], args[2]))
-    im.save(args[1], 'JPEG')
+    im.save(args[1], im.format)
 
 
 class Ricochet(Gtk.Application):
