@@ -7,6 +7,7 @@
   - GTK+ >3.12
   - python bindings for gtk+ 3.0 (probably packaged with python gobject)
   - [python mpd bindings](https://github.com/Mic92/python-mpd2): `pip3 install python-mpd2`
+  - Pillow (for image manipulation): `pip install Pillow`
 
 
 ##Usage:

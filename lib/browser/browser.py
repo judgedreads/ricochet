@@ -9,13 +9,15 @@ class Cover(Gtk.EventBox):
 
     '''The class structure for each album in the main browser'''
 
-    def __init__(self, name, player):
+    def __init__(self, name, player, pixbuf):
         Gtk.EventBox.__init__(self)
         self.name = name
         self.player = player
 
         self.image = Gtk.Image()
-        self.set_album_art()
+        self.image.set_from_file(pixbuf)
+
+        # self.set_album_art()
         self.add(self.image)
 
         # set up menu and its items
@@ -122,9 +124,9 @@ class Browser(Gtk.ScrolledWindow):
     def search_changed(self, *args):
         self.flowbox.invalidate_filter()
 
-    def add_album(self, album):
+    def add_album(self, album, pixbuf):
         self.albums.append(album)
-        cover = Cover(album, self.player)
+        cover = Cover(album, self.player, pixbuf)
         self.flowbox.add(cover)
 
     def on_selection_changed(self, box):
