@@ -10,9 +10,11 @@ def get_settings():
         'mpd_host': 'localhost',
         'mpd_port': '6600',
         'music_dir': '%s/Music/' % os.environ['HOME'],
-        'grid_icon_size': 128,
-        'detail_icon_size': 256,
+        'grid_icon_size': 150,
+        'detail_icon_size': 300,
         'notifications': 'True',
+        'cache': '%s/.cache/ricochet' % os.environ['HOME'],
+        'cover_names': 'cover.jpg,cover.png,front.jpg,front.png'
     }
 
     if os.path.isfile(path):
