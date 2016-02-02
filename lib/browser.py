@@ -1,8 +1,8 @@
 from gi.repository import Gtk, GdkPixbuf
 import os
 
-from . import albumart
-from .albumdetail import Album
+from . import utils
+from .album import Album
 
 
 class Cover(Gtk.EventBox):
@@ -67,7 +67,7 @@ class Cover(Gtk.EventBox):
         return Album(self.name, self.player)
 
     def fetch_album_art(self, widget):
-        code = albumart.fetch_album_art(self.name, self.player.MUSIC_DIR)
+        code = utils.fetch_album_art(self.name, self.player.MUSIC_DIR)
         if code == 0:
             self.set_album_art()
 

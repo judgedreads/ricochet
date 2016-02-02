@@ -1,9 +1,9 @@
 [Desktop Entry]
 Name=Ricochet
 GenericName=Music Player
-Comment=A different angle on music
+Comment=An album oriented MPD client
 Exec=ricochet
 Terminal=false
 Type=Application
-Icon=/opt/ricochet/images/ricochet.png
-Categories=AudioVideo;Audio;Music;
+Icon=ricochet
+Categories=Audio;Music;

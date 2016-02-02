@@ -23,18 +23,17 @@ gi.require_version('Notify', '0.7')
 from gi.repository import (Gtk, Notify, Gio, GLib)
 import os
 
-from lib.browser.browser import Browser
-from lib import settings
-from lib.player.control import Control
-from lib.browser import albumart
+from lib.browser import Browser
+from lib import utils
+from lib.control import Control
 
 
 VERSION = '0.3.6'
 print('Ricochet v%s' % VERSION)
 
-settings = settings.get_settings()
+settings = utils.get_settings()
 
-from lib.player import mpdapi as backend
+from lib import mpdapi
 
 
 class Ricochet(Gtk.Application):
@@ -54,19 +53,20 @@ class Ricochet(Gtk.Application):
     def on_activate(self, app):
         window = Gtk.ApplicationWindow()
         window.set_border_width(0)
-        window.set_icon_from_file("/opt/ricochet/images/ricochet.png")
+        # window.set_icon_from_file("/opt/ricochet/images/ricochet.png")
+        window.set_icon_name("ricochet")
         window.set_default_size(1000, 700)
 
         Notify.init('Ricochet')
 
         # TODO: pass settings to all classes?
-        player = backend.Player(settings)
+        player = mpdapi.Player(settings)
         music = settings['music_dir']
 
         control = Control(player, settings)
         control.MUSIC_DIR = music
 
-        albumart.update_cache(settings)
+        utils.update_cache(settings)
 
         brow = Browser(control)
         cache_dir = '/home/judgedreads/.cache/ricochet/'

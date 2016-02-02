@@ -1,6 +1,6 @@
 import mpd
 from gi.repository import GLib
-from .. import utils
+from . import utils
 
 
 def is_connected(client):
