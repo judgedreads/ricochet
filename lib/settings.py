@@ -15,7 +15,8 @@ def get_settings():
         'detail_icon_size': 300,
         'notifications': 'True',
         'cache': '%s/.cache/ricochet' % os.environ['HOME'],
-        'cover_names': ["cover.jpg", "cover.png", "front.jpg", "front.png"]
+        'cover_names': ["cover.jpg", "cover.png", "front.jpg", "front.png"],
+        'symbolic_icons': False
     }
 
     if os.path.isfile(path):

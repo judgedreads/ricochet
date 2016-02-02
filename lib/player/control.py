@@ -21,15 +21,24 @@ class Control(Gtk.Box):
         Gtk.Box.__init__(self, orientation=1)
         self.pack_start(self.image, False, False, 0)
 
-        buttons = [
-            ('\u25AE\u25C0', self.skip_prev),
-            ('\u25B6\u25AE\u25AE', self.toggle),
-            ('\u25FC', self.stop),
-            ('\u25B6\u25AE', self.skip_next)
-        ]
+        # TODO: it would be cool to have the toggle button change icon
+        if settings['symbolic_icons'] == True:
+            buttons = [
+                ('media-skip-backward-symbolic', self.skip_prev),
+                ('media-playback-start-symbolic', self.toggle),
+                ('media-playback-stop-symbolic', self.stop),
+                ('media-skip-forward-symbolic', self.skip_next)
+            ]
+        else:
+            buttons = [
+                ('media-skip-backward', self.skip_prev),
+                ('media-playback-start', self.toggle),
+                ('media-playback-stop', self.stop),
+                ('media-skip-forward', self.skip_next)
+            ]
         button_box = Gtk.Box()
-        for label, method in buttons:
-            button = Gtk.Button(label=label)
+        for icon, method in buttons:
+            button = Gtk.Button.new_from_icon_name(icon, 1)
             button.connect("clicked", method)
             button.set_focus_on_click(False)
             button_box.pack_start(button, True, True, 0)
