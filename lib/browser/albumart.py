@@ -69,7 +69,7 @@ def update_cache(settings):
     dests = []
     for artist in sorted(os.listdir(music)):
         for album in os.listdir(os.path.join(music, artist)):
-            for name in settings['cover_names'].split(','):
+            for name in settings['cover_names']:
                 src = os.path.join(music, artist, album, name)
                 if os.path.exists(src):
                     break
