@@ -1,6 +1,6 @@
 from gi.repository import Gtk, Gdk, GdkPixbuf
 import os
-from .. import utils
+from . import utils
 
 
 class Album(Gtk.Window):
@@ -17,7 +17,7 @@ class Album(Gtk.Window):
 
         path = os.path.join(self.player.MUSIC_DIR, self.name, 'cover.jpg')
         if not os.path.exists(path):
-            path = '/opt/ricochet/images/default_album.png'
+            path = '/usr/share/ricochet/default_album.png'
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
         image = Gtk.Image()
         image.set_from_pixbuf(pixbuf)

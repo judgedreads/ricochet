@@ -74,7 +74,7 @@ def update_cache(settings):
                 if os.path.exists(src):
                     break
             if not os.path.exists(src):
-                src = '/opt/ricochet/images/default_album.png'
+                src = '/usr/share/ricochet/default_album.png'
             srcs.append(src)
             dests.append('%s/%s__%s' % (cache, artist, album))
     size = [int(settings['grid_icon_size'])] * len(srcs)
@@ -84,7 +84,8 @@ def update_cache(settings):
 
 def get_settings():
 
-    path = '%s/.config/ricochet/settings.json' % os.environ['HOME']
+    paths = ['%s/.config/ricochet/settings.json' % os.environ['HOME'],
+             '/etc/ricochet/settings.json']
 
     # set up defaults
     settings = {
@@ -99,12 +100,12 @@ def get_settings():
         'symbolic_icons': False
     }
 
-    if os.path.isfile(path):
-        with open(path) as f:
-            overrides = json.load(f)
-        settings.update(overrides)
-    else:
-        print('No file found at %s - using defaults.' % path)
+    for path in paths:
+        if os.path.isfile(path):
+            with open(path) as f:
+                overrides = json.load(f)
+            settings.update(overrides)
+            break
 
     settings['music_dir'] = os.path.normpath(settings['music_dir'])
 
@@ -196,5 +197,5 @@ def get_cover_path(album, music_root=None):
     music_root = get_default_music_root(music_root)
     path = '%s/%s/cover.jpg' % (music_root, album)
     if not os.path.exists(path):
-        path = '/opt/ricochet/images/default_album.png'
+        path = '/usr/share/ricochet/default_album.png'
     return path

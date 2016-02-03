@@ -143,7 +143,7 @@ class Control(Gtk.Box):
     def update_image(self):
         # FIXME: the multi disc albums look in the directory containing
         # the songs rather than the toplevel album directory.
-        cover = "/opt/ricochet/images/default_album.png"
+        cover = "/usr/share/ricochet/default_album.png"
         if self.player.playlist:
             song = self.player.playlist[self.player.track - 1]
             cover = song['cover']
@@ -156,7 +156,7 @@ class Control(Gtk.Box):
             return
         song = self.player.playlist[self.player.track - 1]
         cover = song['cover']
-        icon = '/opt/ricochet/images/ricochet.png'
+        icon = 'ricochet'
         title = song['name']
         body = 'by %s\non %s' % (song['artist'], song['album'])
 
