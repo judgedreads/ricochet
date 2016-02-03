@@ -5,9 +5,12 @@
   - mpd
   - python 3
   - GTK+ >3.12
-  - python bindings for gtk+ 3.0 (probably packaged with python gobject)
-  - [python mpd bindings](https://github.com/Mic92/python-mpd2): `pip3 install python-mpd2`
-  - Pillow (for image manipulation): `pip install Pillow`
+  - Python dependencies can be installed with package manager or pip.
+    Any that are missing will be installed with make.
+    - pygobject
+    - [python-mpd2](https://github.com/Mic92/python-mpd2)
+    - Pillow
+    - requests
 
 
 ##Usage:
@@ -20,18 +23,14 @@
     _MusicDir/Artist/Album/song_ e.g. mine is
     _~/Music/Artist/Album/song_
 
-  - Cover art is expected to be called cover.jpg and located in the
-    album directory to which it corresponds. 
+  - Cover art is expected to be in the album directory to which it
+    corresponds (names are configurable).
 
-  - A simple install script (run: `./setup install`) will put the data
-    in _/opt/ricochet/_ and executables in _/usr/bin_; needs to be run
-    as root. Then you can just run `ricochet` anywhere. Use `./setup
-    remove` to uninstall.
+  - install/uninstall with make
 
-  - Ricochet can also be run from the program directory: `./ricochet`
-
-  - Settings should be configured in _~/.config/ricochet/ricochetrc_ (a
-    sample config is included)
+  - Settings should be configured in _~/.config/ricochet/settings.json_
+    or _/etc/ricochet/settings.json_. Defaults are installed to the
+    latter.
 
   - Make sure mpd is running before launching Ricochet
 
