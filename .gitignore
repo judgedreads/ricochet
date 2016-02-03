@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 *.pyo
+build/
 
 # Backup files
 *.bak
