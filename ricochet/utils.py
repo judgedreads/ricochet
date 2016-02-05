@@ -19,11 +19,10 @@ def _get_image_url(html):
     return None
 
 
-def fetch_album_art(name, musicdir):
+def fetch_album_art(name, musicdir, settings):
     # use notifications here or at least log stuff
     artist, album = name.split('/')
     artist = artist.replace(' ', '_')
-    print(artist)
     try:
         r = requests.get(
             'http://musicdatabase.co/artist/%s/album/%s' % (artist, album)
@@ -31,24 +30,23 @@ def fetch_album_art(name, musicdir):
         print(r.status_code)
     except requests.exceptions.RequestException as e:
         print(e)
-        return 1
+        return
     image_url = _get_image_url(r.text)
     if image_url is None:
-        return 1
-    ext = image_url.split('.')[-1]
-    path = '%s/%s/cover.%s' % (musicdir, name, ext)
-    print(path)
+        return
     try:
         r = requests.get(image_url)
     except requests.exceptions.RequestException as e:
         print(e)
-        return 1
+        return
     im = Image.open(BytesIO(r.content))
     path = '%s/%s/cover.%s' % (musicdir, name, im.format.lower())
-    cache = '/home/judgedreads/.cache/ricochet/%s__%s' % (artist, album)
     im.save(path, im.format)
+    cache = '/home/judgedreads/.cache/ricochet/%s' % name.replace('/', '__')
+    size = int(settings['grid_icon_size'])
+    im.thumbnail((size, size))
     im.save(cache, im.format)
-    return 0
+    return cache
 
 
 def _cache_image(args):

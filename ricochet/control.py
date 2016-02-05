@@ -9,6 +9,7 @@ class Control(Gtk.Box):
     '''
 
     def __init__(self, player, settings):
+        # TODO: make init simpler
         self.player = player
         self.player.listen(self.event_callback)
         self.track = 1
@@ -21,27 +22,7 @@ class Control(Gtk.Box):
         Gtk.Box.__init__(self, orientation=1)
         self.pack_start(self.image, False, False, 0)
 
-        # TODO: it would be cool to have the toggle button change icon
-        if settings['symbolic_icons'] == True:
-            buttons = [
-                ('media-skip-backward-symbolic', self.skip_prev),
-                ('media-playback-start-symbolic', self.toggle),
-                ('media-playback-stop-symbolic', self.stop),
-                ('media-skip-forward-symbolic', self.skip_next)
-            ]
-        else:
-            buttons = [
-                ('media-skip-backward', self.skip_prev),
-                ('media-playback-start', self.toggle),
-                ('media-playback-stop', self.stop),
-                ('media-skip-forward', self.skip_next)
-            ]
-        button_box = Gtk.Box()
-        for icon, method in buttons:
-            button = Gtk.Button.new_from_icon_name(icon, 1)
-            button.connect("clicked", method)
-            button.set_focus_on_click(False)
-            button_box.pack_start(button, True, True, 0)
+        button_box = self.make_buttons()
         self.pack_start(button_box, False, False, 0)
 
         scroll = Gtk.ScrolledWindow()
@@ -71,6 +52,43 @@ class Control(Gtk.Box):
 
     def event_callback(self, *args, **kwargs):
         self.change_playlist()
+        self.update_tgl_btn()
+
+    def make_buttons(self):
+        buttons = [
+            ('media-skip-backward', self.skip_prev),
+            ('media-playback-start', self.toggle),
+            ('media-playback-stop', self.stop),
+            ('media-skip-forward', self.skip_next)
+        ]
+        button_box = Gtk.Box()
+        for icon, method in buttons:
+            if self.settings['symbolic_icons'] is True:
+                icon += '-symbolic'
+            button = Gtk.Button.new_from_icon_name(icon, 1)
+            if method == self.toggle:
+                self.tgl_btn = button
+                self.update_tgl_btn()
+            button.connect("clicked", method)
+            button.set_focus_on_click(False)
+            button_box.pack_start(button, True, True, 0)
+        return button_box
+
+    def update_tgl_btn(self):
+        state = self.player.get_play_state()
+        # TODO: store these vars somewhere, they don't change often.
+        # could probs just set them up in settings dict.
+        play = 'media-playback-start'
+        pause = 'media-playback-pause'
+        if self.settings['symbolic_icons'] is True:
+            pause += '-symbolic'
+            play += '-symbolic'
+        im = self.tgl_btn.get_image()
+        icon = im.get_icon_name()
+        if state == 'play':
+            im.set_from_icon_name(pause, icon[1])
+        else:
+            im.set_from_icon_name(play, icon[1])
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
@@ -84,6 +102,7 @@ class Control(Gtk.Box):
             else:
                 self.liststore.append([song['name']])
         self.treeview.set_model(self.liststore)
+        # FIXME: this stuff probably shouldn't be done here...
         if self.player.track != self.track:
             self.track = self.player.track
             self.update_image()
@@ -110,30 +129,25 @@ class Control(Gtk.Box):
         song = song.replace('\u25B6 ', '')
         song = song.replace('\u25AE\u25AE ', '')
         self.player.select_song(song)
-        self.change_playlist()
+        # self.change_playlist()
 
     def skip_prev(self, *args, **kwargs):
         self.player.skip_prev()
-        self.change_playlist()
 
     def skip_next(self, *args, **kwargs):
         self.player.skip_next()
-        self.change_playlist()
 
     def toggle(self, widget=None):
         '''toggle play state'''
         self.player.toggle()
-        self.change_playlist()
 
     def stop(self, widget=None):
         self.player.stop()
         self.track = 1
         self.update_image()
-        self.change_playlist()
 
     def play(self, *args, **kwargs):
         self.player.play(*args, **kwargs)
-        self.change_playlist()
         self.update_image()
 
     def queue(self, *args, **kwargs):

@@ -74,6 +74,10 @@ class Player(object):
                 item['playing'] = False
 
     @connect
+    def get_play_state(self):
+        return self.client.status()['state']
+
+    @connect
     def toggle(self):
         '''toggle between playing and paused'''
         if self.client.status()['state'] == 'stop':

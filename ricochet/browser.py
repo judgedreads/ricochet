@@ -67,9 +67,10 @@ class Cover(Gtk.EventBox):
         return Album(self.name, self.player)
 
     def fetch_album_art(self, widget):
-        code = utils.fetch_album_art(self.name, self.player.MUSIC_DIR)
-        if code == 0:
-            self.set_album_art()
+        path = utils.fetch_album_art(self.name, self.player.MUSIC_DIR,
+                                     self.player.settings)
+        if path:
+            self.image.set_from_file(path)
 
     def on_button_press(self, widget, event):
         '''Callback function for clicking on album'''
