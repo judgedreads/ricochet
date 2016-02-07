@@ -10,7 +10,7 @@ class Album(Gtk.Window):
     def __init__(self, name, player):
         Gtk.Window.__init__(self, title=name)
         size = player.settings['detail_icon_size']
-        self.set_default_size(size, 2 * size)
+        # self.set_default_size(size, 2 * size)
 
         self.name = name
         self.player = player
@@ -22,9 +22,9 @@ class Album(Gtk.Window):
         image = Gtk.Image()
         image.set_from_pixbuf(pixbuf)
 
-        vbox = Gtk.Box(orientation=1, spacing=0)
-        self.add(vbox)
-        vbox.pack_start(image, False, False, 0)
+        hbox = Gtk.Box(orientation=0, spacing=0)
+        self.add(hbox)
+        hbox.pack_start(image, False, False, 0)
 
         discs = []
         for item in os.listdir(os.path.join(self.player.MUSIC_DIR, name)):
@@ -37,7 +37,7 @@ class Album(Gtk.Window):
         else:
             tracklist = self.multi_disc(discs)
 
-        vbox.pack_start(tracklist, True, True, 0)
+        hbox.pack_start(tracklist, True, True, 0)
 
         self.show_all()
 
@@ -59,21 +59,36 @@ class Album(Gtk.Window):
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
         # set up the song treeview
-        liststore = Gtk.ListStore(str)
+        liststore = Gtk.ListStore(str, str, str, str)
         songs = os.listdir(os.path.join(self.player.MUSIC_DIR, disc))
-        songs.sort()
+        tracklist = []
         for song in songs:
-            if utils.check_filetype(song):
-                liststore.append([song])
+            path = os.path.join(self.player.MUSIC_DIR, disc, song)
+            tags = utils.get_tags(path)
+            if tags:
+                tracklist.append(tags)
+        tracklist.sort(key=lambda t: t[0])
+        print(tracklist)
+        [liststore.append(t) for t in tracklist]
         treeview = Gtk.TreeView(model=liststore)
-        renderer = Gtk.CellRendererText()
+        #treeview.set_property("headers-visible", False)
+        treeview.set_enable_search(False)
+        track_renderer = Gtk.CellRendererText()
         # option is PangoEllipsizeMode numbered 0,1,2,3 for none, start,
         # middle, end (True becomes 1=start)
-        renderer.set_property("ellipsize", 3)
-        column = Gtk.TreeViewColumn("Track", renderer, text=0)
-        treeview.append_column(column)
-        treeview.set_property("headers-visible", False)
-        treeview.set_enable_search(False)
+        #track_renderer.set_property("ellipsize", 3)
+        track_column = Gtk.TreeViewColumn("Track", track_renderer, text=0)
+        treeview.append_column(track_column)
+
+        title_renderer = Gtk.CellRendererText()
+        #title_renderer.set_property("ellipsize", 3)
+        title_column = Gtk.TreeViewColumn("Title", title_renderer, text=1)
+        treeview.append_column(title_column)
+
+        artist_renderer = Gtk.CellRendererText()
+        #track_renderer.set_property("ellipsize", 3)
+        artist_column = Gtk.TreeViewColumn("Artist", artist_renderer, text=2)
+        treeview.append_column(artist_column)
 
         Gtk.TreeSelection.set_mode(
             treeview.get_selection(), Gtk.SelectionMode.MULTIPLE)
@@ -91,13 +106,18 @@ class Album(Gtk.Window):
         model, treeiter = select.get_selected_rows()
         if event.button == 3:
             for path in treeiter:
-                self.player.queue(files=disc + '/' + model[path][0])
+                print(model[path][3])
+                song = os.path.basename(model[path][3])
+                self.player.queue(files=disc + '/' + song)
         elif event.button == 2:
-            self.player.play(files=disc + '/' + model[treeiter][0])
+            song = os.path.basename(model[treeiter][3])
+            self.player.play(files=disc + '/' + song)
             for i in range(1, len(treeiter)):
-                self.player.queue(files=disc + '/' + model[i][0])
+                song = os.path.basename(model[i][3])
+                self.player.queue(files=disc + '/' + song)
         elif event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            self.player.play(files=disc + '/' + model[treeiter][0])
+            song = os.path.basename(model[treeiter][3])
+            self.player.play(files=disc + '/' + song)
 
     def on_key_press(self, widget, event, disc):
         select = widget.get_selection()
@@ -106,12 +126,14 @@ class Album(Gtk.Window):
         # TODO shift+P to play all, shift+Q to queue all
         if event.hardware_keycode == 36 or event.hardware_keycode == 33:
             for i, path in enumerate(treeiter):
+                song = os.path.basename(model[path][3])
                 if i == 0:
-                    self.player.play(files=disc + '/' + model[path][0])
+                    self.player.play(files=disc + '/' + song)
                 else:
-                    self.player.queue(files=disc + '/' + model[path][0])
+                    self.player.queue(files=disc + '/' + song)
         elif event.hardware_keycode == 24:
             for path in treeiter:
-                self.player.queue(files=disc + '/' + model[path][0])
+                song = os.path.basename(model[path][3])
+                self.player.queue(files=disc + '/' + song)
         elif event.hardware_keycode == 65:
             self.player.toggle()

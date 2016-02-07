@@ -5,6 +5,32 @@ import requests
 from io import BytesIO
 from PIL import Image
 import multiprocessing as mp
+import taglib
+
+
+def get_tags(path):
+    if not os.path.isfile(path):
+        return
+    try:
+        d = taglib.File(path)
+    except OSError:
+        return
+    print(d.tags)
+    if 'TRACKNUMBER' in d.tags:
+        track = d.tags['TRACKNUMBER'][0].split('/')[0]
+    else:
+        track = '00'
+    # make sure track numbers are padded
+    track = track.zfill(2)
+    if 'TITLE' in d.tags:
+        title = d.tags['TITLE'][0]
+    else:
+        title = 'Unknown Song'
+    if 'ARTIST' in d.tags:
+        artist = d.tags['ARTIST'][0]
+    else:
+        artist = 'Unknown Artist'
+    return [track, title, artist, path]
 
 
 def _get_image_url(html):

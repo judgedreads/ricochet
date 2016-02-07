@@ -34,6 +34,7 @@ class Control(Gtk.Box):
         self.liststore = Gtk.ListStore(str)
         self.treeview = Gtk.TreeView()
         self.treeview.set_enable_search(False)
+        self.treeview.set_property("headers-visible", False)
         selection = self.treeview.get_selection()
         selection.set_mode(Gtk.SelectionMode.MULTIPLE)
 
