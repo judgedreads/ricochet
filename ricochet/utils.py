@@ -30,7 +30,8 @@ def get_tags(path):
         artist = d.tags['ARTIST'][0]
     else:
         artist = 'Unknown Artist'
-    return [track, title, artist, path]
+    kbps = str(d.bitrate)
+    return [track, title, artist, kbps, path]
 
 
 def _get_image_url(html):

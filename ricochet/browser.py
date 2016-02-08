@@ -9,8 +9,9 @@ class Cover(Gtk.EventBox):
 
     '''The class structure for each album in the main browser'''
 
-    def __init__(self, name, player, pixbuf):
+    def __init__(self, name, player, pixbuf, app):
         Gtk.EventBox.__init__(self)
+        self.app = app
         self.name = name
         self.player = player
 
@@ -64,7 +65,7 @@ class Cover(Gtk.EventBox):
 
     def album_detail(self, widget):
         '''launch the detailed album view'''
-        return Album(self.name, self.player)
+        return Album(self.name, self.player, self.app)
 
     def fetch_album_art(self, widget):
         path = utils.fetch_album_art(self.name, self.player.MUSIC_DIR,
@@ -87,8 +88,9 @@ class Browser(Gtk.ScrolledWindow):
 
     '''The main window displaying all covers'''
 
-    def __init__(self, player):
+    def __init__(self, player, app):
         Gtk.ScrolledWindow.__init__(self)
+        self.app = app
         self.set_border_width(0)
         self.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
@@ -103,8 +105,8 @@ class Browser(Gtk.ScrolledWindow):
         self.search_bar.add(self.entry)
 
         self.flowbox = Gtk.FlowBox()
-        self.flowbox.set_valign(Gtk.Align.START)
-        self.flowbox.set_max_children_per_line(20)
+        # self.flowbox.set_valign(Gtk.Align.START)
+        # self.flowbox.set_min_children_per_line(3)
         self.flowbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
         self.flowbox.connect("key-press-event", self.on_key_press)
         # self.flowbox.connect(
@@ -127,7 +129,7 @@ class Browser(Gtk.ScrolledWindow):
 
     def add_album(self, album, pixbuf):
         self.albums.append(album)
-        cover = Cover(album, self.player, pixbuf)
+        cover = Cover(album, self.player, pixbuf, self.app)
         self.flowbox.add(cover)
 
     def on_selection_changed(self, box):
@@ -139,7 +141,7 @@ class Browser(Gtk.ScrolledWindow):
         child = flowbox.get_selected_children()[0]
         index = child.get_index()
         if event.hardware_keycode == 36 or event.hardware_keycode == 32:
-            Album(self.albums[index], self.player)
+            Album(self.albums[index], self.player, self.app)
         elif event.hardware_keycode == 33:
             self.player.play(files=self.albums[index])
         elif event.hardware_keycode == 24:
