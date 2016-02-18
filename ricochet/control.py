@@ -1,4 +1,6 @@
 from gi.repository import Gtk, GdkPixbuf, Notify
+from ricochet import utils
+import os
 
 
 class Control(Gtk.Box):
@@ -93,19 +95,24 @@ class Control(Gtk.Box):
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
-        self.player.change_playlist()
+        pl = self.player.get_playlist()
+        # self.player.change_playlist()
         self.liststore.clear()
-        for song in self.player.playlist:
-            if song['playing'] == 'playing':
-                self.liststore.append(['\u25B6 ' + song['name']])
-            elif song['playing'] == 'paused':
-                self.liststore.append(['\u25AE\u25AE ' + song['name']])
+        status = self.player.get_status()
+        for song in pl:
+            if song['id'] != status['songid']:
+                self.liststore.append([song['title']])
+                continue
+            if status['state'] == 'play':
+                self.liststore.append(['\u25B6 ' + song['title']])
+            elif status['state'] == 'pause':
+                self.liststore.append(['\u25AE\u25AE ' + song['title']])
             else:
-                self.liststore.append([song['name']])
+                self.liststore.append([song['title']])
         self.treeview.set_model(self.liststore)
         # FIXME: this stuff probably shouldn't be done here...
-        if self.player.track != self.track:
-            self.track = self.player.track
+        if status.get('song') != self.track:
+            self.track = status.get('song')
             self.update_image()
             self.notify()
 
@@ -153,15 +160,11 @@ class Control(Gtk.Box):
 
     def queue(self, *args, **kwargs):
         self.player.queue(*args, **kwargs)
-        self.change_playlist()
+        #self.change_playlist()
 
     def update_image(self):
-        # FIXME: the multi disc albums look in the directory containing
-        # the songs rather than the toplevel album directory.
-        cover = "/usr/share/ricochet/default_album.png"
-        if self.player.playlist:
-            song = self.player.playlist[self.player.track - 1]
-            cover = song['cover']
+        f = self.player.get_currentsong().get('file', '')
+        cover = utils.get_cover_path(os.path.dirname(f))
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(cover, 256, 256)
         self.image.set_from_pixbuf(pixbuf)
         self.image.show()

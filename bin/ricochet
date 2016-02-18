@@ -24,6 +24,7 @@ from gi.repository import (Gtk, Notify, Gio, GLib)
 import os
 import sys
 import argparse
+import json
 
 from ricochet.browser import Browser
 from ricochet import utils
@@ -70,14 +71,18 @@ class Ricochet(Gtk.Application):
 
         if self.need_update is True:
             print('updating album art cache...')
-            utils.update_cache(settings)
+            utils.update_cache(player)
 
         brow = Browser(control, app)
-        cache_dir = '/home/judgedreads/.cache/ricochet/'
-        for f in sorted(os.listdir(cache_dir)):
-            album = f.replace('__', '/')
-            cover = os.path.join(cache_dir, f)
-            brow.add_album(album, cover)
+        cache_dir = settings['cache']
+        with open(os.path.join(cache_dir, 'lib.json')) as f:
+            j = json.load(f)
+        albums = list(j.values())
+        albums.sort(key=lambda x: x['date'])
+        albums.sort(key=lambda x: x['artist'])
+        # TODO: set albums array straight to Browser, maybe pass through init?
+        for a in albums:
+            brow.add_album(a)
 
         hbox = Gtk.Box()
         hbox.pack_start(control, False, False, 0)

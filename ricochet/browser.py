@@ -9,14 +9,14 @@ class Cover(Gtk.EventBox):
 
     '''The class structure for each album in the main browser'''
 
-    def __init__(self, name, player, pixbuf, app):
+    def __init__(self, info, player, app):
         Gtk.EventBox.__init__(self)
         self.app = app
-        self.name = name
+        self.info = info
         self.player = player
 
         self.image = Gtk.Image()
-        self.image.set_from_file(pixbuf)
+        self.image.set_from_file(info['thumb'])
 
         # self.set_album_art()
         self.add(self.image)
@@ -42,7 +42,7 @@ class Cover(Gtk.EventBox):
 
         self.connect("button-press-event", self.on_button_press)
 
-        self.set_tooltip_text(self.name)
+        self.set_tooltip_text(' - '.join([info['artist'], info['title']]))
 
         self.show_all()
 
@@ -56,16 +56,14 @@ class Cover(Gtk.EventBox):
         self.image.show()
 
     def queue(self, *args, **kwargs):
-        # TODO create file list from name on this end
-        self.player.queue(files=self.name)
+        self.player.queue(self.info['tracks'])
 
     def play(self, *args, **kwargs):
-        # TODO create file list from name on this end
-        self.player.play(files=self.name)
+        self.player.play(self.info['tracks'])
 
     def album_detail(self, widget):
         '''launch the detailed album view'''
-        return Album(self.name, self.player, self.app)
+        return Album(self.info, self.player, self.app)
 
     def fetch_album_art(self, widget):
         path = utils.fetch_album_art(self.name, self.player.MUSIC_DIR,
@@ -78,10 +76,10 @@ class Cover(Gtk.EventBox):
         if event.button == 1:
             self.album_detail(self)
         elif event.button == 2:
-            self.player.play(files=self.name)
+            self.play()
         elif event.button == 3:
             self.menu.popup(
-                None, None, None, self.name, event.button, event.time)
+                None, None, None, None, event.button, event.time)
 
 
 class Browser(Gtk.ScrolledWindow):
@@ -121,15 +119,16 @@ class Browser(Gtk.ScrolledWindow):
         self.show_all()
 
     def filter_func(self, child):
-        return (self.entry.get_text().upper()
-                in self.albums[child.get_index()].upper())
+        album = self.albums[child.get_index()]
+        name = ' - '.join([album['artist'], album['title']])
+        return (self.entry.get_text().upper() in name.upper())
 
     def search_changed(self, *args):
         self.flowbox.invalidate_filter()
 
-    def add_album(self, album, pixbuf):
+    def add_album(self, album):
         self.albums.append(album)
-        cover = Cover(album, self.player, pixbuf, self.app)
+        cover = Cover(album, self.player, self.app)
         self.flowbox.add(cover)
 
     def on_selection_changed(self, box):

@@ -6,6 +6,7 @@ from io import BytesIO
 from PIL import Image
 import multiprocessing as mp
 import taglib
+import hashlib
 
 
 def get_tags(path):
@@ -32,6 +33,38 @@ def get_tags(path):
         artist = 'Unknown Artist'
     kbps = str(d.bitrate)
     return [track, title, artist, kbps, path]
+
+
+def get_album_tags(item):
+    a = {}
+    a['artist'] = item.get('albumartist', item.get('artist', 'Unknown Artist'))
+    a['title'] = item.get('album', 'Unknown Album')
+    a['date'] = item.get('date', '')
+    a['genre'] = item.get('genre', '')
+    a['disc'] = item.get('disc', '')
+    for k, v in a.items():
+        a[k] = delistify_tag(v)
+    a['cover'] = get_cover_path(os.path.dirname(item['file']))
+    return a
+
+
+def get_song_tags(item):
+    s = {}
+    s['title'] = item.get('title', 'Unknown Song')
+    s['track'] = item.get('track', '00')
+    s['artist'] = item.get('artist', 'Unknown Artist')
+    s['file'] = item['file']
+    s['time'] = item['time']
+    for k, v in s.items():
+        s[k] = delistify_tag(v)
+    return s
+
+
+def delistify_tag(tag):
+    if not isinstance(tag, list):
+        return tag
+    s = sorted(set(tag))
+    return ', '.join(s)
 
 
 def _get_image_url(html):
@@ -82,29 +115,32 @@ def _cache_image(args):
     im.save(args[1], im.format)
 
 
-def update_cache(settings):
-    # TODO: need to run this when settings change
-    # could have covers dir in cache and also have a file to store previous
-    # geometry info etc
-
-    cache = settings['cache']
-    music = settings['music_dir']
+def update_cache(player):
+    cache_dir = player.settings['cache']
     p = mp.Pool()
-    srcs = []
-    dests = []
-    for artist in sorted(os.listdir(music)):
-        for album in os.listdir(os.path.join(music, artist)):
-            for name in settings['cover_names']:
-                src = os.path.join(music, artist, album, name)
-                if os.path.exists(src):
-                    break
-            if not os.path.exists(src):
-                src = '/usr/share/ricochet/default_album.png'
-            srcs.append(src)
-            dests.append('%s/%s__%s' % (cache, artist, album))
-    size = [int(settings['grid_icon_size'])] * len(srcs)
-    args = zip(srcs, dests, size)
+    lib = {}
+    args = []
+    size = int(player.settings['grid_icon_size'])
+    for item in player.iterlib():
+        a = get_album_tags(item)
+        s = get_song_tags(item)
+        a['tracks'] = [s]
+        h = make_album_hash(a)
+        if h in lib:
+            lib[h]['tracks'].append(s)
+        else:
+            a['thumb'] = os.path.join(cache_dir, 'covers', h)
+            args.append((a['cover'], a['thumb'], size))
+            lib[h] = a
     p.map(_cache_image, args)
+
+    with open(os.path.join(cache_dir, 'lib.json'), 'w') as f:
+        json.dump(lib, f)
+
+
+def make_album_hash(a):
+    s = a['artist'] + a['title'] + a['date'] + a['disc']
+    return hashlib.md5(s.encode()).hexdigest()
 
 
 def get_settings():
@@ -218,9 +254,13 @@ def parse_song(filename):
     return None, song
 
 
-def get_cover_path(album, music_root=None):
-    music_root = get_default_music_root(music_root)
-    path = '%s/%s/cover.jpg' % (music_root, album)
+def get_cover_path(dirname):
+    settings = get_settings()
+    dirname = os.path.join(settings['music_dir'], dirname)
+    for name in settings['cover_names']:
+        path = os.path.join(dirname, name)
+        if os.path.exists(path):
+            break
     if not os.path.exists(path):
         path = '/usr/share/ricochet/default_album.png'
     return path

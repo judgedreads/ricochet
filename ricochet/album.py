@@ -1,13 +1,13 @@
 from gi.repository import Gtk, Gdk, GdkPixbuf
 import os
-from . import utils
 
 
 class Album(Gtk.Window):
 
     '''The class for the detailed album view'''
 
-    def __init__(self, name, player, app):
+    def __init__(self, info, player, app):
+        name = ' - '.join([info['artist'], info['title']])
         Gtk.Window.__init__(self, title=name)
         size = player.settings['detail_icon_size']
         # self.set_default_size(size, 2 * size)
@@ -20,10 +20,10 @@ class Album(Gtk.Window):
         self.name = name
         self.player = player
 
-        path = os.path.join(self.player.MUSIC_DIR, self.name, 'cover.jpg')
-        if not os.path.exists(path):
-            path = '/usr/share/ricochet/default_album.png'
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
+        self.tracks = info['tracks']
+
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+            info['cover'], size, size)
         image = Gtk.Image()
         image.set_from_pixbuf(pixbuf)
 
@@ -31,16 +31,7 @@ class Album(Gtk.Window):
         self.add(hbox)
         hbox.pack_start(image, False, False, 0)
 
-        discs = []
-        for item in os.listdir(os.path.join(self.player.MUSIC_DIR, name)):
-            if item.startswith('.'):
-                continue
-            if os.path.isdir(os.path.join(self.player.MUSIC_DIR, name, item)):
-                discs.append(os.path.join(name, item))
-        if discs == []:
-            tracklist = self.get_tracklist(name)
-        else:
-            tracklist = self.multi_disc(discs)
+        tracklist = self.make_tracklist()
 
         hbox.pack_start(tracklist, True, True, 0)
 
@@ -57,7 +48,7 @@ class Album(Gtk.Window):
 
         return tabbed
 
-    def get_tracklist(self, disc):
+    def make_tracklist(self):
         # scrolled area for the songs
         scroll = Gtk.ScrolledWindow()
         scroll.set_border_width(0)
@@ -65,16 +56,10 @@ class Album(Gtk.Window):
 
         # set up the song treeview
         liststore = Gtk.ListStore(str, str, str, str, str)
-        songs = os.listdir(os.path.join(self.player.MUSIC_DIR, disc))
-        tracklist = []
-        for song in songs:
-            path = os.path.join(self.player.MUSIC_DIR, disc, song)
-            tags = utils.get_tags(path)
-            if tags:
-                tracklist.append(tags)
-        tracklist.sort(key=lambda t: t[0])
-        print(tracklist)
-        [liststore.append(t) for t in tracklist]
+        print(self.tracks)
+        for t in self.tracks:
+            row = [t['track'], t['title'], t['artist'], t['time'], t['file']]
+            liststore.append(row)
         treeview = Gtk.TreeView(model=liststore)
         treeview.set_enable_search(False)
         track_renderer = Gtk.CellRendererText()
@@ -92,38 +77,43 @@ class Album(Gtk.Window):
         artist_column = Gtk.TreeViewColumn("Artist", artist_renderer, text=2)
         treeview.append_column(artist_column)
 
-        bitrate_renderer = Gtk.CellRendererText()
-        bitrate_column = Gtk.TreeViewColumn("kbps", bitrate_renderer, text=3)
-        treeview.append_column(bitrate_column)
+        length_renderer = Gtk.CellRendererText()
+        length_column = Gtk.TreeViewColumn("Length", length_renderer, text=3)
+        treeview.append_column(length_column)
 
         Gtk.TreeSelection.set_mode(
             treeview.get_selection(), Gtk.SelectionMode.MULTIPLE)
 
-        treeview.connect("button-press-event", self.on_button_press, disc)
-        treeview.connect("key-press-event", self.on_key_press, disc)
+        treeview.connect("button-press-event", self.on_button_press)
+        treeview.connect("key-press-event", self.on_key_press)
 
         scroll.add(treeview)
 
         return scroll
 
-    def on_button_press(self, widget, event, disc):
+    def on_button_press(self, widget, event):
         # print(event.type)
         select = widget.get_selection()
         model, treeiter = select.get_selected_rows()
+        songs = []
+        for path in treeiter:
+            f = model[path][4]
+            for t in self.tracks:
+                if t['file'] == f:
+                    songs.append(t)
+                    break
         if event.button == 3:
-            for path in treeiter:
-                print(model[path][4])
-                song = os.path.basename(model[path][4])
-                self.player.queue(files=disc + '/' + song)
+            self.player.queue(songs)
         elif event.button == 2:
-            song = os.path.basename(model[treeiter][4])
-            self.player.play(files=disc + '/' + song)
-            for i in range(1, len(treeiter)):
-                song = os.path.basename(model[i][4])
-                self.player.queue(files=disc + '/' + song)
+            self.player.play(songs)
         elif event.type == Gdk.EventType.DOUBLE_BUTTON_PRESS:
-            song = os.path.basename(model[treeiter][4])
-            self.player.play(files=disc + '/' + song)
+            songs = []
+            f = model[treeiter][4]
+            for t in self.tracks:
+                if t['file'] == f:
+                    songs.append(t)
+                    break
+            self.player.play(songs)
 
     def on_key_press(self, widget, event, disc):
         select = widget.get_selection()

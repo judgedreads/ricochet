@@ -29,13 +29,15 @@ class Player(object):
         self.host = settings['mpd_host']
         self.port = settings['mpd_port']
 
+        self.settings = settings
+
+        # TODO do this outside of init
         try:
             self.client.connect(self.host, self.port)
         except mpd.ConnectionError:
             print("Could not connect to %s on port %d." %
                   (self.host, self.port))
             print("Check that mpd is running correctly.")
-            # TODO raise a custom exception here
 
         VERSION = self.client.mpd_version
         print("Using MPD v%s" % VERSION)
@@ -60,22 +62,20 @@ class Player(object):
         # GLib.MainLoop().run()
 
     @connect
-    def change_playlist(self):
-        '''handle reloading of the playlist widget upon changes'''
+    def get_playlist(self):
+        return self.client.playlistinfo()
 
-        for i, item in enumerate(self.playlist):
-            if str(i) == self.client.currentsong().get('pos', '0'):
-                self.track = i + 1
-                if self.client.status()['state'] == 'play':
-                    item['playing'] = 'playing'
-                elif self.client.status()['state'] == 'pause':
-                    item['playing'] = 'paused'
-            else:
-                item['playing'] = False
+    @connect
+    def get_status(self):
+        return self.client.status()
 
     @connect
     def get_play_state(self):
         return self.client.status()['state']
+
+    @connect
+    def get_currentsong(self):
+        return self.client.currentsong()
 
     @connect
     def toggle(self):
@@ -86,21 +86,22 @@ class Player(object):
             self.client.pause()
 
     @connect
-    def play(self, files=None):
+    def play(self, songs):
         '''method to play now, i.e. replace playlist and play it'''
         self.client.clear()
         self.playlist = []
-        self._queue(files=files)
+        self._queue(songs)
         self.client.play()
 
     @connect
-    def queue(self, files=None):
+    def queue(self, songs):
         '''add songs to the current playlist'''
-        self._queue(files=files)
+        self._queue(songs)
 
-    def _queue(self, files=None):
-        self.client.add(files)
-        self.playlist.extend(utils.parse_files(files))
+    def _queue(self, songs):
+        for s in songs:
+            self.client.add(s['file'])
+        self.playlist.extend(songs)
 
     @connect
     def remove(self, ind):
@@ -137,3 +138,28 @@ class Player(object):
     @connect
     def skip_prev(self):
         self.client.previous()
+
+    @connect
+    def get_lib(self):
+        return self.client.listallinfo()
+
+    def iterlib(self):
+        lib = self.get_lib()
+        for item in lib:
+            if 'directory' in item or 'playlist' in item:
+                continue
+            yield item
+
+    @connect
+    def get_songs_for_album(self, tags):
+        songs = self.client.find('album', tags['album'],
+                                 'albumartist', tags['artist'],
+                                 'date', tags['date'],
+                                 'disc', tags['disc'])
+        if not songs:
+            songs = self.client.find('album', tags['album'],
+                                     'artist', tags['artist'],
+                                     'date', tags['date'],
+                                     'disc', tags['disc'])
+        if songs:
+            return songs
