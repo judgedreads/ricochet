@@ -142,9 +142,9 @@ class Browser(Gtk.ScrolledWindow):
         if event.hardware_keycode == 36 or event.hardware_keycode == 32:
             Album(self.albums[index], self.player, self.app)
         elif event.hardware_keycode == 33:
-            self.player.play(files=self.albums[index])
+            self.player.play(self.albums[index]['tracks'])
         elif event.hardware_keycode == 24:
-            self.player.queue(files=self.albums[index])
+            self.player.queue(self.albums[index]['tracks'])
         elif event.hardware_keycode == 43:
             event.hardware_keycode = 113
             self.event(event)

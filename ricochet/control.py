@@ -33,7 +33,7 @@ class Control(Gtk.Box):
         self.pack_start(scroll, True, True, 0)
 
         # create playlist tree widget
-        self.liststore = Gtk.ListStore(str)
+        self.liststore = Gtk.ListStore(str, str)
         self.treeview = Gtk.TreeView()
         self.treeview.set_enable_search(False)
         self.treeview.set_property("headers-visible", False)
@@ -101,14 +101,15 @@ class Control(Gtk.Box):
         status = self.player.get_status()
         for song in pl:
             if song['id'] != status['songid']:
-                self.liststore.append([song['title']])
+                self.liststore.append([song['title'], song['id']])
                 continue
             if status['state'] == 'play':
-                self.liststore.append(['\u25B6 ' + song['title']])
+                self.liststore.append(['\u25B6 ' + song['title'], song['id']])
             elif status['state'] == 'pause':
-                self.liststore.append(['\u25AE\u25AE ' + song['title']])
+                self.liststore.append(
+                    ['\u25AE\u25AE ' + song['title'], song['id']])
             else:
-                self.liststore.append([song['title']])
+                self.liststore.append([song['title'], song['id']])
         self.treeview.set_model(self.liststore)
         # FIXME: this stuff probably shouldn't be done here...
         if status.get('song') != self.track:
@@ -120,24 +121,13 @@ class Control(Gtk.Box):
         if event.hardware_keycode == 119:
             selection = widget.get_selection()
             songs = selection.get_selected_rows()[1]
-            rm = []
             for song in songs:
-                # don't remove play/pause char as we want this song to be
-                # unremovable
-                for i, track in enumerate(self.player.playlist):
-                    if self.liststore[song][0] == track['name']:
-                        rm.append(i)
-            for x, i in enumerate(rm):
-                self.player.remove(i-x)
-            self.change_playlist()
+                self.player.remove(self.liststore[song][1])
 
     def on_activate(self, tree, path, column):
         '''callback for activation on playlist tree'''
-        song = self.liststore[path][0]
-        song = song.replace('\u25B6 ', '')
-        song = song.replace('\u25AE\u25AE ', '')
-        self.player.select_song(song)
-        # self.change_playlist()
+        songid = self.liststore[path][1]
+        self.player.select_song(songid)
 
     def skip_prev(self, *args, **kwargs):
         self.player.skip_prev()
@@ -160,7 +150,7 @@ class Control(Gtk.Box):
 
     def queue(self, *args, **kwargs):
         self.player.queue(*args, **kwargs)
-        #self.change_playlist()
+        # self.change_playlist()
 
     def update_image(self):
         f = self.player.get_currentsong().get('file', '')

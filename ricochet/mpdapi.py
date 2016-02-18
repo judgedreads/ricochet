@@ -104,17 +104,12 @@ class Player(object):
         self.playlist.extend(songs)
 
     @connect
-    def remove(self, ind):
-        self.client.delete(ind)
-        del self.playlist[ind]
+    def remove(self, songid):
+        self.client.deleteid(songid)
 
     @connect
-    def select_song(self, song):
-        for num, track in enumerate(self.playlist):
-            if track['name'] == song:
-                self.client.play(num)
-                self.track = num + 1
-                break
+    def select_song(self, songid):
+        self.client.playid(songid)
 
     @connect
     def stop(self, clear_playlist=True):
