@@ -1,38 +1,10 @@
-import re
 import os
 import json
 import requests
 from io import BytesIO
 from PIL import Image
 import multiprocessing as mp
-import taglib
 import hashlib
-
-
-def get_tags(path):
-    if not os.path.isfile(path):
-        return
-    try:
-        d = taglib.File(path)
-    except OSError:
-        return
-    print(d.tags)
-    if 'TRACKNUMBER' in d.tags:
-        track = d.tags['TRACKNUMBER'][0].split('/')[0]
-    else:
-        track = '00'
-    # make sure track numbers are padded
-    track = track.zfill(2)
-    if 'TITLE' in d.tags:
-        title = d.tags['TITLE'][0]
-    else:
-        title = 'Unknown Song'
-    if 'ARTIST' in d.tags:
-        artist = d.tags['ARTIST'][0]
-    else:
-        artist = 'Unknown Artist'
-    kbps = str(d.bitrate)
-    return [track, title, artist, kbps, path]
 
 
 def get_album_tags(item):
@@ -79,14 +51,13 @@ def _get_image_url(html):
     return None
 
 
-def fetch_album_art(name, musicdir, settings):
+def fetch_album_art(album):
     # use notifications here or at least log stuff
-    artist, album = name.split('/')
-    artist = artist.replace(' ', '_')
+    settings = get_settings()
+    url = 'http://musicdatabase.co/artist/%s/album/%s' % (
+        album['artist'], album['title'])
     try:
-        r = requests.get(
-            'http://musicdatabase.co/artist/%s/album/%s' % (artist, album)
-        )
+        r = requests.get(url)
         print(r.status_code)
     except requests.exceptions.RequestException as e:
         print(e)
@@ -99,14 +70,36 @@ def fetch_album_art(name, musicdir, settings):
     except requests.exceptions.RequestException as e:
         print(e)
         return
+    dirname = os.path.dirname(album['tracks'][0]['file'])
     im = Image.open(BytesIO(r.content))
-    path = '%s/%s/cover.%s' % (musicdir, name, im.format.lower())
+    path = os.path.join(settings['music_dir'], dirname, im.format.lower())
     im.save(path, im.format)
-    cache = '/home/judgedreads/.cache/ricochet/%s' % name.replace('/', '__')
+    album['cover'] = path
+    cache = os.path.join(settings['cache'], 'covers', make_album_hash(album))
     size = int(settings['grid_icon_size'])
     im.thumbnail((size, size))
     im.save(cache, im.format)
-    return cache
+    album['thumb'] = cache
+    update_cached_album(album)
+    return True
+
+
+def need_update():
+    # TODO: maybe I should parse mpd.conf to get common mpd vars?
+    settings = get_settings()
+    mpddb = os.path.expanduser('~/.mpd/database')
+    lib = os.path.join(settings['cache'], 'lib.json')
+    return os.path.getmtime(mpddb) > os.path.getmtime(lib)
+
+
+def update_cached_album(album):
+    settings = get_settings()
+    h = make_album_hash(album)
+    with open(os.path.join(settings['cache'], 'lib.json'), 'r') as f:
+        lib = json.load(f)
+    lib[h] = album
+    with open(os.path.join(settings['cache'], 'lib.json'), 'w') as f:
+        json.dump(lib, f)
 
 
 def _cache_image(args):
@@ -171,87 +164,6 @@ def get_settings():
     settings['music_dir'] = os.path.normpath(settings['music_dir'])
 
     return settings
-
-
-def check_filetype(f):
-    valid = ('mp3', 'm4a', 'flac', 'mp4', 'ogg', 'mpc', 'oga')
-    return f.endswith(valid)
-
-
-def get_default_music_root(music_root=None):
-    if music_root is None:
-        return os.path.join(os.environ.get('HOME', ''), 'Music')
-    return os.path.abspath(music_root)
-
-
-def parse_files(files, music_root=None):
-    '''
-    returns a list of dicts containing information about the songs in the
-    playlist
-    '''
-    # I think that this should be done by the browser so that the player can be
-    # handed a list of file paths instead of a directory or filename.
-    music_root = get_default_music_root(music_root)
-    songs = []
-    if not isinstance(files, list):
-        absfiles = music_root+'/'+files
-        if os.path.isfile(absfiles):
-            files = [files]
-        elif os.path.isdir(absfiles):
-            files = [os.path.join(files, f) for f in os.listdir(absfiles)]
-            files.sort()
-    for i, f in enumerate(files):
-        f = trim_prefix(f, 'file://')
-        f = trim_prefix(f, 'file: ')
-        if not check_filetype(f):
-            continue
-        segs = f.split('/')
-        song = {
-            'artist': segs[0],
-            'album': segs[1],
-            'path': os.path.join(music_root, f),
-            # TODO: cover path should be passed through from initial browser,
-            # maybe even reuse the pixbuf?
-            'cover': get_cover_path('/'.join(segs[0:2])),
-            'playing': False
-        }
-        num, name = parse_song(segs[-1])
-        if num is None:
-            num = i
-        song['name'] = name
-        song['track'] = num
-        songs.append(song)
-    return songs
-
-
-def trim_prefix(s, prefix):
-    # could make this take tuples of prefixes
-    if s.startswith(prefix):
-        return s[len(prefix):]
-    else:
-        return s
-
-
-def trim_suffix(s, suffix):
-    if s.endswith(suffix):
-        return s[:len(suffix)]
-    else:
-        return s
-
-
-def remove_ext(filename):
-    return '.'.join(filename.split('.')[:-1])
-
-
-def parse_song(filename):
-    song = remove_ext(filename)
-    for sep in ('.', '-', '_', ' '):
-        segs = song.split(sep)
-        if re.match('[0-9][0-9]$', segs[0].strip()):
-            tracknum = int(segs[0].strip())
-            trackname = sep.join(segs[1:]).strip()
-            return tracknum, trackname
-    return None, song
 
 
 def get_cover_path(dirname):

@@ -1,6 +1,5 @@
 import mpd
 from gi.repository import GLib
-from . import utils
 
 
 def is_connected(client):
@@ -43,7 +42,6 @@ class Player(object):
         print("Using MPD v%s" % VERSION)
 
         self.track = 1
-        self.playlist = utils.parse_files(self.client.playlist())
 
         self.watcher = mpd.MPDClient()
 
@@ -89,7 +87,6 @@ class Player(object):
     def play(self, songs):
         '''method to play now, i.e. replace playlist and play it'''
         self.client.clear()
-        self.playlist = []
         self._queue(songs)
         self.client.play()
 
@@ -101,7 +98,6 @@ class Player(object):
     def _queue(self, songs):
         for s in songs:
             self.client.add(s['file'])
-        self.playlist.extend(songs)
 
     @connect
     def remove(self, songid):
@@ -117,7 +113,6 @@ class Player(object):
         self.client.stop()
         self.track = 1
         if clear_playlist is True:
-            self.playlist = []
             self.client.clear()
 
     @connect

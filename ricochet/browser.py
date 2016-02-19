@@ -66,10 +66,10 @@ class Cover(Gtk.EventBox):
         return Album(self.info, self.player, self.app)
 
     def fetch_album_art(self, widget):
-        path = utils.fetch_album_art(self.name, self.player.MUSIC_DIR,
-                                     self.player.settings)
-        if path:
-            self.image.set_from_file(path)
+        # TODO: write modified album info into json cache
+        if utils.fetch_album_art(self.info):
+            self.image.set_from_file(self.info['thumb'])
+            self.image.show()
 
     def on_button_press(self, widget, event):
         '''Callback function for clicking on album'''
@@ -110,6 +110,7 @@ class Browser(Gtk.ScrolledWindow):
         # self.flowbox.connect(
         #    "selected-children-changed", self.on_selection_changed)
         self.flowbox.set_filter_func(self.filter_func)
+        #self.flowbox.connect('size-allocate', self.on_resize)
 
         vbox = Gtk.Box(orientation=1, spacing=0)
         self.add(vbox)
@@ -117,6 +118,10 @@ class Browser(Gtk.ScrolledWindow):
         vbox.pack_start(self.flowbox, False, False, 0)
 
         self.show_all()
+
+    def on_resize(self, *args, **kwargs):
+        print('resize')
+        self.flowbox.set_row_spacing(self.flowbox.get_column_spacing())
 
     def filter_func(self, child):
         album = self.albums[child.get_index()]

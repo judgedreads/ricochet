@@ -12,7 +12,6 @@ class Album(Gtk.Window):
         size = player.settings['detail_icon_size']
         # self.set_default_size(size, 2 * size)
         windows = app.get_windows()
-        print(windows)
         self.set_transient_for(windows[0])
         self.set_modal(True)
         self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
@@ -56,9 +55,13 @@ class Album(Gtk.Window):
 
         # set up the song treeview
         liststore = Gtk.ListStore(str, str, str, str, str)
-        print(self.tracks)
         for t in self.tracks:
-            row = [t['track'], t['title'], t['artist'], t['time'], t['file']]
+            track_num = t['track'].split('/')[0].zfill(2)
+            secs = int(t['time'])
+            mins = secs // 60
+            rem = secs % 60
+            time = '%02d:%02d' % (mins, rem)
+            row = [track_num, t['title'], t['artist'], time, t['file']]
             liststore.append(row)
         treeview = Gtk.TreeView(model=liststore)
         treeview.set_enable_search(False)

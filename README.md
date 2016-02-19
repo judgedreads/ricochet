@@ -5,6 +5,7 @@
   - mpd
   - python 3
   - GTK+ >3.12
+  - libnotify (optional)
   - Python dependencies can be installed with package manager or pip.
     Any that are missing will be installed with make.
     - pygobject

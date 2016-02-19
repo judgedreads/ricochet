@@ -58,7 +58,7 @@ class Ricochet(Gtk.Application):
         window = Gtk.ApplicationWindow()
         window.set_border_width(0)
         window.set_icon_name("ricochet")
-        #window.set_default_size(1000, 700)
+        # window.set_default_size(1000, 700)
 
         Notify.init('Ricochet')
 
@@ -104,5 +104,6 @@ if __name__ == "__main__":
     if args.version:
         print(VERSION)
         sys.exit()
-    app = Ricochet(need_update=args.update_cache)
+    need_update = args.update_cache or utils.need_update()
+    app = Ricochet(need_update=need_update)
     app.run(None)

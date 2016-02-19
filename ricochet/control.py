@@ -100,14 +100,16 @@ class Control(Gtk.Box):
         self.liststore.clear()
         status = self.player.get_status()
         for song in pl:
-            if song['id'] != status['songid']:
+            if status['state'] == 'stop':
                 self.liststore.append([song['title'], song['id']])
                 continue
-            if status['state'] == 'play':
-                self.liststore.append(['\u25B6 ' + song['title'], song['id']])
-            elif status['state'] == 'pause':
-                self.liststore.append(
-                    ['\u25AE\u25AE ' + song['title'], song['id']])
+            if song['id'] == status['songid']:
+                if status['state'] == 'play':
+                    self.liststore.append(
+                        ['\u25B6 ' + song['title'], song['id']])
+                elif status['state'] == 'pause':
+                    self.liststore.append(
+                        ['\u25AE\u25AE ' + song['title'], song['id']])
             else:
                 self.liststore.append([song['title'], song['id']])
         self.treeview.set_model(self.liststore)
