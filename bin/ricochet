@@ -30,6 +30,7 @@ from ricochet.browser import Browser
 from ricochet import utils
 from ricochet.control import Control
 from ricochet import mpdapi
+from ricochet.progress import progress
 
 # TODO: use logging
 
@@ -41,21 +42,22 @@ settings = utils.get_settings()
 
 class Ricochet(Gtk.Application):
 
-    def __init__(self, need_update=False):
+    def __init__(self, player):
         Gtk.Application.__init__(self,
                                  application_id="apps.judgedreads.ricochet",
                                  flags=Gio.ApplicationFlags.FLAGS_NONE)
         GLib.set_application_name('Ricochet')
         GLib.set_prgname('Ricochet')
         self.connect("activate", self.on_activate)
-        self.need_update = need_update
+        self.player = player
 
-    def on_key_press(self, widget, event, player):
+    def on_key_press(self, widget, event):
         if event.hardware_keycode == 65:
-            player.toggle()
+            self.player.toggle()
 
     def on_activate(self, app):
         window = Gtk.ApplicationWindow()
+        window.set_role("Cover Browser")
         window.set_border_width(0)
         window.set_icon_name("ricochet")
         # window.set_default_size(1000, 700)
@@ -63,26 +65,20 @@ class Ricochet(Gtk.Application):
         Notify.init('Ricochet')
 
         # TODO: pass settings to all classes?
-        player = mpdapi.Player(settings)
         music = settings['music_dir']
 
-        control = Control(player, settings)
+        control = Control(self.player, settings)
         control.MUSIC_DIR = music
 
-        if self.need_update is True:
-            print('updating album art cache...')
-            utils.update_cache(player)
-
-        brow = Browser(control, app)
         cache_dir = settings['cache']
         with open(os.path.join(cache_dir, 'lib.json')) as f:
             j = json.load(f)
         albums = list(j.values())
+        albums.sort(key=lambda x: x['disc'])
         albums.sort(key=lambda x: x['date'])
+        albums.sort(key=lambda x: x['title'])
         albums.sort(key=lambda x: x['artist'])
-        # TODO: set albums array straight to Browser, maybe pass through init?
-        for a in albums:
-            brow.add_album(a)
+        brow = Browser(albums, control, app)
 
         hbox = Gtk.Box()
         hbox.pack_start(control, False, False, 0)
@@ -90,7 +86,7 @@ class Ricochet(Gtk.Application):
         brow.flowbox.get_child_at_index(0).grab_focus()
 
         window.add(hbox)
-        window.connect("key-press-event", self.on_key_press, player)
+        window.connect("key-press-event", self.on_key_press)
         app.add_window(window)
         window.show_all()
 
@@ -104,6 +100,9 @@ if __name__ == "__main__":
     if args.version:
         print(VERSION)
         sys.exit()
+    player = mpdapi.Player(settings)
     need_update = args.update_cache or utils.need_update()
-    app = Ricochet(need_update=need_update)
+    if need_update:
+        progress(utils.update_cache, player)
+    app = Ricochet(player)
     app.run(None)

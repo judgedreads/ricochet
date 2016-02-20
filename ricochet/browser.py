@@ -86,13 +86,13 @@ class Browser(Gtk.ScrolledWindow):
 
     '''The main window displaying all covers'''
 
-    def __init__(self, player, app):
+    def __init__(self, albums, player, app):
         Gtk.ScrolledWindow.__init__(self)
         self.app = app
         self.set_border_width(0)
         self.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
-        self.albums = []
+        self.albums = albums
         self.player = player
 
         self.search_bar = Gtk.SearchBar()
@@ -117,6 +117,10 @@ class Browser(Gtk.ScrolledWindow):
         vbox.pack_start(self.search_bar, False, False, 0)
         vbox.pack_start(self.flowbox, False, False, 0)
 
+        for album in self.albums:
+            cover = Cover(album, self.player, self.app)
+            self.flowbox.add(cover)
+
         self.show_all()
 
     def on_resize(self, *args, **kwargs):
@@ -130,11 +134,6 @@ class Browser(Gtk.ScrolledWindow):
 
     def search_changed(self, *args):
         self.flowbox.invalidate_filter()
-
-    def add_album(self, album):
-        self.albums.append(album)
-        cover = Cover(album, self.player, self.app)
-        self.flowbox.add(cover)
 
     def on_selection_changed(self, box):
         child = box.get_selected_children()[0]
