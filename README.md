@@ -14,28 +14,35 @@
     - requests
 
 
-##Usage:
-
-###Running:
+##Running:
 
   - This program assumes you are running a Linux distribution
 
-  - The music is expected to be structured as follows:
-    _MusicDir/Artist/Album/song_ e.g. mine is
-    _~/Music/Artist/Album/song_
-
-  - Cover art is expected to be in the album directory to which it
-    corresponds (names are configurable).
-
   - install/uninstall with make
-
-  - Settings should be configured in _~/.config/ricochet/settings.json_
-    or _/etc/ricochet/settings.json_. Defaults are installed to the
-    latter.
 
   - Make sure mpd is running before launching Ricochet
 
-###Controls:
+##Settings
+
+Settings should be configured in _~/.config/ricochet/settings.json_ or
+_/etc/ricochet/settings.json_ (defaults are installed to the latter).
+Most settings should be self-explanatory.
+
+**cover_names**  
+A list of paths (relative to the song files) that ricochet will check
+for cover images. Albums are expected to be grouped toogether as the
+first track's cover will be used for the others.
+
+**symbolic_icons**  
+Specifies whether to use symbolic alternatives in the icon theme for the
+buttons etc.
+
+**notifications**  
+Whether or not to use libnotify to send a notification when the song
+changes, with actions to skip back and forwards.
+
+
+##Controls:
 
 **Main browser:**
   - Left click on an album brings up the album window with song list,
