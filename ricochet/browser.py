@@ -1,8 +1,7 @@
-from gi.repository import Gtk, GdkPixbuf
-import os
+from gi.repository import Gtk
 
-from . import utils
-from .album import Album
+from ricochet import utils
+from ricochet.album import Album
 
 
 class Cover(Gtk.EventBox):
@@ -14,46 +13,31 @@ class Cover(Gtk.EventBox):
         self.app = app
         self.info = info
         self.player = player
+        self.set_tooltip_text(' - '.join([info['artist'], info['title']]))
+        self.connect("button-press-event", self.on_button_press)
+        self.menu = self.make_menu()
 
         self.image = Gtk.Image()
         self.image.set_from_file(info['thumb'])
-
-        # self.set_album_art()
         self.add(self.image)
-
-        # set up menu and its items
-        self.menu = Gtk.Menu()
-        menu_item_open = Gtk.MenuItem("Open")
-        self.menu.append(menu_item_open)
-        menu_item_open.connect("activate", self.album_detail)
-        menu_item_open.show()
-        menu_item_queue = Gtk.MenuItem("Queue")
-        self.menu.append(menu_item_queue)
-        menu_item_queue.connect("activate", self.queue)
-        menu_item_queue.show()
-        menu_item_play = Gtk.MenuItem("Play")
-        self.menu.append(menu_item_play)
-        menu_item_play.connect("activate", self.play)
-        menu_item_play.show()
-        menu_item_cover = Gtk.MenuItem("Get Cover")
-        self.menu.append(menu_item_cover)
-        menu_item_cover.connect("activate", self.fetch_album_art)
-        menu_item_cover.show()
-
-        self.connect("button-press-event", self.on_button_press)
-
-        self.set_tooltip_text(' - '.join([info['artist'], info['title']]))
 
         self.show_all()
 
-    def set_album_art(self):
-        path = os.path.join(self.player.MUSIC_DIR, self.name, 'cover.jpg')
-        if not os.path.exists(path):
-            path = '/usr/share/ricochet/default_album.png'
-        size = int(self.player.settings['grid_icon_size'])
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(path, size, size)
-        self.image.set_from_pixbuf(pixbuf)
-        self.image.show()
+    def make_menu(self):
+        menu = Gtk.Menu()
+        menu_items = [
+            ("Open", self.album_detail),
+            ("Queue", self.queue),
+            ("Play", self.play),
+            ("Get Cover", self.fetch_album_art),
+        ]
+
+        for label, callback in menu_items:
+            menu_item = Gtk.MenuItem(label)
+            menu.append(menu_item)
+            menu_item.connect("activate", callback)
+            menu_item.show()
+        return menu
 
     def queue(self, *args, **kwargs):
         self.player.queue(self.info['tracks'])
@@ -66,7 +50,6 @@ class Cover(Gtk.EventBox):
         return Album(self.info, self.player, self.app)
 
     def fetch_album_art(self, widget):
-        # TODO: write modified album info into json cache
         if utils.fetch_album_art(self.info):
             self.image.set_from_file(self.info['thumb'])
             self.image.show()
@@ -103,14 +86,9 @@ class Browser(Gtk.ScrolledWindow):
         self.search_bar.add(self.entry)
 
         self.flowbox = Gtk.FlowBox()
-        # self.flowbox.set_valign(Gtk.Align.START)
-        # self.flowbox.set_min_children_per_line(3)
         self.flowbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
         self.flowbox.connect("key-press-event", self.on_key_press)
-        # self.flowbox.connect(
-        #    "selected-children-changed", self.on_selection_changed)
         self.flowbox.set_filter_func(self.filter_func)
-        #self.flowbox.connect('size-allocate', self.on_resize)
 
         vbox = Gtk.Box(orientation=1, spacing=0)
         self.add(vbox)
@@ -123,10 +101,6 @@ class Browser(Gtk.ScrolledWindow):
 
         self.show_all()
 
-    def on_resize(self, *args, **kwargs):
-        print('resize')
-        self.flowbox.set_row_spacing(self.flowbox.get_column_spacing())
-
     def filter_func(self, child):
         album = self.albums[child.get_index()]
         name = ' - '.join([album['artist'], album['title']])
@@ -134,10 +108,6 @@ class Browser(Gtk.ScrolledWindow):
 
     def search_changed(self, *args):
         self.flowbox.invalidate_filter()
-
-    def on_selection_changed(self, box):
-        child = box.get_selected_children()[0]
-        print(self.albums[child.get_index()])
 
     def on_key_press(self, flowbox, event):
         '''handle keyboard controls'''

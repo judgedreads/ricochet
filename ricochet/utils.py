@@ -10,6 +10,19 @@ import threading
 import pkg_resources
 
 
+SETTINGS = {
+    'mpd_host': 'localhost',
+    'mpd_port': '6600',
+    'music_dir': os.path.expandvars('$HOME/Music'),
+    'grid_icon_size': 150,
+    'detail_icon_size': 300,
+    'notifications': 'True',
+    'cache': '%s/.cache/ricochet' % os.environ['HOME'],
+    'cover_names': ["cover.jpg", "cover.png", "front.jpg", "front.png"],
+    'symbolic_icons': False,
+}
+
+
 def get_version():
     return pkg_resources.require("ricochet")[0].version
 
@@ -88,7 +101,6 @@ def _get_image_url(html):
 
 def fetch_album_art(album):
     # use notifications here or at least log stuff
-    settings = get_settings()
     url = 'http://musicdatabase.co/artist/%s/album/%s' % (
         album['artist'], album['title'])
     try:
@@ -107,11 +119,12 @@ def fetch_album_art(album):
         return
     dirname = os.path.dirname(album['tracks'][0]['file'])
     im = Image.open(BytesIO(r.content))
-    path = os.path.join(settings['music_dir'], dirname, im.format.lower())
+    fname = '.'.join(['cover', im.format.lower()])
+    path = os.path.join(SETTINGS['music_dir'], dirname, fname)
     im.save(path, im.format)
     album['cover'] = path
-    cache = os.path.join(settings['cache'], 'covers', make_album_hash(album))
-    size = int(settings['grid_icon_size'])
+    cache = os.path.join(SETTINGS['cache'], 'covers', make_album_hash(album))
+    size = int(SETTINGS['grid_icon_size'])
     im.thumbnail((size, size))
     im.save(cache, im.format)
     album['thumb'] = cache
@@ -121,19 +134,17 @@ def fetch_album_art(album):
 
 def need_update():
     # TODO: maybe I should parse mpd.conf to get common mpd vars?
-    settings = get_settings()
     mpddb = os.path.expanduser('~/.mpd/database')
-    lib = os.path.join(settings['cache'], 'lib.json')
+    lib = os.path.join(SETTINGS['cache'], 'lib.json')
     return os.path.getmtime(mpddb) > os.path.getmtime(lib)
 
 
 def update_cached_album(album):
-    settings = get_settings()
     h = make_album_hash(album)
-    with open(os.path.join(settings['cache'], 'lib.json'), 'r') as f:
+    with open(os.path.join(SETTINGS['cache'], 'lib.json'), 'r') as f:
         lib = json.load(f)
     lib[h] = album
-    with open(os.path.join(settings['cache'], 'lib.json'), 'w') as f:
+    with open(os.path.join(SETTINGS['cache'], 'lib.json'), 'w') as f:
         json.dump(lib, f)
 
 
@@ -144,11 +155,12 @@ def _cache_image(args):
 
 
 def update_cache(player):
-    cache_dir = player.settings['cache']
+    # TODO: only update images that need to be updated
+    cache_dir = SETTINGS['cache']
     p = mp.Pool()
     lib = {}
     args = []
-    size = int(player.settings['grid_icon_size'])
+    size = int(SETTINGS['grid_icon_size'])
     for item in player.iterlib():
         a = get_album_tags(item)
         s = get_song_tags(item)
@@ -171,40 +183,22 @@ def make_album_hash(a):
     return hashlib.md5(s.encode()).hexdigest()
 
 
-def get_settings():
+def update_settings():
 
-    paths = ['%s/.config/ricochet/settings.json' % os.environ['HOME'],
+    paths = [os.path.expandvars('$HOME/.config/ricochet/settings.json'),
              '/etc/ricochet/settings.json']
-
-    # set up defaults
-    settings = {
-        'mpd_host': 'localhost',
-        'mpd_port': '6600',
-        'music_dir': '%s/Music/' % os.environ['HOME'],
-        'grid_icon_size': 150,
-        'detail_icon_size': 300,
-        'notifications': 'True',
-        'cache': '%s/.cache/ricochet' % os.environ['HOME'],
-        'cover_names': ["cover.jpg", "cover.png", "front.jpg", "front.png"],
-        'symbolic_icons': False
-    }
 
     for path in paths:
         if os.path.isfile(path):
             with open(path) as f:
                 overrides = json.load(f)
-            settings.update(overrides)
+            SETTINGS.update(overrides)
             break
-
-    settings['music_dir'] = os.path.normpath(settings['music_dir'])
-
-    return settings
 
 
 def get_cover_path(dirname):
-    settings = get_settings()
-    dirname = os.path.join(settings['music_dir'], dirname)
-    for name in settings['cover_names']:
+    dirname = os.path.join(SETTINGS['music_dir'], dirname)
+    for name in SETTINGS['cover_names']:
         path = os.path.join(dirname, name)
         if os.path.exists(path):
             break

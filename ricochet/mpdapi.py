@@ -1,5 +1,6 @@
 import mpd
 from gi.repository import GLib
+from ricochet import utils
 
 
 def is_connected(client):
@@ -22,13 +23,11 @@ def connect(func):
 
 class Player(object):
 
-    def __init__(self, settings, playlist=None):
+    def __init__(self):
 
         self.client = mpd.MPDClient()
-        self.host = settings['mpd_host']
-        self.port = settings['mpd_port']
-
-        self.settings = settings
+        self.host = utils.SETTINGS['mpd_host']
+        self.port = utils.SETTINGS['mpd_port']
 
         # TODO do this outside of init
         try:

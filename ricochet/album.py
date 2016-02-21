@@ -1,5 +1,6 @@
 from gi.repository import Gtk, Gdk, GdkPixbuf
 import os
+from ricochet import utils
 
 
 class Album(Gtk.Window):
@@ -9,7 +10,7 @@ class Album(Gtk.Window):
     def __init__(self, info, player, app):
         name = ' - '.join([info['artist'], info['title']])
         Gtk.Window.__init__(self, title=name)
-        size = player.settings['detail_icon_size']
+        size = utils.SETTINGS['detail_icon_size']
         windows = app.get_windows()
         self.set_transient_for(windows[0])
         self.set_modal(True)

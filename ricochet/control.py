@@ -10,13 +10,10 @@ class Control(Gtk.Box):
     of music is done through this module, including handling of signals.
     '''
 
-    def __init__(self, player, settings):
-        # TODO: make init simpler
+    def __init__(self, player):
         self.player = player
         self.player.listen(self.event_callback)
         self.track = 1
-
-        self.settings = settings
 
         self.image = Gtk.Image()
         self.update_image()
@@ -66,7 +63,7 @@ class Control(Gtk.Box):
         ]
         button_box = Gtk.Box()
         for icon, method in buttons:
-            if self.settings['symbolic_icons'] is True:
+            if utils.SETTINGS['symbolic_icons'] is True:
                 icon += '-symbolic'
             button = Gtk.Button.new_from_icon_name(icon, 1)
             if method == self.toggle:
@@ -83,7 +80,7 @@ class Control(Gtk.Box):
         # could probs just set them up in settings dict.
         play = 'media-playback-start'
         pause = 'media-playback-pause'
-        if self.settings['symbolic_icons'] is True:
+        if utils.SETTINGS['symbolic_icons'] is True:
             pause += '-symbolic'
             play += '-symbolic'
         im = self.tgl_btn.get_image()
@@ -161,7 +158,7 @@ class Control(Gtk.Box):
         self.image.show()
 
     def notify(self):
-        if self.settings['notifications'] != "True":
+        if utils.SETTINGS['notifications'] != "True":
             return
         song = self.player.playlist[self.player.track - 1]
         cover = song['cover']
