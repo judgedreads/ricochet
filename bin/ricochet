@@ -35,7 +35,7 @@ from ricochet.progress import progress
 # TODO: use logging
 
 
-VERSION = '0.3.6'
+VERSION = '0.4.0'
 
 settings = utils.get_settings()
 

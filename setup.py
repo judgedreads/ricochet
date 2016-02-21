@@ -6,7 +6,7 @@ config = {
     'description': 'An album oriented MPD client',
     'author': 'judgedreads',
     'url': 'github.com/judgedreads/ricochet',
-    'version': '0.3.6',
+    'version': '0.4.0',
     'license': 'GPLv3',
     'install_requires': [
         'python-mpd2',
