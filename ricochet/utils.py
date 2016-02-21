@@ -5,6 +5,41 @@ from io import BytesIO
 from PIL import Image
 import multiprocessing as mp
 import hashlib
+from gi.repository import Gtk, GObject
+import threading
+import pkg_resources
+
+
+def get_version():
+    return pkg_resources.require("ricochet")[0].version
+
+
+def progress(func, *args, **kwargs):
+    win = Gtk.Window(default_height=50, default_width=300)
+    win.connect("delete-event", Gtk.main_quit)
+    win.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+
+    progress = Gtk.ProgressBar(show_text=True)
+    progress.set_text('updating cache...')
+    win.add(progress)
+
+    def update_progress():
+        progress.pulse()
+        return True
+
+    def target():
+        try:
+            func(*args, **kwargs)
+        finally:
+            win.close()
+
+    win.show_all()
+
+    GObject.timeout_add(100, update_progress)
+    thread = threading.Thread(target=target)
+    thread.daemon = True
+    thread.start()
+    Gtk.main()
 
 
 def get_album_tags(item):

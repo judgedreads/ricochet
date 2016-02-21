@@ -152,7 +152,6 @@ class Control(Gtk.Box):
 
     def queue(self, *args, **kwargs):
         self.player.queue(*args, **kwargs)
-        # self.change_playlist()
 
     def update_image(self):
         f = self.player.get_currentsong().get('file', '')

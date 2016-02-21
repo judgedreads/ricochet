@@ -10,13 +10,11 @@ class Album(Gtk.Window):
         name = ' - '.join([info['artist'], info['title']])
         Gtk.Window.__init__(self, title=name)
         size = player.settings['detail_icon_size']
-        # self.set_default_size(size, 2 * size)
         windows = app.get_windows()
         self.set_transient_for(windows[0])
         self.set_modal(True)
         self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
 
-        self.name = name
         self.player = player
 
         self.tracks = info['tracks']
@@ -31,7 +29,6 @@ class Album(Gtk.Window):
         hbox.pack_start(image, False, False, 0)
 
         tracklist = self.make_tracklist()
-
         hbox.pack_start(tracklist, True, True, 0)
 
         self.show_all()
@@ -48,12 +45,10 @@ class Album(Gtk.Window):
         return tabbed
 
     def make_tracklist(self):
-        # scrolled area for the songs
         scroll = Gtk.ScrolledWindow()
         scroll.set_border_width(0)
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
-        # set up the song treeview
         liststore = Gtk.ListStore(str, str, str, str, str)
         for t in self.tracks:
             track_num = t['track'].split('/')[0].zfill(2)
@@ -66,9 +61,6 @@ class Album(Gtk.Window):
         treeview = Gtk.TreeView(model=liststore)
         treeview.set_enable_search(False)
         track_renderer = Gtk.CellRendererText()
-        # option is PangoEllipsizeMode numbered 0,1,2,3 for none, start,
-        # middle, end (True becomes 1=start)
-        # track_renderer.set_property("ellipsize", 3)
         track_column = Gtk.TreeViewColumn("Track", track_renderer, text=0)
         treeview.append_column(track_column)
 
@@ -118,21 +110,20 @@ class Album(Gtk.Window):
                     break
             self.player.play(songs)
 
-    def on_key_press(self, widget, event, disc):
+    def on_key_press(self, widget, event):
         select = widget.get_selection()
         model, treeiter = select.get_selected_rows()
-
+        songs = []
+        for path in treeiter:
+            f = model[path][4]
+            for t in self.tracks:
+                if t['file'] == f:
+                    songs.append(t)
+                    break
         # TODO shift+P to play all, shift+Q to queue all
         if event.hardware_keycode == 36 or event.hardware_keycode == 33:
-            for i, path in enumerate(treeiter):
-                song = os.path.basename(model[path][4])
-                if i == 0:
-                    self.player.play(files=disc + '/' + song)
-                else:
-                    self.player.queue(files=disc + '/' + song)
+            self.player.play(songs)
         elif event.hardware_keycode == 24:
-            for path in treeiter:
-                song = os.path.basename(model[path][4])
-                self.player.queue(files=disc + '/' + song)
+            self.player.queue(songs)
         elif event.hardware_keycode == 65:
             self.player.toggle()

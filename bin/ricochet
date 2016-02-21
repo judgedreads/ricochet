@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Ricochet: A different angle on music.
+# Ricochet: An album-oriented MPD client.
 # Copyright (C) 2013-2014 Pearce Dedmon
 
 # This program is free software: you can redistribute it and/or modify
@@ -30,12 +30,9 @@ from ricochet.browser import Browser
 from ricochet import utils
 from ricochet.control import Control
 from ricochet import mpdapi
-from ricochet.progress import progress
 
 # TODO: use logging
 
-
-VERSION = '0.4.0'
 
 settings = utils.get_settings()
 
@@ -64,11 +61,7 @@ class Ricochet(Gtk.Application):
 
         Notify.init('Ricochet')
 
-        # TODO: pass settings to all classes?
-        music = settings['music_dir']
-
         control = Control(self.player, settings)
-        control.MUSIC_DIR = music
 
         cache_dir = settings['cache']
         with open(os.path.join(cache_dir, 'lib.json')) as f:
@@ -98,11 +91,11 @@ if __name__ == "__main__":
                         help='update album art cache for the grid')
     args = parser.parse_args()
     if args.version:
-        print(VERSION)
+        print(utils.get_version())
         sys.exit()
     player = mpdapi.Player(settings)
     need_update = args.update_cache or utils.need_update()
     if need_update:
-        progress(utils.update_cache, player)
+        utils.progress(utils.update_cache, player)
     app = Ricochet(player)
     app.run(None)
