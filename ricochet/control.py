@@ -10,10 +10,12 @@ class Control(Gtk.Box):
     of music is done through this module, including handling of signals.
     '''
 
-    def __init__(self, player):
+    def __init__(self, player, status):
         self.player = player
         self.player.listen(self.event_callback)
         self.track = 1
+        self.status = status
+        self.update_status()
 
         self.image = Gtk.Image()
         self.update_image()
@@ -53,6 +55,7 @@ class Control(Gtk.Box):
     def event_callback(self, *args, **kwargs):
         self.change_playlist()
         self.update_tgl_btn()
+        self.update_status()
 
     def make_buttons(self):
         buttons = [
@@ -89,6 +92,11 @@ class Control(Gtk.Box):
             im.set_from_icon_name(pause, icon[1])
         else:
             im.set_from_icon_name(play, icon[1])
+
+    def update_status(self):
+        s = self.player.get_status()
+        pl = self.player.get_playlist()
+        self.status.update(s, pl)
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
@@ -197,3 +205,38 @@ class Notifier(object):
             self.player.skip_next()
         elif data == 'prev':
             self.player.skip_prev()
+
+
+class StatusLine(Gtk.Box):
+
+    def __init__(self, stats):
+        Gtk.Box.__init__(self)
+        # maybe I should use Gtk.Label instead of textview...
+        self.stats = Gtk.Label()
+        text = '  {albums} albums featuring {artists} artists containing '\
+               '{songs} songs'.format(**stats)
+        self.stats.set_text(text)
+        self.stats.set_xalign(1)
+
+        self.audio = Gtk.Label()
+
+        self.pl_stats = Gtk.Label()
+        self.pl_stats.set_xalign(0)
+
+        self.pack_start(self.pl_stats, True, True, 0)
+        self.pack_start(self.audio, True, True, 0)
+        self.pack_start(self.stats, True, True, 0)
+
+    def update(self, s, playlist):
+        if 'audio' not in s:
+            self.audio.set_text('')
+            return
+        audio = s['audio'].split(':')
+        ttime = sum(int(t['time']) for t in playlist)
+        mins = ttime // 60
+        secs = ttime % 60
+        pl_stats = '%d tracks totalling %d:%02d  ' % (len(playlist), mins, secs)
+        self.pl_stats.set_text(pl_stats)
+        text = '  %sHz | %s bits | %s channels | %skbps  ' \
+            % (audio[0], audio[1], audio[2], s['bitrate'])
+        self.audio.set_text(text)

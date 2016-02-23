@@ -67,6 +67,10 @@ class Player(object):
         return self.client.status()
 
     @connect
+    def get_stats(self):
+        return self.client.stats()
+
+    @connect
     def get_play_state(self):
         return self.client.status()['state']
 
