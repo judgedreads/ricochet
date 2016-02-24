@@ -87,6 +87,10 @@ class Player(object):
             self.client.pause()
 
     @connect
+    def seek(self, pos):
+        self.client.seekcur(pos)
+
+    @connect
     def play(self, songs):
         '''method to play now, i.e. replace playlist and play it'''
         self.client.clear()

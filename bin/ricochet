@@ -58,7 +58,7 @@ class Ricochet(Gtk.Application):
 
         Notify.init('Ricochet')
 
-        status = StatusLine(self.player.get_stats())
+        status = StatusLine(self.player)
         control = Control(self.player, status)
 
         cache_dir = utils.SETTINGS['cache']

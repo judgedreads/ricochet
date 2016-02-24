@@ -1,4 +1,4 @@
-from gi.repository import Gtk, GdkPixbuf, Notify
+from gi.repository import Gtk, GdkPixbuf, Notify, GLib
 from ricochet import utils
 import os
 
@@ -15,7 +15,7 @@ class Control(Gtk.Box):
         self.player.listen(self.event_callback)
         self.track = 1
         self.status = status
-        self.update_status()
+        self.status.update()
 
         self.image = Gtk.Image()
         self.update_image()
@@ -60,7 +60,7 @@ class Control(Gtk.Box):
     def event_callback(self, *args, **kwargs):
         self.change_playlist()
         self.update_tgl_btn()
-        self.update_status()
+        self.status.update()
 
     def make_buttons(self):
         buttons = [
@@ -98,10 +98,6 @@ class Control(Gtk.Box):
         else:
             im.set_from_icon_name(play, icon[1])
 
-    def update_status(self):
-        s = self.player.get_status()
-        self.status.update(s)
-
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
         pl = self.player.get_playlist()
@@ -125,7 +121,7 @@ class Control(Gtk.Box):
         ttime = sum(int(t['time']) for t in pl)
         mins = ttime // 60
         secs = ttime % 60
-        pl_stats = '%d tracks totalling %d:%02d  ' % (len(pl), mins, secs)
+        pl_stats = ' %d tracks totalling %d:%02d  ' % (len(pl), mins, secs)
         self.pl_stats.set_text(pl_stats)
         # FIXME: this stuff probably shouldn't be done here...
         if status.get('song') != self.track:
@@ -218,26 +214,83 @@ class Notifier(object):
 
 class StatusLine(Gtk.Box):
 
-    def __init__(self, stats):
+    def __init__(self, player):
         Gtk.Box.__init__(self)
-        # maybe I should use Gtk.Label instead of textview...
+        self.player = player
         self.stats = Gtk.Label()
-        text = '  {albums} albums featuring {artists} artists containing '\
-               '{songs} songs'.format(**stats)
+        stats = self.player.get_stats()
+        text = '    {albums} albums featuring {artists} artists containing '\
+               '{songs} songs '.format(**stats)
         self.stats.set_text(text)
         self.stats.set_xalign(1)
 
         self.audio = Gtk.Label()
         self.audio.set_xalign(0)
 
-        self.pack_start(self.audio, True, True, 0)
-        self.pack_start(self.stats, True, True, 0)
+        self.slider = Gtk.Scale()
+        self.slider.set_draw_value(False)
+        self.slider.set_increments(1, 10)
+        self.slider.set_min_slider_size(200)
+        self.slider_handler_id = self.slider.connect(
+            "value-changed", self.on_slide)
+        self.sync_slider()
 
-    def update(self, s):
+        self.pack_start(self.audio, False, False, 0)
+        self.pack_start(self.slider, True, True, 0)
+        self.pack_start(self.stats, False, False, 0)
+
+        self.playing = False
+
+    def on_slide(self, widget):
+        if not self.playing:
+            return
+        t = self.slider.get_value()
+        self.player.seek(t)
+
+    def sync_slider(self, s=None):
+        if s is None:
+            s = self.player.get_status()
+        t = s.get('time', '0:100').split(':')
+        print(t)
+        self.slider.handler_block(self.slider_handler_id)
+        self.slider.set_value(int(t[0]))
+        self.slider.set_range(0, int(t[1]))
+        self.slider.handler_unblock(self.slider_handler_id)
+
+    def increment_slider(self):
+        if not self.playing:
+            self.sync_slider()
+            return False
+        self.slider.handler_block(self.slider_handler_id)
+        self.slider.set_value(self.slider.get_value()+1)
+        self.slider.handler_unblock(self.slider_handler_id)
+        return True
+
+    def update_audio_info(self, s):
+        audio = s['audio'].split(':')
+        text = '  %sHz | %s bit | %s channels | %skbps    ' \
+            % (audio[0], audio[1], audio[2], s['bitrate'])
+        self.audio.set_text(text)
+
+    def on_timeout(self):
+        s = self.player.get_status()
+        self.sync_slider(s)
+        self.update_audio_info(s)
+        if not self.playing:
+            return False
+        return True
+
+    def update(self):
+        s = self.player.get_status()
         if 'audio' not in s:
             self.audio.set_text('')
             return
-        audio = s['audio'].split(':')
-        text = '  %sHz | %s bits | %s channels | %skbps  ' \
-            % (audio[0], audio[1], audio[2], s['bitrate'])
-        self.audio.set_text(text)
+        if s['state'] == 'play':
+            if not self.playing:
+                self.playing = True
+                GLib.timeout_add(1000, self.on_timeout)
+        else:
+            self.playing = False
+        self.update_audio_info(s)
+        self.sync_slider(s)
+        print('sync')
