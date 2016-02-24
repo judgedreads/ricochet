@@ -39,8 +39,6 @@ class Control(Gtk.Box):
         selection = self.treeview.get_selection()
         selection.set_mode(Gtk.SelectionMode.MULTIPLE)
 
-        self.change_playlist()
-
         renderer = Gtk.CellRendererText()
         renderer.set_property("ellipsize", 3)
         column = Gtk.TreeViewColumn("Playlist", renderer, text=0)
@@ -50,6 +48,13 @@ class Control(Gtk.Box):
         self.treeview.connect("key_press_event", self.on_key_press)
 
         scroll.add(self.treeview)
+
+        self.pl_stats = Gtk.Label()
+        self.pl_stats.set_xalign(0)
+
+        self.pack_start(self.pl_stats, False, False, 0)
+        self.change_playlist()
+
         self.show_all()
 
     def event_callback(self, *args, **kwargs):
@@ -95,8 +100,7 @@ class Control(Gtk.Box):
 
     def update_status(self):
         s = self.player.get_status()
-        pl = self.player.get_playlist()
-        self.status.update(s, pl)
+        self.status.update(s)
 
     def change_playlist(self, widget=None):
         '''handle playlist changes'''
@@ -118,6 +122,11 @@ class Control(Gtk.Box):
             else:
                 self.liststore.append([song['title'], song['id']])
         self.treeview.set_model(self.liststore)
+        ttime = sum(int(t['time']) for t in pl)
+        mins = ttime // 60
+        secs = ttime % 60
+        pl_stats = '%d tracks totalling %d:%02d  ' % (len(pl), mins, secs)
+        self.pl_stats.set_text(pl_stats)
         # FIXME: this stuff probably shouldn't be done here...
         if status.get('song') != self.track:
             self.track = status.get('song')
@@ -219,24 +228,16 @@ class StatusLine(Gtk.Box):
         self.stats.set_xalign(1)
 
         self.audio = Gtk.Label()
+        self.audio.set_xalign(0)
 
-        self.pl_stats = Gtk.Label()
-        self.pl_stats.set_xalign(0)
-
-        self.pack_start(self.pl_stats, True, True, 0)
         self.pack_start(self.audio, True, True, 0)
         self.pack_start(self.stats, True, True, 0)
 
-    def update(self, s, playlist):
+    def update(self, s):
         if 'audio' not in s:
             self.audio.set_text('')
             return
         audio = s['audio'].split(':')
-        ttime = sum(int(t['time']) for t in playlist)
-        mins = ttime // 60
-        secs = ttime % 60
-        pl_stats = '%d tracks totalling %d:%02d  ' % (len(playlist), mins, secs)
-        self.pl_stats.set_text(pl_stats)
         text = '  %sHz | %s bits | %s channels | %skbps  ' \
             % (audio[0], audio[1], audio[2], s['bitrate'])
         self.audio.set_text(text)

@@ -71,16 +71,16 @@ class Ricochet(Gtk.Application):
         albums.sort(key=lambda x: x['artist'])
         brow = Browser(albums, control, app)
 
-        hbox = Gtk.Box()
-        hbox.pack_start(control, False, False, 0)
-        hbox.pack_start(brow, True, True, 0)
-        brow.flowbox.get_child_at_index(0).grab_focus()
-
         vbox = Gtk.Box(orientation=1)
-        vbox.pack_start(hbox, True, True, 0)
+        vbox.pack_start(brow, True, True, 0)
         vbox.pack_start(status, False, False, 0)
 
-        window.add(vbox)
+        hbox = Gtk.Box()
+        hbox.pack_start(control, False, False, 0)
+        hbox.pack_start(vbox, True, True, 0)
+        brow.flowbox.get_child_at_index(0).grab_focus()
+
+        window.add(hbox)
         window.connect("key-press-event", self.on_key_press)
         app.add_window(window)
         window.show_all()
