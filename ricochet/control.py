@@ -251,7 +251,6 @@ class StatusLine(Gtk.Box):
         if s is None:
             s = self.player.get_status()
         t = s.get('time', '0:100').split(':')
-        print(t)
         self.slider.handler_block(self.slider_handler_id)
         self.slider.set_value(int(t[0]))
         self.slider.set_range(0, int(t[1]))
@@ -267,24 +266,24 @@ class StatusLine(Gtk.Box):
         return True
 
     def update_audio_info(self, s):
+        if 'audio' not in s:
+            self.audio.set_text('')
+            return
         audio = s['audio'].split(':')
         text = '  %sHz | %s bit | %s channels | %skbps    ' \
             % (audio[0], audio[1], audio[2], s['bitrate'])
         self.audio.set_text(text)
 
     def on_timeout(self):
+        if not self.playing:
+            return False
         s = self.player.get_status()
         self.sync_slider(s)
         self.update_audio_info(s)
-        if not self.playing:
-            return False
         return True
 
     def update(self):
         s = self.player.get_status()
-        if 'audio' not in s:
-            self.audio.set_text('')
-            return
         if s['state'] == 'play':
             if not self.playing:
                 self.playing = True
@@ -293,4 +292,3 @@ class StatusLine(Gtk.Box):
             self.playing = False
         self.update_audio_info(s)
         self.sync_slider(s)
-        print('sync')
