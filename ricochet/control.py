@@ -269,9 +269,19 @@ class StatusLine(Gtk.Box):
         if 'audio' not in s:
             self.audio.set_text('')
             return
+        # TODO: make into function, can we avoid parsing remaining time every
+        # run since it only changes when the song changes. It would be awesome
+        # to split everything out into things that should update every second
+        # and things that need only change when there is a state change.
+        done, left = s['time'].split(':')
+        done_mins = int(done) // 60
+        done_secs = int(done) % 60
+        left_mins = int(left) // 60
+        left_secs = int(left) % 60
+        tprog = '%d:%02d/%d:%02d' % (done_mins, done_secs, left_mins, left_secs)
         audio = s['audio'].split(':')
-        text = '  %sHz | %s bit | %s channels | %skbps    ' \
-            % (audio[0], audio[1], audio[2], s['bitrate'])
+        text = '  %sHz | %s bit | %s channels | %skbps | %s    ' \
+            % (audio[0], audio[1], audio[2], s['bitrate'], tprog)
         self.audio.set_text(text)
 
     def on_timeout(self):
