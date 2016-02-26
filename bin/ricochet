@@ -65,9 +65,8 @@ class Ricochet(Gtk.Application):
         with open(os.path.join(cache_dir, 'lib.json')) as f:
             j = json.load(f)
         albums = list(j.values())
-        albums.sort(key=lambda x: x['disc'])
-        albums.sort(key=lambda x: x['date'])
         albums.sort(key=lambda x: x['title'])
+        albums.sort(key=lambda x: x['date'])
         albums.sort(key=lambda x: x['artist'])
         brow = Browser(albums, control, app)
 

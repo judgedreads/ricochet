@@ -61,7 +61,6 @@ def get_album_tags(item):
     a['title'] = item.get('album', 'Unknown Album')
     a['date'] = item.get('date', '')
     a['genre'] = item.get('genre', '')
-    a['disc'] = item.get('disc', '')
     for k, v in a.items():
         a[k] = delistify_tag(v)
     a['cover'] = get_cover_path(os.path.dirname(item['file']))
@@ -75,6 +74,7 @@ def get_song_tags(item):
     s['artist'] = item.get('artist', 'Unknown Artist')
     s['file'] = item['file']
     s['time'] = item['time']
+    s['disc'] = item.get('disc', '')
     for k, v in s.items():
         s[k] = delistify_tag(v)
     return s
@@ -136,6 +136,8 @@ def need_update():
     # TODO: maybe I should parse mpd.conf to get common mpd vars?
     mpddb = os.path.expanduser('~/.mpd/database')
     lib = os.path.join(SETTINGS['cache'], 'lib.json')
+    if not os.path.exists(lib):
+        return True
     return os.path.getmtime(mpddb) > os.path.getmtime(lib)
 
 
@@ -157,6 +159,8 @@ def _cache_image(args):
 def update_cache(player):
     # TODO: only update images that need to be updated
     cache_dir = SETTINGS['cache']
+    if not os.path.exists(os.path.join(cache_dir, 'covers')):
+        os.makedirs(os.path.join(cache_dir, 'covers'))
     p = mp.Pool()
     lib = {}
     args = []
@@ -164,11 +168,11 @@ def update_cache(player):
     for item in player.iterlib():
         a = get_album_tags(item)
         s = get_song_tags(item)
-        a['tracks'] = [s]
         h = make_album_hash(a)
         if h in lib:
             lib[h]['tracks'].append(s)
         else:
+            a['tracks'] = [s]
             a['thumb'] = os.path.join(cache_dir, 'covers', h)
             args.append((a['cover'], a['thumb'], size))
             lib[h] = a
@@ -179,7 +183,7 @@ def update_cache(player):
 
 
 def make_album_hash(a):
-    s = a['artist'] + a['title'] + a['date'] + a['disc']
+    s = a['artist'] + a['title'] + a['date']
     return hashlib.md5(s.encode()).hexdigest()
 
 

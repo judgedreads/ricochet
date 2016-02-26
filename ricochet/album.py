@@ -1,5 +1,4 @@
 from gi.repository import Gtk, Gdk, GdkPixbuf
-import os
 from ricochet import utils
 
 
@@ -29,29 +28,48 @@ class Album(Gtk.Window):
         self.add(hbox)
         hbox.pack_start(image, False, False, 0)
 
-        tracklist = self.make_tracklist()
-        hbox.pack_start(tracklist, True, True, 0)
+        if self.is_multi_disc():
+            tracklist = self.make_multi_disc()
+        else:
+            tracklist = self.make_tracklist(self.tracks)
+        label = Gtk.Label()
+        label.set_text('Year: {date} Genre: {genre}'.format(**info))
+
+        vbox = Gtk.Box(orientation=1)
+        vbox.pack_start(tracklist, True, True, 0)
+        vbox.pack_start(label, False, False, 0)
+
+        hbox.pack_start(vbox, True, True, 0)
 
         self.show_all()
 
-    def multi_disc(self, discs):
-        discs.sort()
+    def make_multi_disc(self):
+        discs = {}
+        for t in self.tracks:
+            if t['disc'] in discs:
+                discs[t['disc']].append(t)
+            else:
+                discs[t['disc']] = [t]
         tabbed = Gtk.Notebook()
         tabbed.set_scrollable(True)
-        for disc in discs:
-            scroll = self.get_tracklist(disc)
+        for disc in sorted(discs.keys()):
+            scroll = self.make_tracklist(discs[disc])
             tabbed.append_page(scroll, None)
-            tabbed.set_tab_label_text(scroll, os.path.basename(disc))
+            tabbed.set_tab_label_text(scroll, 'Disc '+disc.split('/')[0])
 
         return tabbed
 
-    def make_tracklist(self):
+    def is_multi_disc(self):
+        discs = {t['disc'] for t in self.tracks}
+        return len(discs) > 1
+
+    def make_tracklist(self, tracks):
         scroll = Gtk.ScrolledWindow()
         scroll.set_border_width(0)
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
 
         liststore = Gtk.ListStore(str, str, str, str, str)
-        for t in self.tracks:
+        for t in tracks:
             track_num = t['track'].split('/')[0].zfill(2)
             secs = int(t['time'])
             mins = secs // 60
@@ -112,6 +130,9 @@ class Album(Gtk.Window):
             self.player.play(songs)
 
     def on_key_press(self, widget, event):
+        if event.hardware_keycode == 9:
+            self.close()
+            return
         select = widget.get_selection()
         model, treeiter = select.get_selected_rows()
         songs = []
