@@ -46,16 +46,17 @@ class Album(Gtk.Window):
     def make_multi_disc(self):
         discs = {}
         for t in self.tracks:
-            if t['disc'] in discs:
-                discs[t['disc']].append(t)
+            disc = t['disc'].split('/')[0].zfill(2)
+            if disc in discs:
+                discs[disc].append(t)
             else:
-                discs[t['disc']] = [t]
+                discs[disc] = [t]
         tabbed = Gtk.Notebook()
         tabbed.set_scrollable(True)
         for disc in sorted(discs.keys()):
             scroll = self.make_tracklist(discs[disc])
             tabbed.append_page(scroll, None)
-            tabbed.set_tab_label_text(scroll, 'Disc '+disc.split('/')[0])
+            tabbed.set_tab_label_text(scroll, 'Disc %s' % disc)
 
         return tabbed
 
