@@ -1,5 +1,4 @@
-build:
-	./setup.py build
+.PHONY: install uninstall
 
 install:
 	cp misc/ricochet.desktop /usr/share/applications/

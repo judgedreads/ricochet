@@ -1,6 +1,5 @@
 from gi.repository import Gtk
 
-from ricochet import utils
 from ricochet.album import Album
 
 
@@ -29,7 +28,6 @@ class Cover(Gtk.EventBox):
             ("Open", self.album_detail),
             ("Queue", self.queue),
             ("Play", self.play),
-            ("Get Cover", self.fetch_album_art),
         ]
 
         for label, callback in menu_items:
@@ -48,11 +46,6 @@ class Cover(Gtk.EventBox):
     def album_detail(self, widget):
         '''launch the detailed album view'''
         return Album(self.info, self.player, self.app)
-
-    def fetch_album_art(self, widget):
-        if utils.fetch_album_art(self.info):
-            self.image.set_from_file(self.info['thumb'])
-            self.image.show()
 
     def on_button_press(self, widget, event):
         '''Callback function for clicking on album'''

@@ -1,7 +1,5 @@
 import os
 import json
-import requests
-from io import BytesIO
 from PIL import Image
 import multiprocessing as mp
 import hashlib
@@ -56,89 +54,49 @@ def progress(func, *args, **kwargs):
 
 
 def get_album_tags(item):
-    a = {}
-    a['artist'] = item.get('albumartist', item.get('artist', 'Unknown Artist'))
-    a['title'] = item.get('album', 'Unknown Album')
-    a['date'] = item.get('date', '')
-    a['genre'] = item.get('genre', '')
-    for k, v in a.items():
-        a[k] = delistify_tag(v)
-    a['cover'] = get_cover_path(os.path.dirname(item['file']))
-    return a
+    a = {
+        'artist': item.get('albumartist', item.get('artist', 'Unknown Artist')),
+        'title': item.get('album', 'Unknown Album'),
+        'date': item.get('date', ''),
+        'genre': item.get('genre', ''),
+        'cover': get_cover_path(os.path.dirname(item['file'])),
+    }
+    return {k: delistify_tag(v) for k, v in a.items()}
 
 
 def get_song_tags(item):
-    s = {}
-    s['title'] = item.get('title', 'Unknown Song')
-    s['track'] = item.get('track', '00')
-    s['artist'] = item.get('artist', 'Unknown Artist')
-    s['file'] = item['file']
-    s['time'] = item['time']
-    s['disc'] = item.get('disc', '')
-    for k, v in s.items():
-        s[k] = delistify_tag(v)
-    return s
+    s = {
+        'title': item.get('title', 'Unknown Song'),
+        'track': item.get('track', '00'),
+        'artist': item.get('artist', 'Unknown Artist'),
+        'file': item['file'],
+        'time': item['time'],
+        'disc': item.get('disc', ''),
+    }
+    return {k: delistify_tag(v) for k, v in s.items()}
 
 
 def delistify_tag(tag):
     if not isinstance(tag, list):
         return tag
-    s = sorted(set(tag))
-    return ', '.join(s)
-
-
-def _get_image_url(html):
-    for line in html.split('\n'):
-        if 'class="artist_pic"' not in line:
-            continue
-        for item in line.split():
-            if 'src' in item:
-                url = item.split('"')[1]
-                if url:
-                    return url
-    return None
-
-
-def fetch_album_art(album):
-    # use notifications here or at least log stuff
-    url = 'http://musicdatabase.co/artist/%s/album/%s' % (
-        album['artist'], album['title'])
-    try:
-        r = requests.get(url)
-        print(r.status_code)
-    except requests.exceptions.RequestException as e:
-        print(e)
-        return
-    image_url = _get_image_url(r.text)
-    if image_url is None:
-        return
-    try:
-        r = requests.get(image_url)
-    except requests.exceptions.RequestException as e:
-        print(e)
-        return
-    dirname = os.path.dirname(album['tracks'][0]['file'])
-    im = Image.open(BytesIO(r.content))
-    fname = '.'.join(['cover', im.format.lower()])
-    path = os.path.join(SETTINGS['music_dir'], dirname, fname)
-    im.save(path, im.format)
-    album['cover'] = path
-    cache = os.path.join(SETTINGS['cache'], 'covers', make_album_hash(album))
-    size = int(SETTINGS['grid_icon_size'])
-    im.thumbnail((size, size))
-    im.save(cache, im.format)
-    album['thumb'] = cache
-    update_cached_album(album)
-    return True
+    return ', '.join(sorted(set(tag)))
 
 
 def need_update():
     # TODO: maybe I should parse mpd.conf to get common mpd vars?
-    mpddb = os.path.expanduser('~/.mpd/database')
     lib = os.path.join(SETTINGS['cache'], 'lib.json')
     if not os.path.exists(lib):
         return True
-    return os.path.getmtime(mpddb) > os.path.getmtime(lib)
+    paths = [
+        os.path.expandvars('$HOME/.mpd/database'),
+        os.path.expandvars('$HOME/.config/ricochet/settings.json'),
+        '/etc/ricochet/settings.json',
+    ]
+    for p in paths:
+        if not os.path.exists(p):
+            continue
+        if os.path.getmtime(p) > os.path.getmtime(lib):
+            return True
 
 
 def update_cached_album(album):
@@ -151,13 +109,13 @@ def update_cached_album(album):
 
 
 def _cache_image(args):
-    im = Image.open(args[0])
-    im.thumbnail((args[2], args[2]))
-    im.save(args[1], im.format)
+    src, dst, sz = args
+    im = Image.open(src)
+    im.thumbnail((sz, sz))
+    im.save(dst, im.format)
 
 
 def update_cache(player):
-    # TODO: only update images that need to be updated
     cache_dir = SETTINGS['cache']
     if not os.path.exists(os.path.join(cache_dir, 'covers')):
         os.makedirs(os.path.join(cache_dir, 'covers'))
@@ -188,10 +146,8 @@ def make_album_hash(a):
 
 
 def update_settings():
-
     paths = [os.path.expandvars('$HOME/.config/ricochet/settings.json'),
              '/etc/ricochet/settings.json']
-
     for path in paths:
         if os.path.isfile(path):
             with open(path) as f:

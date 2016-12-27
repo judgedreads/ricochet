@@ -14,6 +14,7 @@ class Album(Gtk.Window):
         self.set_transient_for(windows[0])
         self.set_modal(True)
         self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
+        self.connect("key-press-event", self.on_close_key)
 
         self.player = player
 
@@ -32,8 +33,9 @@ class Album(Gtk.Window):
             tracklist = self.make_multi_disc()
         else:
             tracklist = self.make_tracklist(self.tracks)
+        info['time'] = self.total_time(self.tracks)
         label = Gtk.Label()
-        label.set_text('Year: {date} Genre: {genre}'.format(**info))
+        label.set_text('Year: {date} | Genre: {genre} | Length: {time}'.format(**info))
 
         vbox = Gtk.Box(orientation=1)
         vbox.pack_start(tracklist, True, True, 0)
@@ -42,6 +44,10 @@ class Album(Gtk.Window):
         hbox.pack_start(vbox, True, True, 0)
 
         self.show_all()
+
+    def total_time(self, tracks):
+        secs = sum(int(t['time']) for t in tracks)
+        return '%02d:%02d' % (secs // 60, secs % 60)
 
     def make_multi_disc(self):
         discs = {}
@@ -61,8 +67,7 @@ class Album(Gtk.Window):
         return tabbed
 
     def is_multi_disc(self):
-        discs = {t['disc'] for t in self.tracks}
-        return len(discs) > 1
+        return len({t['disc'] for t in self.tracks}) > 1
 
     def make_tracklist(self, tracks):
         scroll = Gtk.ScrolledWindow()
@@ -72,11 +77,8 @@ class Album(Gtk.Window):
         liststore = Gtk.ListStore(str, str, str, str, str)
         for t in tracks:
             track_num = t['track'].split('/')[0].zfill(2)
-            secs = int(t['time'])
-            mins = secs // 60
-            rem = secs % 60
-            time = '%02d:%02d' % (mins, rem)
-            row = [track_num, t['title'], t['artist'], time, t['file']]
+            ttime = self.total_time([t])
+            row = [track_num, t['title'], t['artist'], ttime, t['file']]
             liststore.append(row)
         treeview = Gtk.TreeView(model=liststore)
         treeview.set_enable_search(False)
@@ -130,23 +132,19 @@ class Album(Gtk.Window):
                     break
             self.player.play(songs)
 
-    def on_key_press(self, widget, event):
+    def on_close_key(self, widget, event):
         if event.hardware_keycode == 9:
             self.close()
             return
-        select = widget.get_selection()
-        model, treeiter = select.get_selected_rows()
-        songs = []
-        for path in treeiter:
-            f = model[path][4]
-            for t in self.tracks:
-                if t['file'] == f:
-                    songs.append(t)
-                    break
+
+    def on_key_press(self, widget, event):
+        model, treeiter = widget.get_selection().get_selected_rows()
+        selected = [model[path][4] for path in treeiter]
+        tracks = [t for t in self.tracks if t['file'] in selected]
         # TODO shift+P to play all, shift+Q to queue all
         if event.hardware_keycode == 36 or event.hardware_keycode == 33:
-            self.player.play(songs)
+            self.player.play(tracks)
         elif event.hardware_keycode == 24:
-            self.player.queue(songs)
+            self.player.queue(tracks)
         elif event.hardware_keycode == 65:
             self.player.toggle()

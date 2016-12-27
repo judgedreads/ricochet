@@ -261,7 +261,7 @@ class StatusLine(Gtk.Box):
             self.sync_slider()
             return False
         self.slider.handler_block(self.slider_handler_id)
-        self.slider.set_value(self.slider.get_value()+1)
+        self.slider.set_value(self.slider.get_value() + 1)
         self.slider.handler_unblock(self.slider_handler_id)
         return True
 
@@ -269,20 +269,11 @@ class StatusLine(Gtk.Box):
         if 'audio' not in s:
             self.audio.set_text('')
             return
-        # TODO: make into function, can we avoid parsing remaining time every
-        # run since it only changes when the song changes. It would be awesome
-        # to split everything out into things that should update every second
-        # and things that need only change when there is a state change.
-        done, left = s['time'].split(':')
-        done_mins = int(done) // 60
-        done_secs = int(done) % 60
-        left_mins = int(left) // 60
-        left_secs = int(left) % 60
-        tprog = '%d:%02d/%d:%02d' % (done_mins, done_secs, left_mins, left_secs)
-        audio = s['audio'].split(':')
-        text = '  %sHz | %s bit | %s channels | %skbps | %s    ' \
-            % (audio[0], audio[1], audio[2], s['bitrate'], tprog)
-        self.audio.set_text(text)
+        done, tot = map(int, s['time'].split(':'))
+        tprog = '%2d:%02d/%2d:%02d' % (done // 60, done % 60, tot // 60, tot % 60)
+        freq, bit, chan = s['audio'].split(':')
+        text = '  %sHz | %2s bit | %s channel | %4skbps | %s    '
+        self.audio.set_text(text % (freq, bit, chan, s['bitrate'], tprog))
 
     def on_timeout(self):
         if not self.playing:
