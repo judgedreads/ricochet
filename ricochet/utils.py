@@ -157,6 +157,8 @@ def update_settings():
 
 
 def get_cover_path(dirname):
+    if not dirname:
+        return '/usr/share/ricochet/default_album.png'
     dirname = os.path.join(SETTINGS['music_dir'], dirname)
     for name in SETTINGS['cover_names']:
         path = os.path.join(dirname, name)
