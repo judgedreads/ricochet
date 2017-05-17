@@ -37,11 +37,9 @@ class Player(object):
                   (self.host, self.port))
             print("Check that mpd is running correctly.")
 
-        VERSION = self.client.mpd_version
-        print("Using MPD v%s" % VERSION)
+        print("Using MPD v%s" % self.client.mpd_version)
 
         self.track = 1
-
         self.watcher = mpd.MPDClient()
 
     def listen(self, func):
@@ -141,8 +139,7 @@ class Player(object):
         return self.client.listallinfo()
 
     def iterlib(self):
-        lib = self.get_lib()
-        for item in lib:
+        for item in self.get_lib():
             if 'directory' in item or 'playlist' in item:
                 continue
             yield item

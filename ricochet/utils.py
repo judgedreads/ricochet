@@ -15,8 +15,8 @@ SETTINGS = {
     'grid_icon_size': 150,
     'detail_icon_size': 300,
     'notifications': 'True',
-    'cache': '%s/.cache/ricochet' % os.environ['HOME'],
-    'cover_names': ["cover.jpg", "cover.png", "front.jpg", "front.png"],
+    'cache': os.path.expandvars('$HOME/.cache/ricochet'),
+    'cover_names': ("cover.jpg", "cover.png", "front.jpg", "front.png"),
     'symbolic_icons': False,
 }
 
