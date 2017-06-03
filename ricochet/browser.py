@@ -95,10 +95,13 @@ class Browser(Gtk.ScrolledWindow):
         self.show_all()
 
     def filter_func(self, child):
+        terms = self.entry.get_text().lower().split()
+        if not terms:
+            return True
         album = self.albums[child.get_index()]
-        name = ' '.join([album['artist'], album['title']]).lower()
-        terms = self.entry.get_text().split()
-        return any(t.lower() in name for t in terms)
+        artist = album['artist'].lower()
+        title = album['title'].lower()
+        return all(t in artist or t in title for t in terms)
 
     def search_changed(self, *args):
         self.flowbox.invalidate_filter()
