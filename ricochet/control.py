@@ -10,12 +10,13 @@ class Control(Gtk.Box):
     of music is done through this module, including handling of signals.
     '''
 
-    def __init__(self, player, status):
+    def __init__(self, player, status, window):
         self.player = player
         self.player.listen(self.event_callback)
         self.track = 1
         self.status = status
         self.status.update()
+        self.window = window
 
         self.image = Gtk.Image()
         self.update_image()
@@ -54,6 +55,7 @@ class Control(Gtk.Box):
 
         self.pack_start(self.pl_stats, False, False, 0)
         self.change_playlist()
+        self.update_win_title()
 
         self.show_all()
 
@@ -61,6 +63,17 @@ class Control(Gtk.Box):
         self.change_playlist()
         self.update_tgl_btn()
         self.status.update()
+        self.update_win_title()
+
+    def update_win_title(self):
+        song = self.player.get_currentsong()
+        try:
+            title = '{artist} - {title}'.format(**song)
+        except KeyError:
+            self.window.set_title('Ricochet')
+            return
+        state = '\u25b6 ' if self.player.get_play_state() == 'play' else ''
+        self.window.set_title(state + title)
 
     def make_buttons(self):
         buttons = [

@@ -59,7 +59,7 @@ class Ricochet(Gtk.Application):
         Notify.init('Ricochet')
 
         status = StatusLine(self.player)
-        control = Control(self.player, status)
+        control = Control(self.player, status, window)
 
         cache_dir = utils.SETTINGS['cache']
         with open(os.path.join(cache_dir, 'lib.json')) as f:
